@@ -1,0 +1,29 @@
+PHP-LevelDB: PHP Bindings for LevelDB
+=============
+
+Installation
+=============
+
+Requirements:
+1. Install leveldb from: <http://code.google.com/p/leveldb/>
+
+leveldb didn't have install in Makefile, you need to copy yourself.
+eg:
+
+	$ cd leveldb-1.4.0
+	$ make
+	$ cp -r include /usr/local
+	$ cp -r libleveldb* /usr/local/lib
+
+2.1 Install from source
+2.2 Install from PECL
+
+Usage
+============
+
+	<?php
+	
+	$db = new LevelDB("/tmp/leveldb-test");
+	$db->put($key, $value);
+
+
