@@ -165,6 +165,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_delete, 0, 0, 1)
 	ZEND_ARG_INFO(0, write_options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_destroy, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_repair, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 /* Methods */
 /* {{{ php_leveldb_class_methods */
 static zend_function_entry php_leveldb_class_methods[] = {
@@ -174,6 +184,8 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	/* make put an alias of set, since leveldb use put */
 	PHP_MALIAS(LevelDB,	put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -233,7 +245,7 @@ PHP_METHOD(LevelDB, get)
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	read_options = leveldb_readoptions_create();
 
-	value = leveldb_get(intern->db, read_options, key, key_len, &value_len, &err);
+	value = leveldb_get(intern->db, read_options, key, key_len, (size_t *)&value_len, &err);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -304,6 +316,62 @@ PHP_METHOD(LevelDB, delete)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/*	{{{ proto bool LevelDB::destroy(string $name [, array $options])
+	Destroy the contents of the specified database. */
+PHP_METHOD(LevelDB, destroy)
+{
+	char *name;
+	int name_len;
+	zval *options_zv;
+
+	char *err = NULL;
+	leveldb_options_t *options;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
+		&name, &name_len, &options_zv) == FAILURE) {
+		return;
+	}
+
+	PHP_LEVELDB_CHECK_OPEN_BASEDIR(name);
+
+	options = leveldb_options_create();
+
+	leveldb_destroy_db(options, name, &err);
+
+	LEVELDB_CHECK_ERROR(err);
+
+	RETURN_TRUE;
+}
+/*	}}} */
+
+/*	{{{ proto bool LevelDB::repair(string $name [, array $options])
+	Repair the given database. */
+PHP_METHOD(LevelDB, repair)
+{
+	char *name;
+	int name_len;
+	zval *options_zv;
+
+	char *err = NULL;
+	leveldb_options_t *options;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
+		&name, &name_len, &options_zv) == FAILURE) {
+		return;
+	}
+
+	PHP_LEVELDB_CHECK_OPEN_BASEDIR(name);
+
+	options = leveldb_options_create();
+
+	leveldb_repair_db(options, name, &err);
+
+	LEVELDB_CHECK_ERROR(err);
+
+	RETURN_TRUE;
+}
+/*	}}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */

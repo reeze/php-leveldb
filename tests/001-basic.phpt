@@ -5,8 +5,11 @@ leveldb - basic: get(), set(), put(), delete()
 --FILE--
 <?php
 
-$path = dirname(__FILE__) . '/leveldb.test';
-$db = new LevelDb($path);
+include "leveldb.inc";
+cleanup_leveldb_on_shutdown();
+
+$leveldb_path = dirname(__FILE__) . '/leveldb-basic.test-db';
+$db = new LevelDB($leveldb_path);
 
 var_dump($db->set('key', 'value'));
 var_dump($db->get('key'));
