@@ -38,21 +38,17 @@ extern zend_module_entry leveldb_module_entry;
 #include "TSRM.h"
 #endif
 
+PHP_METHOD(LevelDB, __construct);
+PHP_METHOD(LevelDB, get);
+PHP_METHOD(LevelDB, set);
+PHP_METHOD(LevelDB, put);
+PHP_METHOD(LevelDB, delete);
+
 PHP_MINIT_FUNCTION(leveldb);
 PHP_MSHUTDOWN_FUNCTION(leveldb);
 PHP_RINIT_FUNCTION(leveldb);
 PHP_RSHUTDOWN_FUNCTION(leveldb);
 PHP_MINFO_FUNCTION(leveldb);
-
-/* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
-
-ZEND_BEGIN_MODULE_GLOBALS(leveldb)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(leveldb)
-*/
 
 #ifdef ZTS
 #define LDB_G(v) TSRMG(leveldb_globals_id, zend_leveldb_globals *, v)
