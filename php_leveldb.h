@@ -43,6 +43,7 @@ PHP_METHOD(LevelDB, get);
 PHP_METHOD(LevelDB, set);
 PHP_METHOD(LevelDB, put);
 PHP_METHOD(LevelDB, delete);
+PHP_METHOD(LevelDB, write);
 PHP_METHOD(LevelDB, destroy);
 PHP_METHOD(LevelDB, repair);
 
@@ -51,6 +52,12 @@ PHP_MSHUTDOWN_FUNCTION(leveldb);
 PHP_RINIT_FUNCTION(leveldb);
 PHP_RSHUTDOWN_FUNCTION(leveldb);
 PHP_MINFO_FUNCTION(leveldb);
+
+PHP_METHOD(LevelDBWriteBatch, __construct);
+PHP_METHOD(LevelDBWriteBatch, set);
+PHP_METHOD(LevelDBWriteBatch, put);
+PHP_METHOD(LevelDBWriteBatch, delete);
+PHP_METHOD(LevelDBWriteBatch, clear);
 
 #ifdef ZTS
 #define LDB_G(v) TSRMG(leveldb_globals_id, zend_leveldb_globals *, v)

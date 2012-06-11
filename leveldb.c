@@ -68,9 +68,11 @@
                                                                 \
   return retval;
 
-#define LEVELDB_CHECK_ERROR(erro) \
+#define LEVELDB_CHECK_ERROR(err) \
 	if ((err) != NULL) { \
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C), ((err)), 0 TSRMLS_CC); \
+		char *err_msg = estrdup((err)); \
+		free((err)); \
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C), err_msg, 0 TSRMLS_CC); \
 		return; \
 	}
 
@@ -113,6 +115,7 @@ static zend_object_handlers leveldb_iterator_object_handlers;
 
 /* Class entries */
 zend_class_entry *php_leveldb_class_entry;
+zend_class_entry *php_leveldb_write_batch_class_entry;
 zend_class_entry *php_leveldb_iterator_class_entry;
 
 /* Objects */
@@ -120,6 +123,11 @@ typedef struct {
 	zend_object std;
 	leveldb_t *db;
 } leveldb_object;
+
+typedef struct {
+	zend_object std;
+	leveldb_writebatch_t *batch;
+} leveldb_write_batch_object;
 
 void php_leveldb_object_free(void *object TSRMLS_DC)
 {
@@ -137,6 +145,22 @@ static zend_object_value php_leveldb_object_new(zend_class_entry *class_type TSR
 	php_leveldb_obj_new(leveldb_object, class_type);
 }
 
+/* Write batch object operate */
+void php_leveldb_write_batch_object_free(void *object TSRMLS_DC)
+{
+	leveldb_write_batch_object *obj = (leveldb_write_batch_object *)object;
+
+	if (obj->batch) {
+		leveldb_writebatch_destroy(obj->batch);
+	}
+
+	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
+}
+
+static zend_object_value php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_CC)
+{
+	php_leveldb_obj_new(leveldb_write_batch_object, class_type);
+}
 
 /* arg info */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_void, 0, 0, 0)
@@ -165,6 +189,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_delete, 0, 0, 1)
 	ZEND_ARG_INFO(0, write_options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_write, 0, 0, 1)
+	ZEND_ARG_INFO(0, batch)
+	ZEND_ARG_INFO(0, write_options)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_destroy, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, options)
@@ -184,12 +213,24 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	/* make put an alias of set, since leveldb use put */
 	PHP_MALIAS(LevelDB,	put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, write, arginfo_leveldb_write, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 /* }}} */
 
+/* {{{ php_leveldb_write_batch_class_methods */
+static zend_function_entry php_leveldb_write_batch_class_methods[] = {
+	PHP_ME(LevelDBWriteBatch, __construct, arginfo_leveldb_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(LevelDBWriteBatch, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
+	/* make put an alias of set, since leveldb use put */
+	PHP_MALIAS(LevelDBWriteBatch, put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBWriteBatch, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBWriteBatch, clear, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+/* }}} */
 
 /* {{{ proto LevelDB LevelDB::__construct(string $name [, array $options [, array $readoptions [, array $writeoptions]]])
    Instantiates an LevelDB object and opens then give database. */
@@ -329,7 +370,7 @@ PHP_METHOD(LevelDB, destroy)
 	leveldb_options_t *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
-		&name, &name_len, &options_zv) == FAILURE) {
+			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
 
@@ -338,6 +379,35 @@ PHP_METHOD(LevelDB, destroy)
 	options = leveldb_options_create();
 
 	leveldb_destroy_db(options, name, &err);
+
+	LEVELDB_CHECK_ERROR(err);
+
+	RETURN_TRUE;
+}
+/*	}}} */
+
+/*	{{{ proto bool LevelDB::write(LevelDBWriteBatch $batch [, array $write_options])
+	Destroy the contents of the specified database. */
+PHP_METHOD(LevelDB, write)
+{
+	zval *write_options_zv = NULL;
+	zval *write_batch;
+
+	char *err = NULL;
+	leveldb_object *intern;
+	leveldb_writeoptions_t *write_options;
+	leveldb_write_batch_object *write_batch_object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "O|z",
+			&write_batch, php_leveldb_write_batch_class_entry, &write_options_zv) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	write_batch_object = (leveldb_write_batch_object *)zend_object_store_get_object(write_batch TSRMLS_CC);
+	write_options = leveldb_writeoptions_create();
+
+	leveldb_write(intern->db, write_options, write_batch_object->batch, &err);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -357,7 +427,7 @@ PHP_METHOD(LevelDB, repair)
 	leveldb_options_t *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
-		&name, &name_len, &options_zv) == FAILURE) {
+			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
 
@@ -373,6 +443,85 @@ PHP_METHOD(LevelDB, repair)
 }
 /*	}}} */
 
+
+/*  {{{ proto bool LevelDBWriteBatch::__construct()
+	Set the given value for the given key to the write batch. */
+PHP_METHOD(LevelDBWriteBatch, __construct)
+{
+	leveldb_write_batch_object *intern;
+	leveldb_writebatch_t *batch;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	batch = leveldb_writebatch_create();
+
+	intern->batch = batch;
+}
+/* }}} */
+
+/*  {{{ proto bool LevelDBWriteBatch::set(string $key, string $value)
+	Set the given value for the given key to the write batch. */
+PHP_METHOD(LevelDBWriteBatch, set)
+{
+	char *key, *value;
+	int key_len, value_len;
+
+	leveldb_write_batch_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+			&key, &key_len, &value, &value_len) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	leveldb_writebatch_put(intern->batch, key, key_len, value, value_len);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/*  {{{ proto bool LevelDBWriteBatch::delete(string $key)
+	Set the given value for the given key to the write batch. */
+PHP_METHOD(LevelDBWriteBatch, delete)
+{
+	char *key;
+	int key_len;
+
+	leveldb_write_batch_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	leveldb_writebatch_delete(intern->batch, key, key_len);
+
+	RETURN_TRUE;
+
+}
+/* }}} */
+
+/*  {{{ proto bool LevelDBWriteBatch::clear()
+	Set the given value for the given key to the write batch. */
+PHP_METHOD(LevelDBWriteBatch, clear)
+{
+	leveldb_write_batch_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	leveldb_writebatch_clear(intern->batch);
+
+	RETURN_TRUE;
+
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(leveldb)
@@ -387,6 +536,11 @@ PHP_MINIT_FUNCTION(leveldb)
 	INIT_CLASS_ENTRY(ce, "LevelDB", php_leveldb_class_methods);
 	ce.create_object = php_leveldb_object_new;
 	php_leveldb_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+	/* Register LevelDBWriteBatch Class */
+	INIT_CLASS_ENTRY(ce, "LevelDBWriteBatch", php_leveldb_write_batch_class_methods);
+	ce.create_object = php_leveldb_write_batch_object_new;
+	php_leveldb_write_batch_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	return SUCCESS;
 }
