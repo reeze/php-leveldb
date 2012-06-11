@@ -129,6 +129,11 @@ typedef struct {
 	leveldb_writebatch_t *batch;
 } leveldb_write_batch_object;
 
+typedef struct {
+	zend_object std;
+	leveldb_iterator_t *iterator;
+} leveldb_iterator_object;
+
 void php_leveldb_object_free(void *object TSRMLS_DC)
 {
 	leveldb_object *obj = (leveldb_object *)object;
@@ -160,6 +165,23 @@ void php_leveldb_write_batch_object_free(void *object TSRMLS_DC)
 static zend_object_value php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_CC)
 {
 	php_leveldb_obj_new(leveldb_write_batch_object, class_type);
+}
+
+/* Iterator object operate */
+void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
+{
+	leveldb_iterator_object *obj = (leveldb_iterator_object *)object;
+
+	if (obj->iterator) {
+		leveldb_iter_destroy(obj->iterator);
+	}
+
+	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
+}
+
+static zend_object_value php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_CC)
+{
+	php_leveldb_obj_new(leveldb_iterator_object, class_type);
 }
 
 /* arg info */
@@ -204,6 +226,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_repair, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_iterator_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, db)
+	ZEND_ARG_INFO(0, read_options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_iterator_seek, 0, 0, 1)
+	ZEND_ARG_INFO(0, key)
+ZEND_END_ARG_INFO()
+
 /* Methods */
 /* {{{ php_leveldb_class_methods */
 static zend_function_entry php_leveldb_class_methods[] = {
@@ -228,6 +259,21 @@ static zend_function_entry php_leveldb_write_batch_class_methods[] = {
 	PHP_MALIAS(LevelDBWriteBatch, put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBWriteBatch, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBWriteBatch, clear, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+/* }}} */
+
+/* {{{ php_leveldb_iterator_class_methods */
+static zend_function_entry php_leveldb_iterator_class_methods[] = {
+	PHP_ME(LevelDBIterator, __construct, arginfo_leveldb_iterator_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(LevelDBIterator, valid, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, rewind, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, last, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, seek, arginfo_leveldb_iterator_seek, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, next, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, prev, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, key, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, current, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -444,7 +490,7 @@ PHP_METHOD(LevelDB, repair)
 /*	}}} */
 
 
-/*  {{{ proto bool LevelDBWriteBatch::__construct()
+/*  {{{ proto LevelDBWriteBatch LevelDBWriteBatch::__construct()
 	Instantiates a LevelDBWriteBatch object. */
 PHP_METHOD(LevelDBWriteBatch, __construct)
 {
@@ -522,6 +568,174 @@ PHP_METHOD(LevelDBWriteBatch, clear)
 }
 /* }}} */
 
+/*  {{{ proto LevelDBIterator LevelDBIterator::__construct(LevelDB $db [, array $read_options])
+	Instantiates a LevelDBIterator object. */
+PHP_METHOD(LevelDBIterator, __construct)
+{
+	zval *db_zv = NULL;
+	leveldb_object *db_obj;
+	zval *write_options = NULL;
+
+	leveldb_iterator_object *intern;
+	leveldb_readoptions_t *read_options;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z",
+			&db_zv, php_leveldb_class_entry, &write_options) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	db_obj = (leveldb_object *)zend_object_store_get_object(db_zv TSRMLS_CC);
+	read_options = leveldb_readoptions_create();
+
+	intern->iterator = leveldb_create_iterator(db_obj->db, read_options);
+}
+/*	}}} */
+
+/*	{{{ proto string LevelDBIterator::current()
+	Return current element */
+PHP_METHOD(LevelDBIterator, current)
+{
+	char *value = NULL;
+	int value_len;
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!leveldb_iter_valid(intern->iterator) ||
+			!(value = (char *)leveldb_iter_value(intern->iterator, (size_t *)&value_len))) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(value, value_len, 1);
+}
+/*	}}} */
+
+/*	{{{ proto string LevelDBIterator::key()
+	Returns the key of current element */
+PHP_METHOD(LevelDBIterator, key)
+{
+	char *key = NULL;
+	int key_len;
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!leveldb_iter_valid(intern->iterator) ||
+			!(key = (char *)leveldb_iter_key(intern->iterator, (size_t *)&key_len))) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRINGL(key, key_len, 1);
+}
+/*	}}} */
+
+/*	{{{ proto void LevelDBIterator::next()
+	Moves forward to the next element */
+PHP_METHOD(LevelDBIterator, next)
+{
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	leveldb_iter_next(intern->iterator);
+}
+/*	}}} */
+
+/*	{{{ proto void LevelDBIterator::prev()
+	Moves backward to the previous element */
+PHP_METHOD(LevelDBIterator, prev)
+{
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	leveldb_iter_prev(intern->iterator);
+}
+/*	}}} */
+
+/*	{{{ proto void LevelDBIterator::rewind()
+	Rewinds back to the first element of the Iterator */
+PHP_METHOD(LevelDBIterator, rewind)
+{
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	leveldb_iter_seek_to_first(intern->iterator);
+}
+/*	}}} */
+
+/*	{{{ proto void LevelDBIterator::last()
+	Moves to the last element of the Iterator */
+PHP_METHOD(LevelDBIterator, last)
+{
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	leveldb_iter_seek_to_last(intern->iterator);
+}
+/*	}}} */
+
+/*	{{{ proto void LevelDBIterator::seek(string $key)
+	Seeks to a given key in the Iterator if no such key it will point to nearest key */
+PHP_METHOD(LevelDBIterator, seek)
+{
+	char *key;
+	int key_len;
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s", &key, &key_len ) == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	leveldb_iter_seek(intern->iterator, key, key_len);
+}
+/*	}}} */
+
+/*	{{{ proto bool LevelDBIterator::valid()
+	Checks if current position is valid */
+PHP_METHOD(LevelDBIterator, valid)
+{
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	RETURN_BOOL(leveldb_iter_valid(intern->iterator));
+}
+/*	}}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(leveldb)
@@ -541,6 +755,11 @@ PHP_MINIT_FUNCTION(leveldb)
 	INIT_CLASS_ENTRY(ce, "LevelDBWriteBatch", php_leveldb_write_batch_class_methods);
 	ce.create_object = php_leveldb_write_batch_object_new;
 	php_leveldb_write_batch_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+
+	/* Register LevelDBIterator Class */
+	INIT_CLASS_ENTRY(ce, "LevelDBIterator", php_leveldb_iterator_class_methods);
+	ce.create_object = php_leveldb_iterator_object_new;
+	php_leveldb_iterator_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	return SUCCESS;
 }

@@ -59,6 +59,16 @@ PHP_METHOD(LevelDBWriteBatch, put);
 PHP_METHOD(LevelDBWriteBatch, delete);
 PHP_METHOD(LevelDBWriteBatch, clear);
 
+PHP_METHOD(LevelDBIterator, __construct);
+PHP_METHOD(LevelDBIterator, valid);
+PHP_METHOD(LevelDBIterator, rewind);
+PHP_METHOD(LevelDBIterator, last);
+PHP_METHOD(LevelDBIterator, seek);
+PHP_METHOD(LevelDBIterator, next);
+PHP_METHOD(LevelDBIterator, prev);
+PHP_METHOD(LevelDBIterator, key);
+PHP_METHOD(LevelDBIterator, current);
+
 #ifdef ZTS
 #define LDB_G(v) TSRMG(leveldb_globals_id, zend_leveldb_globals *, v)
 #else
