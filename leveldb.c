@@ -387,7 +387,7 @@ PHP_METHOD(LevelDB, destroy)
 /*	}}} */
 
 /*	{{{ proto bool LevelDB::write(LevelDBWriteBatch $batch [, array $write_options])
-	Destroy the contents of the specified database. */
+	Executes all of the operations added in the write batch. */
 PHP_METHOD(LevelDB, write)
 {
 	zval *write_options_zv = NULL;
@@ -416,7 +416,7 @@ PHP_METHOD(LevelDB, write)
 /*	}}} */
 
 /*	{{{ proto bool LevelDB::repair(string $name [, array $options])
-	Repair the given database. */
+	Repairs the given database. */
 PHP_METHOD(LevelDB, repair)
 {
 	char *name;
@@ -445,7 +445,7 @@ PHP_METHOD(LevelDB, repair)
 
 
 /*  {{{ proto bool LevelDBWriteBatch::__construct()
-	Set the given value for the given key to the write batch. */
+	Instantiates a LevelDBWriteBatch object. */
 PHP_METHOD(LevelDBWriteBatch, __construct)
 {
 	leveldb_write_batch_object *intern;
@@ -463,7 +463,7 @@ PHP_METHOD(LevelDBWriteBatch, __construct)
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::set(string $key, string $value)
-	Set the given value for the given key to the write batch. */
+	Adds a set operation for the given key and value to the write batch. */
 PHP_METHOD(LevelDBWriteBatch, set)
 {
 	char *key, *value;
@@ -484,7 +484,7 @@ PHP_METHOD(LevelDBWriteBatch, set)
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::delete(string $key)
-	Set the given value for the given key to the write batch. */
+	Adds a deletion operation for the given key to the write batch. */
 PHP_METHOD(LevelDBWriteBatch, delete)
 {
 	char *key;
@@ -505,7 +505,7 @@ PHP_METHOD(LevelDBWriteBatch, delete)
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::clear()
-	Set the given value for the given key to the write batch. */
+	Clears all of operations in the write batch. */
 PHP_METHOD(LevelDBWriteBatch, clear)
 {
 	leveldb_write_batch_object *intern;
