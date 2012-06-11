@@ -1,7 +1,7 @@
 --TEST--
 leveldb - basic: get(), set(), put(), delete()
 --SKIPIF--
-<?php include 'skipif.inc'; } ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 

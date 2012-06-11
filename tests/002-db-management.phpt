@@ -1,7 +1,7 @@
 --TEST--
 leveldb - db management
 --SKIPIF--
-<?php include 'skipif.inc'; } ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
