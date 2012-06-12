@@ -44,6 +44,7 @@ PHP_METHOD(LevelDB, set);
 PHP_METHOD(LevelDB, put);
 PHP_METHOD(LevelDB, delete);
 PHP_METHOD(LevelDB, write);
+PHP_METHOD(LevelDB, close);
 PHP_METHOD(LevelDB, destroy);
 PHP_METHOD(LevelDB, repair);
 
