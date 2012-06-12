@@ -1,0 +1,37 @@
+--TEST--
+leveldb - iterate thought db by foreach
+--SKIPIF--
+<?php include 'skipif.inc'; ?>
+--FILE--
+<?php
+
+include "leveldb.inc";
+cleanup_leveldb_on_shutdown();
+
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator-foreach.test-db';
+$db = new LevelDb($leveldb_path);
+
+/* Add test data, and the data will be be sorted */
+$data = array(
+	"First", "Second", "Third", 10, "", "Last"
+);
+
+foreach($data as $item) {
+	$db->set($item, $item);
+}
+
+$it = new LevelDbIterator($db);
+
+echo "*** Loop through in foreach style ***\n";
+foreach ($it as $key => $value) {
+	echo "{$key} => {$value}\n";
+}
+?>
+--EXPECTF--
+*** Loop through in foreach style ***
+ => 
+10 => 10
+First => First
+Last => Last
+Second => Second
+Third => Third

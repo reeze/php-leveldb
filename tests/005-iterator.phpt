@@ -1,5 +1,5 @@
 --TEST--
-leveldb - iterat thought db
+leveldb - iterate thought db
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

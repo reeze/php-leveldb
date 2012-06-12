@@ -129,6 +129,13 @@ typedef struct {
 	leveldb_writebatch_t *batch;
 } leveldb_write_batch_object;
 
+/* define an overloaded iterator structure */
+typedef struct {
+	zend_object_iterator  intern;
+	leveldb_iterator_t *iterator;
+	zval **current;
+} leveldb_iterator_iterator;
+
 typedef struct {
 	zend_object std;
 	leveldb_iterator_t *iterator;
@@ -568,6 +575,129 @@ PHP_METHOD(LevelDBWriteBatch, clear)
 }
 /* }}} */
 
+
+/* {{{ forward declarations to the iterator handlers */
+static void leveldb_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
+static int leveldb_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
+static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+static int leveldb_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static void leveldb_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
+static void leveldb_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
+
+/* iterator handler table */
+zend_object_iterator_funcs leveldb_iterator_funcs = {
+	leveldb_iterator_dtor,
+	leveldb_iterator_valid,
+	leveldb_iterator_current_data,
+	leveldb_iterator_current_key,
+	leveldb_iterator_move_forward,
+	leveldb_iterator_rewind
+};
+/* }}} */
+
+/* {{{ leveldb_iterator_get_iterator */
+zend_object_iterator *leveldb_iterator_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+{
+	leveldb_iterator_iterator *iterator;
+	leveldb_iterator_object *it_object;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+	}
+
+	Z_ADDREF_P(object);
+
+	it_object = (leveldb_iterator_object *)zend_object_store_get_object(object TSRMLS_DC);
+	iterator = emalloc(sizeof(leveldb_iterator_iterator));
+
+	iterator->intern.funcs = &leveldb_iterator_funcs;
+	iterator->intern.data = (void *)object;
+	iterator->iterator = it_object->iterator;
+	iterator->current = NULL;
+
+	return (zend_object_iterator*)iterator;
+}
+/* }}} */
+
+/* {{{ leveldb_iterator_dtor */
+static void leveldb_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+{
+	leveldb_iterator_iterator *iterator = (leveldb_iterator_iterator *)iter;
+
+	if (iterator->intern.data) {
+		zval *object =  iterator->intern.data;
+		zval_ptr_dtor(&object);
+	}
+
+	if (iterator->current) {
+		Z_DELREF_PP(iterator->current);
+		efree(iterator->current);
+	}
+
+	efree(iterator);
+}
+/* }}} */
+
+/* {{{ leveldb_iterator_valid */
+static int leveldb_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
+{
+	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
+	return leveldb_iter_valid(iterator) ? SUCCESS : FAILURE;
+}
+
+/* {{{ leveldb_iterator_current_data */
+static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+{
+	char *value;
+	int value_len;
+	leveldb_iterator_iterator *iterator = (leveldb_iterator_iterator *)iter;
+
+	if (iterator->current) {
+		Z_DELREF_PP(iterator->current);
+		efree(iterator->current);
+	}
+
+	*data = (zval **) emalloc(sizeof(zval *));
+	value = (char *)leveldb_iter_value(iterator->iterator, (size_t *)&value_len);
+
+	MAKE_STD_ZVAL(**data);
+	ZVAL_STRINGL(**data, value, value_len, 1);
+
+	iterator->current = *data;
+}
+/* }}} */
+
+/* {{{ leveldb_iterator_current_key */
+static int leveldb_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+{
+	char *key;
+	int key_len;
+	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
+
+	key = (char *)leveldb_iter_key(iterator, (size_t *)&key_len);
+	*str_key = estrndup(key, key_len);
+	*str_key_len = key_len + 1; /* adding the \0 like HashTable does */
+
+	return HASH_KEY_IS_STRING;
+}
+/* }}} */
+
+/* {{{ leveldb_iterator_move_forward */
+static void leveldb_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+{
+	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
+	leveldb_iter_next(iterator);
+}
+/* }}} */
+
+/* {{{ leveldb_iterator_rewind */
+static void leveldb_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
+{
+	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
+	leveldb_iter_seek_to_first(iterator);
+}
+/* }}} */
+
 /*  {{{ proto LevelDBIterator LevelDBIterator::__construct(LevelDB $db [, array $read_options])
 	Instantiates a LevelDBIterator object. */
 PHP_METHOD(LevelDBIterator, __construct)
@@ -589,6 +719,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 	read_options = leveldb_readoptions_create();
 
 	intern->iterator = leveldb_create_iterator(db_obj->db, read_options);
+	leveldb_iter_seek_to_first(intern->iterator);
 }
 /*	}}} */
 
@@ -760,6 +891,7 @@ PHP_MINIT_FUNCTION(leveldb)
 	INIT_CLASS_ENTRY(ce, "LevelDBIterator", php_leveldb_iterator_class_methods);
 	ce.create_object = php_leveldb_iterator_object_new;
 	php_leveldb_iterator_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_leveldb_iterator_class_entry->get_iterator = leveldb_iterator_get_iterator;
 
 	return SUCCESS;
 }
