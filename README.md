@@ -1,4 +1,4 @@
-# PHP-LevelDB: PHP Bindings for LevelDB
+# PHP-LevelDB: The PHP Binding for LevelDB
 [![Build Status](https://secure.travis-ci.org/reeze/php-leveldb.png)](http://travis-ci.org/reeze/php-leveldb)
 
 ## Requirements
@@ -16,13 +16,14 @@ eg:
 ## Installation
 
 1. Install from source
-	
+
 	$ git clone https://github.com/reeze/php-leveldb.git
 	$ cd php-leveldb
-	$ phpize && make && make install
+	$ phpize
+	* ./configure --enable-leveldb && make && make install
 
 1. Install from PECL
-	Not Host in PECL Yet
+	Didn't host in PECL Yet
 
 ## Usage
 
