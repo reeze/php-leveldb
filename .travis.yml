@@ -10,13 +10,8 @@ env:
 before_script:
   - sh -c "wget http://leveldb.googlecode.com/files/leveldb-1.4.0.tar.gz"
   - sh -c "tar zxvf leveldb-1.4.0.tar.gz"
-  - sh -c "cd leveldb-1.4.0 && make"
-  - sh -c "mkdir lib"
-  - sh -c "ls"
-  - sh -c "cp libleveldb* lib/"
-  - sh -c "cd - && phpize"
-  - sh -c "./configure --with-leveldb=$PWD/leveldb-1.4.0"
-  - sh -c "make"
+  - sh -c "cd leveldb-1.4.0 && make && mkdir lib && cp libleveldb* lib"
+  - sh -c "phpize && ./configure --with-leveldb=$PWD/leveldb-1.4.0 && make"
 
 script: make test
 
