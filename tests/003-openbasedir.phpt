@@ -1,5 +1,7 @@
 --TEST--
 leveldb - open base dir
+--INI--
+open_basedir=.
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

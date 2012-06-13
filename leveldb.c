@@ -45,7 +45,22 @@
 	if ((db_object)->db == NULL) { \
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Can not operate on closed db", 0 TSRMLS_CC); \
 		return; \
-	} \
+	}
+
+#ifndef PHP_FE_END
+# define PHP_FE_END { NULL, NULL, NULL, 0, 0 }
+#endif
+
+#if ZEND_MODULE_API_NO < 20090626
+# define Z_ADDREF_P(arg) ZVAL_ADDREF(arg)
+# define Z_ADDREF_PP(arg) ZVAL_ADDREF(*(arg))
+# define Z_DELREF_P(arg) ZVAL_DELREF(arg)
+# define Z_DELREF_PP(arg) ZVAL_DELREF(*(arg))
+#endif
+
+#ifndef zend_parse_parameters_none
+# define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
+#endif
 
 #if ZEND_MODULE_API_NO >= 20100525
 #define init_properties(intern) object_properties_init(&intern->std, class_type)
@@ -489,7 +504,7 @@ PHP_METHOD(LevelDB, destroy)
 	char *err = NULL;
 	leveldb_options_t *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
@@ -517,7 +532,7 @@ PHP_METHOD(LevelDB, repair)
 	char *err = NULL;
 	leveldb_options_t *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
@@ -771,7 +786,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 		(intern)->iterator = NULL; \
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Can not iterate on closed db", 0 TSRMLS_CC); \
 		return; \
-	} \
+	}
 
 /*	{{{ proto string LevelDBIterator::current()
 	Return current element */
