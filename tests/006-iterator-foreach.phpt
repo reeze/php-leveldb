@@ -9,7 +9,7 @@ include "leveldb.inc";
 cleanup_leveldb_on_shutdown();
 
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator-foreach.test-db';
-$db = new LevelDb($leveldb_path);
+$db = new LevelDB($leveldb_path);
 
 /* Add test data, and the data will be be sorted */
 $data = array(
@@ -20,7 +20,7 @@ foreach($data as $item) {
 	$db->set($item, $item);
 }
 
-$it = new LevelDbIterator($db);
+$it = new LevelDBIterator($db);
 
 echo "*** Loop through in foreach style ***\n";
 foreach ($it as $key => $value) {

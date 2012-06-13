@@ -9,7 +9,7 @@ include "leveldb.inc";
 cleanup_leveldb_on_shutdown();
 
 $leveldb_path = dirname(__FILE__) . '/leveldb_batch.test-db';
-$db = new LevelDb($leveldb_path);
+$db = new LevelDB($leveldb_path);
 
 echo "* batch write with setting\n";
 $batch = new LevelDBWriteBatch();

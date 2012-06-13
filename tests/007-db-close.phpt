@@ -9,11 +9,11 @@ include "leveldb.inc";
 cleanup_leveldb_on_shutdown();
 
 $leveldb_path = dirname(__FILE__) . '/leveldb_close.test-db';
-$db = new LevelDb($leveldb_path);
+$db = new LevelDB($leveldb_path);
 
 $db->set("key", "value");
 
-$it = new LevelDbIterator($db);
+$it = new LevelDBIterator($db);
 
 $db->close();
 $db->close();

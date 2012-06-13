@@ -295,7 +295,7 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 /* }}} */
 
 /* {{{ proto LevelDB LevelDB::__construct(string $name [, array $options [, array $readoptions [, array $writeoptions]]])
-   Instantiates an LevelDB object and opens then give database. */
+   Instantiates a LevelDB object and opens the give database. */
 PHP_METHOD(LevelDB, __construct)
 {
 	char *name;
