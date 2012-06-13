@@ -5,7 +5,8 @@ php:
   - 5.4
 
 env:
-  - NO_INTERACTION=1
+  - REPORT_EXIT_STATUS=1
+  - TEST_PHP_EXECUTABLE=./sapi/cli/php
 
 before_script:
   - sh -c "wget http://leveldb.googlecode.com/files/leveldb-1.4.0.tar.gz"
@@ -13,7 +14,7 @@ before_script:
   - sh -c "cd leveldb-1.4.0 && make && mkdir lib && cp libleveldb* lib"
   - sh -c "phpize && ./configure --with-leveldb=$PWD/leveldb-1.4.0 && make"
 
-script: make test
+script: php run-tests.php
 
 notifications:
   email:
