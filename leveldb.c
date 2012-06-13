@@ -33,7 +33,7 @@
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
 # define LEVELDB_SAFE_MODE_CHECK(file) || (PG(safe_mode) && !php_checkuid((file), "rb+", CHECKUID_CHECK_MODE_PARAM))
 #else
-# define LEVELDB_SAFE_MODE_CHECK
+# define LEVELDB_SAFE_MODE_CHECK(file)
 #endif
 
 #define LEVELDB_CHECK_OPEN_BASEDIR(file) \
@@ -50,15 +50,17 @@
 #if ZEND_MODULE_API_NO >= 20100525
 #define init_properties(intern) object_properties_init(&intern->std, class_type)
 #else
-#define init_properties(intern) zend_hash_copy(intern->std.properties, \
+#define init_properties(intern) do { \
+	zval *tmp; \
+	zend_hash_copy(intern->std.properties, \
     &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,  \
-    (void *) &tmp, sizeof(zval *))
+    (void *) &tmp, sizeof(zval *)); \
+} while(0)
 #endif
 
 #define php_leveldb_obj_new(obj, class_type)					\
   zend_object_value retval;										\
   obj *intern;													\
-  zval *tmp;                                            		\
 																\
   intern = (obj *)emalloc(sizeof(obj));               			\
   memset(intern, 0, sizeof(obj));                          		\
@@ -158,7 +160,7 @@ void php_leveldb_object_free(void *object TSRMLS_DC)
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
 
-static zend_object_value php_leveldb_object_new(zend_class_entry *class_type TSRMLS_CC)
+static zend_object_value php_leveldb_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_leveldb_obj_new(leveldb_object, class_type);
 }
@@ -175,7 +177,7 @@ void php_leveldb_write_batch_object_free(void *object TSRMLS_DC)
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
 
-static zend_object_value php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_CC)
+static zend_object_value php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_leveldb_obj_new(leveldb_write_batch_object, class_type);
 }
@@ -194,7 +196,7 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
 
-static zend_object_value php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_CC)
+static zend_object_value php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_leveldb_obj_new(leveldb_iterator_object, class_type);
 }
@@ -439,7 +441,7 @@ PHP_METHOD(LevelDB, write)
 	leveldb_writeoptions_t *write_options;
 	leveldb_write_batch_object *write_batch_object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "O|z",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z",
 			&write_batch, php_leveldb_write_batch_class_entry, &write_options_zv) == FAILURE) {
 		return;
 	}
@@ -487,7 +489,7 @@ PHP_METHOD(LevelDB, destroy)
 	char *err = NULL;
 	leveldb_options_t *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", 
 			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
@@ -515,7 +517,7 @@ PHP_METHOD(LevelDB, repair)
 	char *err = NULL;
 	leveldb_options_t *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s|z", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", 
 			&name, &name_len, &options_zv) == FAILURE) {
 		return;
 	}
@@ -642,7 +644,7 @@ zend_object_iterator *leveldb_iterator_get_iterator(zend_class_entry *ce, zval *
 
 	Z_ADDREF_P(object);
 
-	it_object = (leveldb_iterator_object *)zend_object_store_get_object(object TSRMLS_DC);
+	it_object = (leveldb_iterator_object *)zend_object_store_get_object(object TSRMLS_CC);
 	iterator = emalloc(sizeof(leveldb_iterator_iterator));
 
 	iterator->intern.funcs = &leveldb_iterator_funcs;
@@ -765,7 +767,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 /*	}}} */
 
 #define LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern) \
-	if (((leveldb_object *)zend_object_store_get_object((intern)->db))->db == NULL) { \
+	if (((leveldb_object *)zend_object_store_get_object((intern)->db TSRMLS_CC))->db == NULL) { \
 		(intern)->iterator = NULL; \
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Can not iterate on closed db", 0 TSRMLS_CC); \
 		return; \
@@ -895,7 +897,7 @@ PHP_METHOD(LevelDBIterator, seek)
 	int key_len;
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_DC, "s", &key, &key_len ) == FAILURE ) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE ) {
 		return;
 	}
 
