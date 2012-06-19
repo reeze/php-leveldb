@@ -144,6 +144,11 @@ zend_class_entry *php_leveldb_iterator_class_entry;
 typedef struct {
 	zend_object std;
 	leveldb_t *db;
+	/* default read options */
+	unsigned char verify_check_sum;
+	unsigned char fill_cache;
+	/* default write options */
+	unsigned char sync;
 } leveldb_object;
 
 typedef struct {
@@ -311,21 +316,164 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 };
 /* }}} */
 
+static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv)
+{
+	zval *value;
+	HashTable *ht;
+	leveldb_options_t *options = leveldb_options_create();
+
+	/* default true */
+	leveldb_options_set_create_if_missing(options, 1);
+
+	if (options_zv == NULL) {
+		return options;
+	}
+
+	ht = Z_ARRVAL_P(options_zv);
+
+	if (zend_hash_find(ht, "create_if_missing", sizeof("create_if_missing"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_options_set_create_if_missing(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "error_if_exists", sizeof("error_if_exists"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_options_set_error_if_exists(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "paranoid_checks", sizeof("paranoid_checks"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_options_set_paranoid_checks(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "write_buffer_size", sizeof("paranoid_checks"), (void **)&value) == SUCCESS) {
+		convert_to_long(value);
+		leveldb_options_set_write_buffer_size(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "max_open_files", sizeof("max_open_files"), (void **)&value) == SUCCESS) {
+		convert_to_long(value);
+		leveldb_options_set_max_open_files(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "block_size", sizeof("block_size"), (void **)&value) == SUCCESS) {
+		convert_to_long(value);
+		leveldb_options_set_block_size(options, Z_LVAL_P(value));
+	}
+
+	if (zend_hash_find(ht, "block_restart_interval", sizeof("block_restart_interval"), (void **)&value) == SUCCESS) {
+		convert_to_long(value);
+		leveldb_options_set_block_restart_interval(options, Z_LVAL_P(value));
+	}
+
+	/* TODO
+		- Add compression
+		- Comparator
+	*/
+
+	return options;
+}
+
+static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object *intern, zval *options_zv)
+{
+	zval *value;
+	HashTable *ht;
+	leveldb_readoptions_t *readoptions = leveldb_readoptions_create();
+
+	if (options_zv == NULL) {
+		return readoptions;
+	}
+
+	ht = Z_ARRVAL_P(options_zv);
+	if (zend_hash_find(ht, "verify_check_sum", sizeof("verify_check_sum"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_readoptions_set_verify_checksums(readoptions, Z_LVAL_P(value));
+	} else {
+		leveldb_readoptions_set_verify_checksums(readoptions, intern->verify_check_sum);
+	}
+
+	if (zend_hash_find(ht, "fill_cache", sizeof("fill_cache"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_readoptions_set_fill_cache(readoptions, Z_LVAL_P(value));
+	} else {
+		leveldb_readoptions_set_fill_cache(readoptions, intern->fill_cache);
+	}
+
+	return readoptions;
+}
+
+static inline void php_leveldb_set_readoptions(leveldb_object *intern, zval *options_zv)
+{
+	zval *value;
+	HashTable *ht;
+
+	if (options_zv == NULL) {
+		return;
+	}
+
+	ht = Z_ARRVAL_P(options_zv);
+
+	if (zend_hash_find(ht, "verify_check_sum", sizeof("verify_check_sum"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		intern->verify_check_sum = Z_LVAL_P(value);
+	}
+
+	if (zend_hash_find(ht, "fill_cache", sizeof("fill_cache"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		intern->fill_cache = Z_LVAL_P(value);
+	}
+}
+
+static inline leveldb_writeoptions_t *php_leveldb_get_writeoptions(leveldb_object *intern, zval *options_zv)
+{
+	zval *value;
+	HashTable *ht;
+	leveldb_writeoptions_t *writeoptions = leveldb_writeoptions_create();
+
+	if (options_zv == NULL) {
+		return writeoptions;
+	}
+
+	ht = Z_ARRVAL_P(options_zv);
+	if (zend_hash_find(ht, "sync", sizeof("sync"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		leveldb_writeoptions_set_sync(writeoptions, Z_LVAL_P(value));
+	} else {
+		leveldb_writeoptions_set_sync(writeoptions, intern->sync);
+	}
+
+	return writeoptions;
+}
+
+static inline void php_leveldb_set_writeoptions(leveldb_object *intern, zval *options_zv)
+{
+	zval *value;
+
+	if (options_zv == NULL) {
+		return;
+	}
+
+	if (zend_hash_find(Z_ARRVAL_P(options_zv), "sync", sizeof("sync"), (void **)&value) == SUCCESS) {
+		convert_to_boolean(value);
+		intern->sync = Z_LVAL_P(value);
+	}
+}
+
 /* {{{ proto LevelDB LevelDB::__construct(string $name [, array $options [, array $readoptions [, array $writeoptions]]])
    Instantiates a LevelDB object and opens the give database. */
 PHP_METHOD(LevelDB, __construct)
 {
 	char *name;
 	int name_len;
-	zval *options = NULL, *read_options = NULL, *write_options = NULL;
+	zval *options_zv = NULL, *readoptions_zv = NULL, *writeoptions_zv = NULL;
 
 	char *err = NULL;
 	leveldb_t *db = NULL;
-	leveldb_options_t *open_options;
+	leveldb_options_t *openoptions;
 	leveldb_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzz",
-			&name, &name_len, &options, &read_options, &write_options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a!a!a!",
+			&name, &name_len, &options_zv, &readoptions_zv, &writeoptions_zv) == FAILURE) {
 		return;
 	}
 
@@ -337,11 +485,11 @@ PHP_METHOD(LevelDB, __construct)
 		leveldb_close(db);
 	}
 
-	/* leveldb create_if_missing default is false, make it true as default */
-	open_options = leveldb_options_create();
-	leveldb_options_set_create_if_missing(open_options, 1);
+	openoptions = php_leveldb_get_open_options(options_zv);
+	php_leveldb_set_readoptions(intern, readoptions_zv);
+	php_leveldb_set_writeoptions(intern, writeoptions_zv);
 
-	db = leveldb_open(open_options, (const char *)name, &err);
+	db = leveldb_open(openoptions, (const char *)name, &err);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -355,22 +503,23 @@ PHP_METHOD(LevelDB, get)
 {
 	char *key, *value;
 	int key_len, value_len;
-	zval *read_options_zv = NULL;
+	zval *readoptions_zv = NULL;
 
 	char *err = NULL;
-	leveldb_readoptions_t *read_options;
+	leveldb_readoptions_t *readoptions;
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
-			&key, &key_len, &read_options_zv) == FAILURE) {
+			&key, &key_len, &readoptions_zv) == FAILURE) {
 		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_NOT_CLOSED(intern);
 
-	read_options = leveldb_readoptions_create();
-	value = leveldb_get(intern->db, read_options, key, key_len, (size_t *)&value_len, &err);
+	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv);
+	value = leveldb_get(intern->db, readoptions, key, key_len, (size_t *)&value_len, &err);
+	leveldb_readoptions_destroy(readoptions);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -388,22 +537,23 @@ PHP_METHOD(LevelDB, set)
 {
 	char *key, *value;
 	int key_len, value_len;
-	zval *write_options_zv = NULL;
+	zval *writeoptions_zv = NULL;
 
 	char *err = NULL;
-	leveldb_writeoptions_t *write_options;
+	leveldb_writeoptions_t *writeoptions;
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z",
-			&key, &key_len, &value, &value_len, &write_options_zv) == FAILURE) {
+			&key, &key_len, &value, &value_len, &writeoptions_zv) == FAILURE) {
 		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_NOT_CLOSED(intern);
 
-	write_options = leveldb_writeoptions_create();
-	leveldb_put(intern->db, write_options, key, key_len, value, value_len, &err);
+	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
+	leveldb_put(intern->db, writeoptions, key, key_len, value, value_len, &err);
+	leveldb_writeoptions_destroy(writeoptions);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -417,22 +567,23 @@ PHP_METHOD(LevelDB, delete)
 {
 	char *key;
 	int key_len;
-	zval *write_options_zv = NULL;
+	zval *writeoptions_zv = NULL;
 
 	char *err = NULL;
-	leveldb_writeoptions_t *write_options;
+	leveldb_writeoptions_t *writeoptions;
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
-			&key, &key_len, &write_options_zv) == FAILURE) {
+			&key, &key_len, &writeoptions_zv) == FAILURE) {
 		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_NOT_CLOSED(intern);
 
-	write_options = leveldb_writeoptions_create();
-	leveldb_delete(intern->db, write_options, key, key_len, &err);
+	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
+	leveldb_delete(intern->db, writeoptions, key, key_len, &err);
+	leveldb_writeoptions_destroy(writeoptions);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -448,25 +599,27 @@ PHP_METHOD(LevelDB, delete)
 	Executes all of the operations added in the write batch. */
 PHP_METHOD(LevelDB, write)
 {
-	zval *write_options_zv = NULL;
+	zval *writeoptions_zv = NULL;
 	zval *write_batch;
 
 	char *err = NULL;
 	leveldb_object *intern;
-	leveldb_writeoptions_t *write_options;
+	leveldb_writeoptions_t *writeoptions;
 	leveldb_write_batch_object *write_batch_object;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z",
-			&write_batch, php_leveldb_write_batch_class_entry, &write_options_zv) == FAILURE) {
+			&write_batch, php_leveldb_write_batch_class_entry, &writeoptions_zv) == FAILURE) {
 		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_NOT_CLOSED(intern);
 
+	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
 	write_batch_object = (leveldb_write_batch_object *)zend_object_store_get_object(write_batch TSRMLS_CC);
-	write_options = leveldb_writeoptions_create();
-	leveldb_write(intern->db, write_options, write_batch_object->batch, &err);
+
+	leveldb_write(intern->db, writeoptions, write_batch_object->batch, &err);
+	leveldb_writeoptions_destroy(writeoptions);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -499,7 +652,7 @@ PHP_METHOD(LevelDB, destroy)
 {
 	char *name;
 	int name_len;
-	zval *options_zv;
+	zval *options_zv = NULL;
 
 	char *err = NULL;
 	leveldb_options_t *options;
@@ -511,9 +664,10 @@ PHP_METHOD(LevelDB, destroy)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = leveldb_options_create();
-
+	options = php_leveldb_get_open_options(options_zv);
 	leveldb_destroy_db(options, name, &err);
+
+	leveldb_options_destroy(options);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -539,9 +693,10 @@ PHP_METHOD(LevelDB, repair)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = leveldb_options_create();
-
+	options = php_leveldb_get_open_options(options_zv);
 	leveldb_repair_db(options, name, &err);
+
+	leveldb_options_destroy(options);
 
 	LEVELDB_CHECK_ERROR(err);
 
@@ -757,13 +912,13 @@ PHP_METHOD(LevelDBIterator, __construct)
 {
 	zval *db_zv = NULL;
 	leveldb_object *db_obj;
-	zval *write_options = NULL;
+	zval *readoptions_zv = NULL;
 
 	leveldb_iterator_object *intern;
-	leveldb_readoptions_t *read_options;
+	leveldb_readoptions_t *readoptions;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z",
-			&db_zv, php_leveldb_class_entry, &write_options) == FAILURE) {
+			&db_zv, php_leveldb_class_entry, &readoptions_zv) == FAILURE) {
 		return;
 	}
 
@@ -771,8 +926,10 @@ PHP_METHOD(LevelDBIterator, __construct)
 	db_obj = (leveldb_object *)zend_object_store_get_object(db_zv TSRMLS_CC);
 	LEVELDB_CHECK_NOT_CLOSED(db_obj);
 
-	read_options = leveldb_readoptions_create();
-	intern->iterator = leveldb_create_iterator(db_obj->db, read_options);
+	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv);
+	intern->iterator = leveldb_create_iterator(db_obj->db, readoptions);
+
+	leveldb_readoptions_destroy(readoptions);
 
 	Z_ADDREF_P(db_zv);
 	intern->db = db_zv;
