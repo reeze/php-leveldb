@@ -5,15 +5,11 @@ php:
   - 5.4
 
 env:
-  - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=php
+  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
 
-before_script:
-  - sh -c "wget http://leveldb.googlecode.com/files/leveldb-1.4.0.tar.gz"
-  - sh -c "tar zxvf leveldb-1.4.0.tar.gz"
-  - sh -c "cd leveldb-1.4.0 && make && mkdir lib && cp libleveldb* lib"
-  - sh -c "phpize && ./configure --with-leveldb=$PWD/leveldb-1.4.0 && make"
+before_script: sh travis/prepare.sh
 
-script: php run-tests.php
+script: sh travis/run-test.sh
 
 notifications:
   email:
