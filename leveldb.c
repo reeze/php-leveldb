@@ -870,12 +870,11 @@ static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***da
 static int leveldb_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	char *key;
-	int key_len;
 	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
 
-	key = (char *)leveldb_iter_key(iterator, (size_t *)&key_len);
-	*str_key = estrndup(key, key_len);
-	*str_key_len = key_len + 1; /* adding the \0 like HashTable does */
+	key = (char *)leveldb_iter_key(iterator, (size_t *)str_key_len);
+	*str_key = estrndup(key, *str_key_len);
+	*str_key_len = *str_key_len + 1; /* adding the \0 like HashTable does */
 
 	return HASH_KEY_IS_STRING;
 }
