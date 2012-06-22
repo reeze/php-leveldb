@@ -7,9 +7,9 @@ open_basedir=.
 --FILE--
 <?php
 
-ini_set("open_basedir", dirname(__FILE__));
+$cwd = getcwd();
 
-$path = dirname(__FILE__) . '/../leveldb_openbasedir.test-db';
+$path = $cwd . '/../leveldb_openbasedir.test-db';
 $db = new LevelDB($path);
 LevelDB::destroy($path);
 LevelDB::repair($path);
