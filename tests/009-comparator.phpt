@@ -49,6 +49,7 @@ echo "*** custom comparator which throw exception ***\n";
 $db3 = new LevelDB($leveldb_path, array('comparator' => array('CustomFunc', 'willException')));
 try {
 	$db3->set("Hi", "guys");
+	var_dump($db3->get("Hi"));
 } catch(Exception $e) {
 	echo $e->getMessage() . "\n";
 }
@@ -82,4 +83,5 @@ Invalid open option: comparator, invaid_func() is not callable
 Invalid argument: php_leveldb.custom_comparatordoes not match existing comparator : leveldb.BytewiseComparator
 bool(true)
 *** custom comparator which throw exception ***
+Oops!
 ==DONE==
