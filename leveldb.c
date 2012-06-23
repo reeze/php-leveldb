@@ -73,6 +73,9 @@
 } while(0)
 #endif
 
+/* PHP-LevelDB MAGIC identifier don't change this */
+#define PHP_LEVELDB_CUSTOM_COMPARATOR_NAME "php_leveldb.custom_comparator"
+
 #define php_leveldb_obj_new(obj, class_type)					\
   zend_object_value retval;										\
   obj *intern;													\
@@ -148,6 +151,10 @@ typedef struct {
 	unsigned char fill_cache;
 	/* default write options */
 	unsigned char sync;
+
+	/* custom comparator */
+	leveldb_comparator_t *comparator;
+	char *callable_name;
 } leveldb_object;
 
 typedef struct {
@@ -174,6 +181,11 @@ void php_leveldb_object_free(void *object TSRMLS_DC)
 
 	if (obj->db) {
 		leveldb_close(obj->db);
+	}
+
+	if (obj->comparator) {
+		leveldb_comparator_destroy(obj->comparator);
+		efree(obj->callable_name);
 	}
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
@@ -206,11 +218,11 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 {
 	leveldb_iterator_object *obj = (leveldb_iterator_object *)object;
 
-	if (obj->iterator) {
+	if (obj->iterator && ((leveldb_object *)zend_object_store_get_object(obj->db TSRMLS_CC))->db != NULL) {
 		leveldb_iter_destroy(obj->iterator);
 	}
 
-	Z_DELREF_P(obj->db);
+	zval_dtor(obj->db);
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
@@ -315,7 +327,41 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 };
 /* }}} */
 
-static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv)
+static void leveldb_custom_comparator_destructor(void *stat)
+{
+	zval *callable = (zval *)stat;
+	zval_dtor(callable);
+}
+
+static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
+{
+	zval *callable = (zval *)stat;
+	zval *result = NULL;
+	zval *params[2];
+
+	MAKE_STD_ZVAL(params[0]);
+	MAKE_STD_ZVAL(params[1]);
+
+	ZVAL_STRINGL(params[0], (char *)a, alen, 1);
+	ZVAL_STRINGL(params[1], (char *)b, blen, 1);
+
+	MAKE_STD_ZVAL(result);
+	if (call_user_function(EG(function_table), NULL, callable, result, 2, params) == SUCCESS) {
+		convert_to_long(result);
+	}
+
+	zval_dtor(params[0]);
+	zval_dtor(params[1]);
+
+	return Z_LVAL_P(result);
+}
+
+static const char* leveldb_custom_comparator_name(void *stat)
+{
+	return PHP_LEVELDB_CUSTOM_COMPARATOR_NAME;
+}
+
+static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, leveldb_comparator_t **out_comparator, char **callable_name)
 {
 	zval **value;
 	HashTable *ht;
@@ -361,9 +407,31 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv)
 		leveldb_options_set_block_restart_interval(options, Z_LVAL_PP(value));
 	}
 
+	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
+		leveldb_comparator_t *comparator;
+		if (!zend_is_callable(*value, 0, callable_name)) {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC,
+				"Invalid open option: comparator, %s() is not callable", *callable_name);
+
+			efree(*callable_name);
+			*callable_name = NULL;
+
+			return NULL;
+		}
+
+		Z_ADDREF_PP(value);
+		comparator = leveldb_comparator_create((void *)(*value),
+			leveldb_custom_comparator_destructor, leveldb_custom_comparator_compare, leveldb_custom_comparator_name);
+
+		if (comparator) {
+			*out_comparator = comparator;
+		}
+
+		leveldb_options_set_comparator(options, comparator);
+	}
+
 	/* TODO
 		- Add compression
-		- Comparator
 	*/
 
 	return options;
@@ -474,7 +542,12 @@ PHP_METHOD(LevelDB, __construct)
 		leveldb_close(db);
 	}
 
-	openoptions = php_leveldb_get_open_options(options_zv);
+	openoptions = php_leveldb_get_open_options(options_zv, &intern->comparator, &intern->callable_name);
+
+	if (!openoptions) {
+		return;
+	}
+
 	php_leveldb_set_readoptions(intern, readoptions_zv);
 	php_leveldb_set_writeoptions(intern, writeoptions_zv);
 
@@ -645,8 +718,9 @@ PHP_METHOD(LevelDB, destroy)
 	int name_len;
 	zval *options_zv = NULL;
 
-	char *err = NULL;
+	char *err = NULL, *callable_name = NULL;
 	leveldb_options_t *options;
+	leveldb_comparator_t *comparator = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
@@ -655,8 +729,18 @@ PHP_METHOD(LevelDB, destroy)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = php_leveldb_get_open_options(options_zv);
+	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name);
+
+	if (!options) {
+		return;
+	}
+
 	leveldb_destroy_db(options, name, &err);
+
+	if (comparator) {
+		leveldb_comparator_destroy(comparator);
+		efree(callable_name);
+	}
 
 	leveldb_options_destroy(options);
 
@@ -674,8 +758,9 @@ PHP_METHOD(LevelDB, repair)
 	int name_len;
 	zval *options_zv;
 
-	char *err = NULL;
+	char *err = NULL, *callable_name = NULL;
 	leveldb_options_t *options;
+	leveldb_comparator_t *comparator = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
@@ -684,8 +769,18 @@ PHP_METHOD(LevelDB, repair)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = php_leveldb_get_open_options(options_zv);
+	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name);
+
+	if (!options) {
+		return;
+	}
+
 	leveldb_repair_db(options, name, &err);
+
+	if (comparator) {
+		leveldb_comparator_destroy(comparator);
+		efree(callable_name);
+	}
 
 	leveldb_options_destroy(options);
 
