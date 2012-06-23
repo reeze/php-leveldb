@@ -13,7 +13,7 @@ $leveldb_path = dirname(__FILE__) . '/leveldb-comparator.test-db';
 echo "*** could not use invalid custom comparator ***\n";
 try {
 	$db2 = new LevelDB($leveldb_path, array('comparator' => 'invaid_func'));
-} catch(Exception $e) {
+} catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
 
@@ -35,7 +35,7 @@ $db->close();
 echo "*** custom comparator can only open with the same comparator again ***\n";
 try {
 	$db2 = new LevelDB($leveldb_path);
-} catch(Exception $e) {
+} catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
 

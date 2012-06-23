@@ -12,7 +12,7 @@ $leveldb_path = dirname(__FILE__) . '/leveldb_options.test-db';
 
 try {
 	$db = new LevelDB($leveldb_path, array("create_if_missing" => false));
-} catch(Exception $e) {
+} catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
 
@@ -20,13 +20,13 @@ try {
 	$db = new LevelDB($leveldb_path, array("max_open_files" => 10));
 	$db->set("key", "value");
 	var_dump($db->get("key"));
-} catch(Exception $e) {
+} catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
 
 try {
 	$db = new LevelDB($leveldb_path, array("error_if_exists" => true));
-} catch(Exception $e) {
+} catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
 ?>

@@ -43,7 +43,7 @@
 
 #define LEVELDB_CHECK_NOT_CLOSED(db_object) \
 	if ((db_object)->db == NULL) { \
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Can not operate on closed db", 0 TSRMLS_CC); \
+		zend_throw_exception(leveldb_ce_LevelDBException, "Can not operate on closed db", 0 TSRMLS_CC); \
 		return; \
 	}
 
@@ -95,10 +95,12 @@
 
 #define LEVELDB_CHECK_ERROR(err) \
 	if ((err) != NULL) { \
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C), err, 0 TSRMLS_CC); \
+		zend_throw_exception(leveldb_ce_LevelDBException, err, 0 TSRMLS_CC); \
 		free(err); \
 		return; \
 	}
+
+zend_class_entry *leveldb_ce_LevelDBException;
 
 
 /* {{{ leveldb_functions[]
@@ -410,7 +412,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
 		leveldb_comparator_t *comparator;
 		if (!zend_is_callable(*value, 0, callable_name)) {
-			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC,
+			zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid open option: comparator, %s() is not callable", *callable_name);
 
 			efree(*callable_name);
@@ -1026,7 +1028,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 #define LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern) \
 	if (((leveldb_object *)zend_object_store_get_object((intern)->db TSRMLS_CC))->db == NULL) { \
 		(intern)->iterator = NULL; \
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Can not iterate on closed db", 0 TSRMLS_CC); \
+		zend_throw_exception(leveldb_ce_LevelDBException, "Can not iterate on closed db", 0 TSRMLS_CC); \
 		return; \
 	}
 
@@ -1187,6 +1189,7 @@ PHP_METHOD(LevelDBIterator, valid)
 PHP_MINIT_FUNCTION(leveldb)
 {
 	zend_class_entry ce;
+	zend_class_entry *exception_ce = zend_exception_get_default(TSRMLS_C);
 
 	memcpy(&leveldb_default_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	memcpy(&leveldb_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -1207,6 +1210,11 @@ PHP_MINIT_FUNCTION(leveldb)
 	ce.create_object = php_leveldb_iterator_object_new;
 	php_leveldb_iterator_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_leveldb_iterator_class_entry->get_iterator = leveldb_iterator_get_iterator;
+
+	/* Register LevelDBException class */
+	INIT_CLASS_ENTRY(ce, "LevelDBException", NULL);
+	ce.create_object = exception_ce->create_object;
+	leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce, NULL TSRMLS_CC);
 
 	return SUCCESS;
 }

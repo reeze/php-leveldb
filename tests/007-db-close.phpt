@@ -20,16 +20,16 @@ $db->close();
 
 try {
 	$db->set("new-key", "value");
-} catch(Exception $e) {
-	var_dump("should be exception");
+} catch(LevelDBException $e) {
+	echo $e->getMessage() . "\n";
 }
 
 try {
 	$it->next();
-} catch(Exception $e) {
-	var_dump("should be exception");
+} catch(LevelDBException $e) {
+	echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--
-string(19) "should be exception"
-string(19) "should be exception"
+Can not operate on closed db
+Can not iterate on closed db
