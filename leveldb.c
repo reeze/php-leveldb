@@ -399,9 +399,15 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 		convert_to_long(*value);
 		leveldb_options_set_max_open_files(options, Z_LVAL_PP(value));
 	}
+
 	if (zend_hash_find(ht, "block_size", sizeof("block_size"), (void **)&value) == SUCCESS) {
 		convert_to_long(*value);
 		leveldb_options_set_block_size(options, Z_LVAL_PP(value));
+	}
+
+	if (zend_hash_find(ht, "block_cache_size", sizeof("block_cache_size"), (void **)&value) == SUCCESS) {
+		convert_to_long(*value);
+		leveldb_options_set_block_cache_size(options, Z_LVAL_PP(value));
 	}
 
 	if (zend_hash_find(ht, "block_restart_interval", sizeof("block_restart_interval"), (void **)&value) == SUCCESS) {
