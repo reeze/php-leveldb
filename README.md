@@ -19,8 +19,6 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 
 ## Installation
 
-1. Install from source
-
 	$ git clone https://github.com/reeze/php-leveldb.git
 	$ cd php-leveldb
 	$ phpize
@@ -70,7 +68,7 @@ When open a leveldb database you could specify options to override default value
 >db afterward, but you could override it by specify read/write options when
 >accessing
 
-### Using custo comparator
+### Using custom comparator
 You could write your own comparator, the comparator can be anything callale in php
 it the same as usort()'s compare function: <http://php.net/usort>, and the comparator
 could be:
@@ -85,8 +83,7 @@ could be:
 
 >**NOTE**
 >If you create a database with custom comparator, you can only open it again
->with the same comparator。
-
+>with the same comparator.
 
 ### Basic operations: get(), put(), delete()
 LevelDB is a key-value database, you could do those basic operations on it:
