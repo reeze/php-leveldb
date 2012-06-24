@@ -17,7 +17,7 @@ if test "$PHP_LEVELDB" != "no"; then
   else # search default path list
     AC_MSG_CHECKING([for leveldb files in default path])
     for i in $SEARCH_PATH ; do
-    if test -r $i/$SEARCH_FOR && test -r $i/lib/$SEARCH_LIB; then
+    if test -r $i/$SEARCH_FOR && test -r $i/$SEARCH_LIB; then
         LEVELDB_DIR=$i
         AC_MSG_RESULT(found in $i)
       fi
@@ -34,7 +34,7 @@ if test "$PHP_LEVELDB" != "no"; then
 
   # --with-leveldb -> check for lib and symbol presence
   LIBNAME=leveldb # you may want to change this
-  PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $LEVELDB_DIR/lib, LEVELDB_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $LEVELDB_DIR, LEVELDB_SHARED_LIBADD)
   
   PHP_SUBST(LEVELDB_SHARED_LIBADD)
 
