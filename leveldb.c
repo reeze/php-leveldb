@@ -409,6 +409,15 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 		leveldb_options_set_block_restart_interval(options, Z_LVAL_PP(value));
 	}
 
+	if (zend_hash_find(ht, "compression", sizeof("compression"), (void **)&value) == SUCCESS) {
+		convert_to_long(*value);
+		if (Z_LVAL_PP(value) != leveldb_no_compression && Z_LVAL_PP(value) != leveldb_snappy_compression) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression type");
+		} else {
+			leveldb_options_set_compression(options, Z_LVAL_PP(value));
+		}
+	}
+
 	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
 		leveldb_comparator_t *comparator;
 		if (!zend_is_callable(*value, 0, callable_name)) {
@@ -1219,6 +1228,10 @@ PHP_MINIT_FUNCTION(leveldb)
 	INIT_CLASS_ENTRY(ce, "LevelDBException", NULL);
 	ce.create_object = exception_ce->create_object;
 	leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce, NULL TSRMLS_CC);
+
+	/* Register constants */
+	REGISTER_LONG_CONSTANT("LEVELDB_NO_COMPRESSION", leveldb_no_compression, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LEVELDB_SNAPPY_COMPRESSION", leveldb_snappy_compression, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
