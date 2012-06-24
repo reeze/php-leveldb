@@ -78,7 +78,7 @@ could be:
 	$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
 	function cmp($a, $b)
 	{
-		return strcmp($a, $b;
+		return strcmp($a, $b);
 	}
 
 >**NOTE**
