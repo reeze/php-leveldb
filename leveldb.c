@@ -266,6 +266,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_write, 0, 0, 1)
 	ZEND_ARG_INFO(0, write_options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getApproximateSizes, 0, 0, 1)
+	ZEND_ARG_INFO(0, range_array)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_destroy, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, options)
@@ -295,6 +299,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_MALIAS(LevelDB,	put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, write, arginfo_leveldb_write, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, getApproximateSizes, arginfo_leveldb_getApproximateSizes, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -706,16 +711,95 @@ PHP_METHOD(LevelDB, write)
 }
 /*	}}} */
 
+
+/*	{{{ proto mixed LevelDB::getApproximateSizes(array $range_array)
+	Get the approximate number of bytes of file system space used by one or more key ranges
+	or return false on failure */
+PHP_METHOD(LevelDB, getApproximateSizes)
+{
+	leveldb_object *intern;
+	zval *range_array, **element, **start_key, **limit_key;
+	char **range_start_key, **range_limit_key;
+	size_t *start_len, *limit_len;
+	uint num_ranges, i;
+	HashPosition pos, pos_range;
+	uint64_t *sizes;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &range_array) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
+
+	array_init(return_value);
+	num_ranges = zend_hash_num_elements(Z_ARRVAL_P(range_array));
+
+	range_start_key = emalloc(num_ranges * sizeof(char *));
+	range_limit_key = emalloc(num_ranges * sizeof(char *));
+	start_len = emalloc(num_ranges * sizeof(size_t));
+	limit_len = emalloc(num_ranges * sizeof(size_t));
+	sizes = emalloc(num_ranges * sizeof(uint64_t));
+
+	for (i = 0, zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(range_array), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(range_array), (void **) &element, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(range_array), &pos), ++i) {
+		if (Z_TYPE_PP(element) == IS_ARRAY) {
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(element), &pos_range);
+
+			if (zend_hash_get_current_data_ex(Z_ARRVAL_PP(element), (void **) &start_key, &pos_range) == SUCCESS &&
+					zend_hash_move_forward_ex(Z_ARRVAL_PP(element), &pos_range) == SUCCESS &&
+					zend_hash_get_current_data_ex(Z_ARRVAL_PP(element), (void **)&limit_key, &pos_range) == SUCCESS) {
+
+/*
+				convert_to_string(*start_key);
+				convert_to_string(*limit_key);
+*/
+
+				range_start_key[i] = Z_STRVAL_PP(start_key);
+				start_len[i] = Z_STRLEN_PP(start_key);
+				range_limit_key[i] = Z_STRVAL_PP(limit_key);
+				limit_len[i] = Z_STRLEN_PP(limit_key);
+
+				continue;
+			}
+		}
+
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid range at range array index: %d", i);
+		zend_hash_destroy(Z_ARRVAL_P(return_value));
+		RETVAL_FALSE;
+
+		goto out;
+	}
+
+	leveldb_approximate_sizes(intern->db, num_ranges,
+		(const char* const *)range_start_key, (const size_t *)start_len,
+		(const char* const *)range_limit_key, (const size_t *)limit_len, sizes);
+
+	for (i = 0; i < num_ranges; ++i) {
+		add_next_index_long(return_value, sizes[i]);
+	}
+
+out:
+	efree(range_start_key);
+	efree(range_limit_key);
+	efree(start_len);
+	efree(limit_len);
+	efree(sizes);
+}
+/*	}}} */
+
 /*	{{{ proto bool LevelDB::close()
 	Close the opened db */
 PHP_METHOD(LevelDB, close)
 {
-	leveldb_object *intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	leveldb_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
+	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	if (intern->db) {
 		leveldb_close(intern->db);
 		intern->db = NULL;
