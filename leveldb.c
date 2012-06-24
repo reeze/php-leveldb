@@ -598,7 +598,9 @@ PHP_METHOD(LevelDB, get)
 /* }}} */
 
 /*	{{{ proto bool LevelDB::set(string $key, string $value [, array $write_options])
-	Sets the value for the given key. */
+	An alias method for LevelDB::put(). */
+/*	proto bool LevelDB::put(string $key, string $value [, array $write_options])
+	Puts the value for the given key. */
 PHP_METHOD(LevelDB, set)
 {
 	char *key, *value;
@@ -812,7 +814,9 @@ PHP_METHOD(LevelDBWriteBatch, __construct)
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::set(string $key, string $value)
-	Adds a set operation for the given key and value to the write batch. */
+	An alias for LevelDBWriteBatch::put() */
+/*  proto bool LevelDBWriteBatch::put(string $key, string $value)
+	Adds a put operation for the given key and value to the write batch. */
 PHP_METHOD(LevelDBWriteBatch, set)
 {
 	char *key, *value;
