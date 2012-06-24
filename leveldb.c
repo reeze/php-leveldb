@@ -41,7 +41,7 @@
 		RETURN_FALSE; \
 	}
 
-#define LEVELDB_CHECK_NOT_CLOSED(db_object) \
+#define LEVELDB_CHECK_DB_NOT_CLOSED(db_object) \
 	if ((db_object)->db == NULL) { \
 		zend_throw_exception(leveldb_ce_LevelDBException, "Can not operate on closed db", 0 TSRMLS_CC); \
 		return; \
@@ -407,7 +407,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if (zend_hash_find(ht, "block_cache_size", sizeof("block_cache_size"), (void **)&value) == SUCCESS) {
 		convert_to_long(*value);
-		leveldb_options_set_block_cache_size(options, Z_LVAL_PP(value));
+		leveldb_options_set_cache(options, leveldb_cache_create_lru(Z_LVAL_PP(value)));
 	}
 
 	if (zend_hash_find(ht, "block_restart_interval", sizeof("block_restart_interval"), (void **)&value) == SUCCESS) {
@@ -592,7 +592,7 @@ PHP_METHOD(LevelDB, get)
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-	LEVELDB_CHECK_NOT_CLOSED(intern);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv);
 	value = leveldb_get(intern->db, readoptions, key, key_len, (size_t *)&value_len, &err);
@@ -628,7 +628,7 @@ PHP_METHOD(LevelDB, set)
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-	LEVELDB_CHECK_NOT_CLOSED(intern);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
 	leveldb_put(intern->db, writeoptions, key, key_len, value, value_len, &err);
@@ -658,7 +658,7 @@ PHP_METHOD(LevelDB, delete)
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-	LEVELDB_CHECK_NOT_CLOSED(intern);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
 	leveldb_delete(intern->db, writeoptions, key, key_len, &err);
@@ -692,7 +692,7 @@ PHP_METHOD(LevelDB, write)
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-	LEVELDB_CHECK_NOT_CLOSED(intern);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
 	write_batch_object = (leveldb_write_batch_object *)zend_object_store_get_object(write_batch TSRMLS_CC);
@@ -1026,7 +1026,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 
 	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	db_obj = (leveldb_object *)zend_object_store_get_object(db_zv TSRMLS_CC);
-	LEVELDB_CHECK_NOT_CLOSED(db_obj);
+	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
 	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv);
 	intern->iterator = leveldb_create_iterator(db_obj->db, readoptions);
