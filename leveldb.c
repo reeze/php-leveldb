@@ -447,10 +447,6 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 		leveldb_options_set_comparator(options, comparator);
 	}
 
-	/* TODO
-		- Add compression
-	*/
-
 	return options;
 }
 
