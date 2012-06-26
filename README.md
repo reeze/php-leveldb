@@ -37,6 +37,7 @@ LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
 ### Open options
 When open a leveldb database you could specify options to override default value:
 
+````php
 	<?php
 	/* default open options */
 	$options = array(
@@ -63,6 +64,7 @@ When open a leveldb database you could specify options to override default value
 	);
 
 	$db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
+````
 
 >**NOTE** The readoptions and writeoptions will take effect when operate on
 >db afterward, but you could override it by specify read/write options when
@@ -73,6 +75,7 @@ You could write your own comparator, the comparator can be anything callale in p
 it the same as usort()'s compare function: <http://php.net/usort>, and the comparator
 could be:
 
+````php
 	int callback(string $a, string $b );
 	<?php
 	$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
@@ -80,6 +83,7 @@ could be:
 	{
 		return strcmp($a, $b);
 	}
+````
 
 >**NOTE**
 >If you create a database with custom comparator, you can only open it again
@@ -88,6 +92,7 @@ could be:
 ### Basic operations: get(), put(), delete()
 LevelDB is a key-value database, you could do those basic operations on it:
 
+````php
 	<?php
 	
 	$db = new LevelDB("/path/to/leveldb-test-db");
@@ -99,6 +104,7 @@ LevelDB is a key-value database, you could do those basic operations on it:
 	$db->set("Key2", "Value2"); // set() is an alias of put()
 	$db->get("Key");
 	$db->delete("Key");
+````
 
 >**NOTE**
 >Some key-value db use set instead of put to set value, so if like set(),
@@ -114,6 +120,7 @@ then writebatch will be your friend.
 >Apart from its atomicity benefits, WriteBatch may also be used to speed up
 >bulk updates by placing lots of individual mutations into the same batch.
 
+````php
 	<?php
 
 	$db = new LevelDB("/path/to/leveldb-test-db");
@@ -126,11 +133,13 @@ then writebatch will be your friend.
 
 	// Write once
 	$db->write($batch);
+````
 
 ### Iterate throught db
 
 You can iterate through the whole database by iteration:
 
+````php
 	<?php
 
 	$db = new LevelDB("/path/to/leveldb-test-db");
@@ -145,10 +154,11 @@ You can iterate through the whole database by iteration:
 	foreach($it as $key => $value) {
 		echo "{$key} => {$value}\n";
 	}
+````
 
 if you want to iterate by reverse order, you could:
 
-
+````php
 	<?php
 
 	$db = new LevelDB("/path/to/leveldb-test-db");
@@ -161,6 +171,7 @@ if you want to iterate by reverse order, you could:
 	/*
      * And you could seek with: rewind(), next(), prev(), seek()
      */
+````
 
 >**NOTE** In LevelDB LevelDB::seek() will success even when the key didn't exists,
 >it will seek to the latest key:
@@ -172,6 +183,7 @@ if you want to iterate by reverse order, you could:
 Since leveldb can only accessed by a single proccess once, so you may want to
 close it when you don't use it anymore.
 
+````php
 	<?php
 
 	$db = new LevelDB("/path/to/leveldb-test-db");
@@ -179,6 +191,7 @@ close it when you don't use it anymore.
 	$db->close();
 	$it->next();				// noop you can't do that, exception thrown
 	$db->set("key", "value");	// you can't do this either
+````
 
 after database closed, you can't do anything related to it;
 
