@@ -38,32 +38,32 @@ LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
 When open a leveldb database you could specify options to override default value:
 
 ````php
-	<?php
-	/* default open options */
-	$options = array(
-		'create_if_missing' => true,	// if the specified database didn't exist will create a new one
-		'error_if_exists'	=> false,	// if the opened database exsits will throw exception
-		'paranoid_checks'	=> false,
-		'block_cache_size'	=> 8 * (2 << 20),
-		'write_buffer_size' => 4<<20,
-		'block_size'		=> 4096,
-		'max_open_files'	=> 1000,
-		'block_restart_interval' => 16,
-		'compression'		=> LEVELDB_SNAPPY_COMPRESSION,
-		'comparator'		=> NULL,   // any callable parameter return 0, -1, 1
-	);
-	/* default readoptions */
-	$readoptions = array(
-		'verify_check_sum'	=> false,
-		'fill_cache'		=> true,
-	);
+<?php
+/* default open options */
+$options = array(
+	'create_if_missing' => true,	// if the specified database didn't exist will create a new one
+	'error_if_exists'	=> false,	// if the opened database exsits will throw exception
+	'paranoid_checks'	=> false,
+	'block_cache_size'	=> 8 * (2 << 20),
+	'write_buffer_size' => 4<<20,
+	'block_size'		=> 4096,
+	'max_open_files'	=> 1000,
+	'block_restart_interval' => 16,
+	'compression'		=> LEVELDB_SNAPPY_COMPRESSION,
+	'comparator'		=> NULL,   // any callable parameter return 0, -1, 1
+);
+/* default readoptions */
+$readoptions = array(
+	'verify_check_sum'	=> false,
+	'fill_cache'		=> true,
+);
 
-	/* default write options */
-	$writeoptions = array(
-		'sync' => false
-	);
+/* default write options */
+$writeoptions = array(
+	'sync' => false
+);
 
-	$db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
+$db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
 ````
 
 >**NOTE** The readoptions and writeoptions will take effect when operate on
@@ -76,13 +76,13 @@ it the same as usort()'s compare function: <http://php.net/usort>, and the compa
 could be:
 
 ````php
-	int callback(string $a, string $b );
-	<?php
-	$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
-	function cmp($a, $b)
-	{
-		return strcmp($a, $b);
-	}
+<?php
+int callback(string $a, string $b );
+$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
+function cmp($a, $b)
+{
+	return strcmp($a, $b);
+}
 ````
 
 >**NOTE**
@@ -93,17 +93,17 @@ could be:
 LevelDB is a key-value database, you could do those basic operations on it:
 
 ````php
-	<?php
-	
-	$db = new LevelDB("/path/to/leveldb-test-db");
+<?php
 
-	/*
-     * Basic operate methods: set(), get(), delete()
-	 */
-	$db->put("Key", "Value");
-	$db->set("Key2", "Value2"); // set() is an alias of put()
-	$db->get("Key");
-	$db->delete("Key");
+$db = new LevelDB("/path/to/leveldb-test-db");
+
+/*
+ * Basic operate methods: set(), get(), delete()
+ */
+$db->put("Key", "Value");
+$db->set("Key2", "Value2"); // set() is an alias of put()
+$db->get("Key");
+$db->delete("Key");
 ````
 
 >**NOTE**
@@ -121,18 +121,18 @@ then writebatch will be your friend.
 >bulk updates by placing lots of individual mutations into the same batch.
 
 ````php
-	<?php
+<?php
 
-	$db = new LevelDB("/path/to/leveldb-test-db");
+$db = new LevelDB("/path/to/leveldb-test-db");
 
-	$batch = new LevelDBWriteBatch();
-	$batch->put("key2", "batch value");
-	$batch->put("key3", "batch value");
-	$batch->set("key4", "a bounch of values"); // set() is an alias of put()
-	$batch->delete("some key");
+$batch = new LevelDBWriteBatch();
+$batch->put("key2", "batch value");
+$batch->put("key3", "batch value");
+$batch->set("key4", "a bounch of values"); // set() is an alias of put()
+$batch->delete("some key");
 
-	// Write once
-	$db->write($batch);
+// Write once
+$db->write($batch);
 ````
 
 ### Iterate throught db
@@ -140,37 +140,37 @@ then writebatch will be your friend.
 You can iterate through the whole database by iteration:
 
 ````php
-	<?php
+<?php
 
-	$db = new LevelDB("/path/to/leveldb-test-db");
-	$it = new LevelDBIterator($db);
+$db = new LevelDB("/path/to/leveldb-test-db");
+$it = new LevelDBIterator($db);
 
-	// Loop in iterator style
-	while($it->valid()) {
-		var_dump($it->key() . " => " . $it->current() . "\n");
-	}
+// Loop in iterator style
+while($it->valid()) {
+	var_dump($it->key() . " => " . $it->current() . "\n");
+}
 
-	// Or loop in foreach
-	foreach($it as $key => $value) {
-		echo "{$key} => {$value}\n";
-	}
+// Or loop in foreach
+foreach($it as $key => $value) {
+	echo "{$key} => {$value}\n";
+}
 ````
 
 if you want to iterate by reverse order, you could:
 
 ````php
-	<?php
+<?php
 
-	$db = new LevelDB("/path/to/leveldb-test-db");
-	$it = new LevelDBIterator($db);
+$db = new LevelDB("/path/to/leveldb-test-db");
+$it = new LevelDBIterator($db);
 
-	for($it->last(); $it->valid(); $it->prev()) {
-		echo "{$key} => {$value}\n";
-	}
+for($it->last(); $it->valid(); $it->prev()) {
+	echo "{$key} => {$value}\n";
+}
 
-	/*
-     * And you could seek with: rewind(), next(), prev(), seek()
-     */
+/*
+ * And you could seek with: rewind(), next(), prev(), seek()
+ */
 ````
 
 >**NOTE** In LevelDB LevelDB::seek() will success even when the key didn't exists,
@@ -184,13 +184,13 @@ Since leveldb can only accessed by a single proccess once, so you may want to
 close it when you don't use it anymore.
 
 ````php
-	<?php
+<?php
 
-	$db = new LevelDB("/path/to/leveldb-test-db");
-	$it = new LevelDBIterator($db);
-	$db->close();
-	$it->next();				// noop you can't do that, exception thrown
-	$db->set("key", "value");	// you can't do this either
+$db = new LevelDB("/path/to/leveldb-test-db");
+$it = new LevelDBIterator($db);
+$db->close();
+$it->next();				// noop you can't do that, exception thrown
+$db->set("key", "value");	// you can't do this either
 ````
 
 after database closed, you can't do anything related to it;
