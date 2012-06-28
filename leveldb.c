@@ -266,6 +266,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_write, 0, 0, 1)
 	ZEND_ARG_INFO(0, write_options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getProperty, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getApproximateSizes, 0, 0, 1)
 	ZEND_ARG_INFO(0, range_array)
 ZEND_END_ARG_INFO()
@@ -299,6 +303,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_MALIAS(LevelDB,	put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, delete, arginfo_leveldb_delete, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, write, arginfo_leveldb_write, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, getProperty, arginfo_leveldb_getProperty, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getApproximateSizes, arginfo_leveldb_getApproximateSizes, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -711,6 +716,31 @@ PHP_METHOD(LevelDB, write)
 }
 /*	}}} */
 
+/*	{{{ proto mixed LevelDB::getProperty(string $name)
+	Returns the property of the db */
+PHP_METHOD(LevelDB, getProperty)
+{
+	char *name, *property;
+	int name_len;
+	leveldb_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
+
+	property = leveldb_property_value(intern->db, (const char *)name);
+
+	if (property == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(property, 1);
+	free(property);
+}
+/* }}} */
 
 /*	{{{ proto mixed LevelDB::getApproximateSizes(array $range_array)
 	Get the approximate number of bytes of file system space used by one or more key ranges
