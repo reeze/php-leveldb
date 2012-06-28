@@ -15,30 +15,22 @@ for($i=0; $i < 99999; ++$i) {
 	$db->set("b{$i}", "value{$i}");
 }
 
-var_dump($db->getProperty('leveldb.stats'));
-var_dump($db->getProperty('leveldb.num-files-at-level1'));
-var_dump($db->getProperty('leveldb.num-files-at-level2'));
-var_dump($db->getProperty('leveldb.num-files-at-level3'));
-var_dump($db->getProperty('leveldb.sstables'));
+var_dump($db->getProperty('leveldb.stats') !== false);
+var_dump($db->getProperty('leveldb.num-files-at-level1') !== false);
+var_dump($db->getProperty('leveldb.num-files-at-level2') !== false);
+var_dump($db->getProperty('leveldb.num-files-at-level3') !== false);
+var_dump($db->getProperty('leveldb.sstables') !== false);
 
+var_dump($db->getProperty('leveldb.anything') === false);
+var_dump($db->getProperty('anythingelse') === false);
 ?>
 ==DONE==
 --EXPECTF--
-string(%d) "                               Compactions
-Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
---------------------------------------------------
-  2        1        1         0        0         1
-"
-string(1) "0"
-string(1) "1"
-string(1) "0"
-string(%d) "--- level 0 ---
---- level 1 ---
---- level 2 ---
-%s
---- level 3 ---
---- level 4 ---
---- level 5 ---
---- level 6 ---
-"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 ==DONE==
