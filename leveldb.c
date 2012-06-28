@@ -335,6 +335,7 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 	PHP_ME(LevelDBIterator, prev, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBIterator, key, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBIterator, current, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDBIterator, getError, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1160,6 +1161,29 @@ PHP_METHOD(LevelDBIterator, __construct)
 		zend_throw_exception(leveldb_ce_LevelDBException, "Can not iterate on closed db", 0 TSRMLS_CC); \
 		return; \
 	}
+
+/*	{{{ proto string LevelDBIterator::current()
+	Return current element */
+PHP_METHOD(LevelDBIterator, getError)
+{
+	char *err = NULL;
+	leveldb_iterator_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE ) {
+		return;
+	}
+
+	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
+
+	leveldb_iter_get_error(intern->iterator, &err);
+
+	if (err == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(err, 1);
+}
 
 /*	{{{ proto string LevelDBIterator::current()
 	Return current element */

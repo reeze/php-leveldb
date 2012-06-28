@@ -43,6 +43,8 @@ var_dump($it->current());
 echo "\n*** Seek to a non-exist key will point to nearest next key ***\n";
 $it->seek("11");
 var_dump($it->current());
+
+var_dump($it->getError());
 ?>
 --EXPECTF--
 *** Loop through ***
@@ -67,3 +69,4 @@ string(6) "Second"
 
 *** Seek to a non-exist key will point to nearest next key ***
 string(5) "First"
+bool(false)
