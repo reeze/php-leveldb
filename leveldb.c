@@ -270,8 +270,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getProperty, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getApproximateSizes, 0, 0, 1)
-	ZEND_ARG_INFO(0, range_array)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_getApproximateSizes, 0, 0, 2)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, limit)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_compactRange, 0, 0, 2)
+	ZEND_ARG_INFO(0, start)
+	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_destroy, 0, 0, 1)
@@ -305,6 +311,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_ME(LevelDB, write, arginfo_leveldb_write, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getProperty, arginfo_leveldb_getProperty, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getApproximateSizes, arginfo_leveldb_getApproximateSizes, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, compactRange, arginfo_leveldb_compactRange, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -743,78 +750,88 @@ PHP_METHOD(LevelDB, getProperty)
 }
 /* }}} */
 
-/*	{{{ proto mixed LevelDB::getApproximateSizes(array $range_array)
-	Get the approximate number of bytes of file system space used by one or more key ranges
-	or return false on failure */
-PHP_METHOD(LevelDB, getApproximateSizes)
+/*	{{{ proto void LevelDB::compactRange(string $start, string $limit)
+	Compact the range between the specified */
+PHP_METHOD(LevelDB, compactRange)
 {
+	char *start, *limit;
+	int start_len, limit_len;
 	leveldb_object *intern;
-	zval *range_array, **element, **start_key, **limit_key;
-	char **range_start_key, **range_limit_key;
-	size_t *start_len, *limit_len;
-	uint num_ranges, i;
-	HashPosition pos, pos_range;
-	uint64_t *sizes;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &range_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &start, &start_len, &limit, &limit_len) == FAILURE) {
 		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
-	array_init(return_value);
-	num_ranges = zend_hash_num_elements(Z_ARRVAL_P(range_array));
+	leveldb_compact_range(intern->db, (const char *)start, (size_t)start_len, (const char *)limit, (size_t)limit_len);
+}
+/* }}} */
 
-	range_start_key = emalloc(num_ranges * sizeof(char *));
-	range_limit_key = emalloc(num_ranges * sizeof(char *));
+/*	{{{ proto mixed LevelDB::getApproximateSizes(array $start, array $limit)
+	Get the approximate number of bytes of file system space used by one or more key ranges
+	or return false on failure */
+PHP_METHOD(LevelDB, getApproximateSizes)
+{
+	leveldb_object *intern;
+	zval *start, *limit, **start_val, **limit_val;
+	char **start_key, **limit_key;
+	size_t *start_len, *limit_len;
+	uint num_ranges, i = 0;
+	HashPosition pos_start, pos_limit;
+	uint64_t *sizes;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &start, &limit) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
+
+	num_ranges = zend_hash_num_elements(Z_ARRVAL_P(start));
+
+	if (num_ranges != zend_hash_num_elements(Z_ARRVAL_P(limit))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The num of start keys and limit keys didn't match");
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	start_key = emalloc(num_ranges * sizeof(char *));
+	limit_key = emalloc(num_ranges * sizeof(char *));
 	start_len = emalloc(num_ranges * sizeof(size_t));
 	limit_len = emalloc(num_ranges * sizeof(size_t));
 	sizes = emalloc(num_ranges * sizeof(uint64_t));
 
-	for (i = 0, zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(range_array), &pos);
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(range_array), (void **) &element, &pos) == SUCCESS;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(range_array), &pos), ++i) {
-		if (Z_TYPE_PP(element) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(element), &pos_range);
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(start), &pos_start);
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(limit), &pos_limit);
 
-			if (zend_hash_get_current_data_ex(Z_ARRVAL_PP(element), (void **) &start_key, &pos_range) == SUCCESS &&
-					zend_hash_move_forward_ex(Z_ARRVAL_PP(element), &pos_range) == SUCCESS &&
-					zend_hash_get_current_data_ex(Z_ARRVAL_PP(element), (void **)&limit_key, &pos_range) == SUCCESS) {
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(start), (void **)&start_val, &pos_start) == SUCCESS &&
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(limit), (void **)&limit_val, &pos_limit) == SUCCESS) {
 
-/*
-				convert_to_string(*start_key);
-				convert_to_string(*limit_key);
-*/
+		start_key[i] = Z_STRVAL_PP(start_val);
+		start_len[i] = Z_STRLEN_PP(start_val);
+		limit_key[i] = Z_STRVAL_PP(limit_val);
+		limit_len[i] = Z_STRLEN_PP(limit_val);
 
-				range_start_key[i] = Z_STRVAL_PP(start_key);
-				start_len[i] = Z_STRLEN_PP(start_key);
-				range_limit_key[i] = Z_STRVAL_PP(limit_key);
-				limit_len[i] = Z_STRLEN_PP(limit_key);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(start), &pos_start);
+		zend_hash_move_forward_ex(Z_ARRVAL_P(limit), &pos_limit);
 
-				continue;
-			}
-		}
-
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid range at range array index: %d", i);
-		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		RETVAL_FALSE;
-
-		goto out;
+		++i;
 	}
 
 	leveldb_approximate_sizes(intern->db, num_ranges,
-		(const char* const *)range_start_key, (const size_t *)start_len,
-		(const char* const *)range_limit_key, (const size_t *)limit_len, sizes);
+		(const char* const *)start_key, (const size_t *)start_len,
+		(const char* const *)limit_key, (const size_t *)limit_len, sizes);
 
 	for (i = 0; i < num_ranges; ++i) {
 		add_next_index_long(return_value, sizes[i]);
 	}
 
-out:
-	efree(range_start_key);
-	efree(range_limit_key);
+	efree(start_key);
 	efree(start_len);
+	efree(limit_key);
 	efree(limit_len);
 	efree(sizes);
 }
