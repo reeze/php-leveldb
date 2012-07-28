@@ -1205,6 +1205,7 @@ PHP_METHOD(LevelDBIterator, destroy)
 
 	RETURN_TRUE;
 }
+/*	}}} */
 
 /*	{{{ proto string LevelDBIterator::current()
 	Return current element */
@@ -1228,6 +1229,7 @@ PHP_METHOD(LevelDBIterator, getError)
 
 	RETURN_STRING(err, 1);
 }
+/*	}}} */
 
 /*	{{{ proto string LevelDBIterator::current()
 	Return current element */
