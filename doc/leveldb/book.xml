@@ -17,6 +17,9 @@ This extension enables you to use Level DB By Using PHP.
  &reference.leveldb.setup;
  &reference.leveldb.constants;
  &reference.leveldb.examples;
+ &reference.leveldb.leveldbiterator;
+ &reference.leveldb.leveldbwritebatch;
+ &reference.leveldb.leveldb;
 
 </book>
 
