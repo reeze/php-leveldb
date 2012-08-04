@@ -227,7 +227,7 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 		leveldb_iter_destroy(obj->iterator);
 	}
 
-	zval_dtor(obj->db);
+	Z_DELREF_P(obj->db);
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
