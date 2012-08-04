@@ -44,6 +44,24 @@ echo "\n*** Seek to a non-exist key will point to nearest next key ***\n";
 $it->seek("11");
 var_dump($it->current());
 
+echo "\n*** Bound checking ***\n";
+$it->rewind();
+$it->prev();
+$it->prev();
+var_dump($it->current());
+
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+$it->next();
+var_dump($it->current());
+
 var_dump($it->getError());
 ?>
 --EXPECTF--
@@ -69,4 +87,8 @@ string(6) "Second"
 
 *** Seek to a non-exist key will point to nearest next key ***
 string(5) "First"
+
+*** Bound checking ***
+bool(false)
+bool(false)
 bool(false)
