@@ -1297,7 +1297,9 @@ PHP_METHOD(LevelDBIterator, next)
 	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
-	leveldb_iter_next(intern->iterator);
+	if (leveldb_iter_valid(intern->iterator)) {
+		leveldb_iter_next(intern->iterator);
+	}
 }
 /*	}}} */
 
@@ -1314,7 +1316,9 @@ PHP_METHOD(LevelDBIterator, prev)
 	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
-	leveldb_iter_prev(intern->iterator);
+	if (leveldb_iter_valid(intern->iterator)) {
+		leveldb_iter_prev(intern->iterator);
+	}
 }
 /*	}}} */
 
