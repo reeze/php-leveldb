@@ -369,8 +369,10 @@ static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t a
 	ZVAL_STRINGL(params[0], (char *)a, alen, 1);
 	ZVAL_STRINGL(params[1], (char *)b, blen, 1);
 
+	TSRMLS_FETCH();
+
 	MAKE_STD_ZVAL(result);
-	if (call_user_function(EG(function_table), NULL, callable, result, 2, params) == SUCCESS) {
+	if (call_user_function(EG(function_table), NULL, callable, result, 2, params TSRMLS_CC) == SUCCESS) {
 		convert_to_long(result);
 	}
 
@@ -385,7 +387,7 @@ static const char* leveldb_custom_comparator_name(void *stat)
 	return PHP_LEVELDB_CUSTOM_COMPARATOR_NAME;
 }
 
-static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, leveldb_comparator_t **out_comparator, char **callable_name)
+static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, leveldb_comparator_t **out_comparator, char **callable_name TSRMLS_DC)
 {
 	zval **value;
 	HashTable *ht;
@@ -448,7 +450,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
 		leveldb_comparator_t *comparator;
-		if (!zend_is_callable(*value, 0, callable_name)) {
+		if (!zend_is_callable(*value, 0, callable_name TSRMLS_CC)) {
 			zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid open option: comparator, %s() is not callable", *callable_name);
 
@@ -577,7 +579,7 @@ PHP_METHOD(LevelDB, __construct)
 		leveldb_close(db);
 	}
 
-	openoptions = php_leveldb_get_open_options(options_zv, &intern->comparator, &intern->callable_name);
+	openoptions = php_leveldb_get_open_options(options_zv, &intern->comparator, &intern->callable_name TSRMLS_CC);
 
 	if (!openoptions) {
 		return;
@@ -880,7 +882,7 @@ PHP_METHOD(LevelDB, destroy)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name);
+	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name TSRMLS_CC);
 
 	if (!options) {
 		return;
@@ -920,7 +922,7 @@ PHP_METHOD(LevelDB, repair)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name);
+	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name TSRMLS_CC);
 
 	if (!options) {
 		return;
