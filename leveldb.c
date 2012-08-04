@@ -354,14 +354,14 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 static void leveldb_custom_comparator_destructor(void *stat)
 {
 	zval *callable = (zval *)stat;
-	zval_dtor(callable);
+	zval_ptr_dtor(&callable);
 }
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
 {
 	zval *callable = (zval *)stat;
-	zval *result = NULL;
-	zval *params[2];
+	zval *params[2], *result = NULL;
+	int ret;
 
 	MAKE_STD_ZVAL(params[0]);
 	MAKE_STD_ZVAL(params[1]);
@@ -376,10 +376,13 @@ static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t a
 		convert_to_long(result);
 	}
 
-	zval_dtor(params[0]);
-	zval_dtor(params[1]);
+	zval_ptr_dtor(&params[0]);
+	zval_ptr_dtor(&params[1]);
 
-	return Z_LVAL_P(result);
+	ret = Z_LVAL_P(result);
+	zval_ptr_dtor(&result);
+
+	return ret;
 }
 
 static const char* leveldb_custom_comparator_name(void *stat)
