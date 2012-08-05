@@ -147,7 +147,7 @@ You can iterate through the whole database by iteration:
 <?php
 
 $db = new LevelDB("/path/to/leveldb-test-db");
-$it = new LevelDBIterator($db);
+$it = new LevelDBIterator($db); // equals to： $it = $db->getIterator();
 
 // Loop in iterator style
 while($it->valid()) {
