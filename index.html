@@ -1,0 +1,305 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>PHP-LevelDB by reeze</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>PHP-LevelDB</h1>
+        <p>The PHP Binding for LevelDB</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/reeze/php-leveldb" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/reeze/php-leveldb/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/reeze/php-leveldb/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>PHP-LevelDB: The PHP Binding for LevelDB</h1>
+
+<p><a href="http://travis-ci.org/reeze/php-leveldb"><img src="https://secure.travis-ci.org/reeze/php-leveldb.png" alt="Build Status"></a></p>
+
+<h2>Requirements</h2>
+
+<ul>
+<li>PHP &gt;= 5.2</li>
+<li>LevelDB</li>
+</ul><p>You could get leveldb from: <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a></p>
+
+<pre><code>$ wget http://leveldb.googlecode.com/files/leveldb-1.5.0.tar.gz
+$ tar zxvf leveldb-1.5.0.tar.gz
+$ cd leveldb-1.5.0
+$ make
+</code></pre>
+
+<blockquote>
+<p><strong>NOTE</strong> LevelDB didn't have make install target in Makefile:
+<a href="http://code.google.com/p/leveldb/issues/detail?id=27">http://code.google.com/p/leveldb/issues/detail?id=27</a>，
+If you want to install to a specific dir, you could:
+<code>make INSTALL_PATH=/Your/Path/</code></p>
+</blockquote>
+
+<h2>Installation</h2>
+
+<pre><code>$ git clone https://github.com/reeze/php-leveldb.git
+$ cd php-leveldb
+$ phpize
+$ ./configure --with-leveldb=/path/to/your/leveldb-1.*.*
+$ make
+$ make install
+</code></pre>
+
+<ol>
+<li>
+<p>Install from PECL</p>
+
+<p>PHP-LevelDB havn't been hosted in PECL Yet</p>
+</li>
+</ol><h2>API Reference</h2>
+
+<p>API Reference could be found here: <a href="http://reeze.cn/php-leveldb/doc/">http://reeze.cn/php-leveldb/doc/</a></p>
+
+<h2>Usage</h2>
+
+<p>Since PHP-LevelDB is a binding for LevelDB, most of the interface are the same as
+LevelDB document: <a href="http://leveldb.googlecode.com/git/doc/index.html">http://leveldb.googlecode.com/git/doc/index.html</a></p>
+
+<h3>Open options</h3>
+
+<p>When open a leveldb database you could specify options to override default value:</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="cm">/* default open options */</span>
+<span class="nv">$options</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+    <span class="s1">'create_if_missing'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>    <span class="c1">// if the specified database didn't exist will create a new one</span>
+    <span class="s1">'error_if_exists'</span>   <span class="o">=&gt;</span> <span class="k">false</span><span class="p">,</span>   <span class="c1">// if the opened database exsits will throw exception</span>
+    <span class="s1">'paranoid_checks'</span>   <span class="o">=&gt;</span> <span class="k">false</span><span class="p">,</span>
+    <span class="s1">'block_cache_size'</span>  <span class="o">=&gt;</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s1">'write_buffer_size'</span> <span class="o">=&gt;</span> <span class="mi">4</span><span class="o">&lt;&lt;</span><span class="mi">20</span><span class="p">,</span>
+    <span class="s1">'block_size'</span>        <span class="o">=&gt;</span> <span class="mi">4096</span><span class="p">,</span>
+    <span class="s1">'max_open_files'</span>    <span class="o">=&gt;</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="s1">'block_restart_interval'</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="s1">'compression'</span>       <span class="o">=&gt;</span> <span class="nx">LEVELDB_SNAPPY_COMPRESSION</span><span class="p">,</span>
+    <span class="s1">'comparator'</span>        <span class="o">=&gt;</span> <span class="k">NULL</span><span class="p">,</span>   <span class="c1">// any callable parameter return 0, -1, 1</span>
+<span class="p">);</span>
+<span class="cm">/* default readoptions */</span>
+<span class="nv">$readoptions</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+    <span class="s1">'verify_check_sum'</span>  <span class="o">=&gt;</span> <span class="k">false</span><span class="p">,</span>
+    <span class="s1">'fill_cache'</span>        <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+<span class="p">);</span>
+
+<span class="cm">/* default write options */</span>
+<span class="nv">$writeoptions</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
+    <span class="s1">'sync'</span> <span class="o">=&gt;</span> <span class="k">false</span>
+<span class="p">);</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/db"</span><span class="p">,</span> <span class="nv">$options</span><span class="p">,</span> <span class="nv">$readoptions</span><span class="p">,</span> <span class="nv">$writeoptions</span><span class="p">);</span>
+</pre></div>
+
+<blockquote>
+<p><strong>NOTE</strong> The readoptions and writeoptions will take effect when operate on
+db afterward, but you could override it by specify read/write options when
+accessing</p>
+</blockquote>
+
+<h3>Using custom comparator</h3>
+
+<p>You could write your own comparator, the comparator can be anything callale in php
+it the same as usort()'s compare function: <a href="http://php.net/usort">http://php.net/usort</a>, and the comparator
+could be:</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<span class="nx">int</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">string</span> <span class="nv">$a</span><span class="p">,</span> <span class="nx">string</span> <span class="nv">$b</span> <span class="p">);</span>
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/db"</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'comparator'</span> <span class="o">=&gt;</span> <span class="s1">'cmp'</span><span class="p">));</span>
+<span class="k">function</span> <span class="nf">cmp</span><span class="p">(</span><span class="nv">$a</span><span class="p">,</span> <span class="nv">$b</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="nb">strcmp</span><span class="p">(</span><span class="nv">$a</span><span class="p">,</span> <span class="nv">$b</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<blockquote>
+<p><strong>NOTE</strong>
+If you create a database with custom comparator, you can only open it again
+with the same comparator.</p>
+</blockquote>
+
+<h3>Basic operations: get(), put(), delete()</h3>
+
+<p>LevelDB is a key-value database, you could do those basic operations on it:</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * Basic operate methods: set(), get(), delete()</span>
+<span class="cm"> */</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"Key"</span><span class="p">,</span> <span class="s2">"Value"</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s2">"Key2"</span><span class="p">,</span> <span class="s2">"Value2"</span><span class="p">);</span> <span class="c1">// set() is an alias of put()</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s2">"Key"</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">delete</span><span class="p">(</span><span class="s2">"Key"</span><span class="p">);</span>
+</pre></div>
+
+<blockquote>
+<p><strong>NOTE</strong>
+Some key-value db use set instead of put to set value, so if like set(),
+you could use set() to save value.</p>
+</blockquote>
+
+<h3>Write in a batch</h3>
+
+<p>If you want to do a sequence of update and want to make it atomically,
+then writebatch will be your friend.</p>
+
+<blockquote>
+<p>The WriteBatch holds a sequence of edits to be made to the database, 
+and these edits within the batch are applied in order.</p>
+
+<p>Apart from its atomicity benefits, WriteBatch may also be used to speed up
+bulk updates by placing lots of individual mutations into the same batch.</p>
+</blockquote>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
+
+<span class="nv">$batch</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBWriteBatch</span><span class="p">();</span>
+<span class="nv">$batch</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"key2"</span><span class="p">,</span> <span class="s2">"batch value"</span><span class="p">);</span>
+<span class="nv">$batch</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"key3"</span><span class="p">,</span> <span class="s2">"batch value"</span><span class="p">);</span>
+<span class="nv">$batch</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s2">"key4"</span><span class="p">,</span> <span class="s2">"a bounch of values"</span><span class="p">);</span> <span class="c1">// set() is an alias of put()</span>
+<span class="nv">$batch</span><span class="o">-&gt;</span><span class="na">delete</span><span class="p">(</span><span class="s2">"some key"</span><span class="p">);</span>
+
+<span class="c1">// Write once</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">(</span><span class="nv">$batch</span><span class="p">);</span>
+</pre></div>
+
+<h3>Iterate throught db</h3>
+
+<p>You can iterate through the whole database by iteration:</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
+
+<span class="c1">// Loop in iterator style</span>
+<span class="k">while</span><span class="p">(</span><span class="nv">$it</span><span class="o">-&gt;</span><span class="na">valid</span><span class="p">())</span> <span class="p">{</span>
+    <span class="nb">var_dump</span><span class="p">(</span><span class="nv">$it</span><span class="o">-&gt;</span><span class="na">key</span><span class="p">()</span> <span class="o">.</span> <span class="s2">" =&gt; "</span> <span class="o">.</span> <span class="nv">$it</span><span class="o">-&gt;</span><span class="na">current</span><span class="p">()</span> <span class="o">.</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Or loop in foreach</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$it</span> <span class="k">as</span> <span class="nv">$key</span> <span class="o">=&gt;</span> <span class="nv">$value</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s2">"</span><span class="si">{</span><span class="nv">$key</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="nv">$value</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>if you want to iterate by reverse order, you could:</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
+
+<span class="k">for</span><span class="p">(</span><span class="nv">$it</span><span class="o">-&gt;</span><span class="na">last</span><span class="p">();</span> <span class="nv">$it</span><span class="o">-&gt;</span><span class="na">valid</span><span class="p">();</span> <span class="nv">$it</span><span class="o">-&gt;</span><span class="na">prev</span><span class="p">())</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s2">"</span><span class="si">{</span><span class="nv">$key</span><span class="si">}</span><span class="s2"> =&gt; </span><span class="si">{</span><span class="nv">$value</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/*</span>
+<span class="cm"> * And you could seek with: rewind(), next(), prev(), seek()</span>
+<span class="cm"> */</span>
+</pre></div>
+
+<blockquote>
+<p><strong>NOTE</strong> In LevelDB LevelDB::seek() will success even when the key didn't exists,
+it will seek to the latest key:
+<code>db-with-key('a', 'b', 'd', 'e');  $db-&gt;seek('c');</code> iterator will point to <code>key 'd'</code></p>
+</blockquote>
+
+<h2>Operations on database</h2>
+
+<h3>LevelDB::close()</h3>
+
+<p>Since leveldb can only accessed by a single proccess once, so you may want to
+close it when you don't use it anymore.</p>
+
+<div class="highlight"><pre><span class="cp">&lt;?php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">close</span><span class="p">();</span>
+<span class="nv">$it</span><span class="o">-&gt;</span><span class="na">next</span><span class="p">();</span>                <span class="c1">// noop you can't do that, exception thrown</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s2">"key"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">);</span>   <span class="c1">// you can't do this either</span>
+</pre></div>
+
+<p>after database closed, you can't do anything related to it;</p>
+
+<h3>LevelDB::destroy()</h3>
+
+<p>If you want to destroy a database, you could delete the whole database by hand:
+<code>rm -rf /path/to/db</code> or you could use <code>LevelDB::destroy('/path/to/db')</code>.</p>
+
+<p>Be careful with this.</p>
+
+<h3>LevelDB::repair()</h3>
+
+<p>If you can't open a database, neither been locked or other error, if it's corrupted,
+you could use <code>LevelDB::repair('/path/to/db')</code> to repair it. it will try to recover
+as much data as possible.</p>
+
+<h2>Reference</h2>
+
+<p>More info could be found at:</p>
+
+<ul>
+<li>LevelDB project home: <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a>
+</li>
+<li>LevelDB document: <a href="http://leveldb.googlecode.com/git/doc/index.html">http://leveldb.googlecode.com/git/doc/index.html</a>
+</li>
+<li>A LevelDB internals analysis in Chinese <a href="http://dirlt.com/LevelDB.html">http://dirlt.com/LevelDB.html</a> 推荐关注博主的博客</li>
+</ul><h2>License</h2>
+
+<p>PHP-LevelDB is licensed under PHP License</p>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/reeze">reeze</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-11029498-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
