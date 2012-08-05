@@ -615,7 +615,7 @@ PHP_METHOD(LevelDB, get)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&key, &key_len, &readoptions_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -651,7 +651,7 @@ PHP_METHOD(LevelDB, set)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z",
 			&key, &key_len, &value, &value_len, &writeoptions_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -681,7 +681,7 @@ PHP_METHOD(LevelDB, delete)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&key, &key_len, &writeoptions_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -715,7 +715,7 @@ PHP_METHOD(LevelDB, write)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|z",
 			&write_batch, php_leveldb_write_batch_class_entry, &writeoptions_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -742,7 +742,7 @@ PHP_METHOD(LevelDB, getProperty)
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -792,7 +792,7 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 	uint64_t *sizes;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &start, &limit) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -853,7 +853,7 @@ PHP_METHOD(LevelDB, close)
 	leveldb_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -880,7 +880,7 @@ PHP_METHOD(LevelDB, destroy)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
@@ -888,7 +888,7 @@ PHP_METHOD(LevelDB, destroy)
 	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name TSRMLS_CC);
 
 	if (!options) {
-		RETURN_FALSE;
+		return;
 	}
 
 	leveldb_destroy_db(options, name, &err);
@@ -920,7 +920,7 @@ PHP_METHOD(LevelDB, repair)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
 			&name, &name_len, &options_zv) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
@@ -928,7 +928,7 @@ PHP_METHOD(LevelDB, repair)
 	options = php_leveldb_get_open_options(options_zv, &comparator, &callable_name TSRMLS_CC);
 
 	if (!options) {
-		RETURN_FALSE;
+		return;
 	}
 
 	leveldb_repair_db(options, name, &err);
