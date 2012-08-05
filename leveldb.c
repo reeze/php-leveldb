@@ -885,7 +885,7 @@ PHP_METHOD(LevelDB, getIterator)
 	object_init_ex(return_value, php_leveldb_iterator_class_entry);
 
 	zend_call_method(&return_value, php_leveldb_iterator_class_entry,
-		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct"),
+		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct") - 1,
 		NULL, (readoptions_zv == NULL ? 1 : 2), getThis(), readoptions_zv TSRMLS_CC);
 }
 /*	}}} */
