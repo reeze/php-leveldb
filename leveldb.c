@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 #include "php_leveldb.h"
 
 #include <leveldb/c.h>
@@ -283,6 +284,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_compactRange, 0, 0, 2)
 	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_get_iterator, 0, 0, 1)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_destroy, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, options)
@@ -316,6 +321,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_ME(LevelDB, getApproximateSizes, arginfo_leveldb_getApproximateSizes, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, compactRange, arginfo_leveldb_compactRange, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, getIterator, arginfo_leveldb_get_iterator, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
@@ -863,6 +869,24 @@ PHP_METHOD(LevelDB, close)
 	}
 
 	RETURN_TRUE;
+}
+/*	}}} */
+
+/*	{{{ proto LevelDBIterator LevelDB::getIterator([array $read_options])
+	Gets a new iterator for the db */
+PHP_METHOD(LevelDB, getIterator)
+{
+	zval *readoptions_zv = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &readoptions_zv) == FAILURE) {
+		return;
+	}
+
+	object_init_ex(return_value, php_leveldb_iterator_class_entry);
+
+	zend_call_method(&return_value, php_leveldb_iterator_class_entry,
+		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct"),
+		NULL, (readoptions_zv == NULL ? 1 : 2), getThis(), readoptions_zv TSRMLS_CC);
 }
 /*	}}} */
 
