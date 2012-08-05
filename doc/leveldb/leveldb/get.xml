@@ -15,10 +15,9 @@
    <methodparam choice="opt"><type>string</type><parameter>read_options</parameter></methodparam>
   </methodsynopsis>
   <para>
+	  This method is used to return a value. This method accepts a string key.
 
   </para>
-
-  &warn.undocumented.func;
 
  </refsect1>
 
@@ -29,7 +28,7 @@
     <term><parameter>key</parameter></term>
     <listitem>
      <para>
-      
+		 A string
      </para>
     </listitem>
    </varlistentry>
@@ -37,7 +36,10 @@
     <term><parameter>read_options</parameter></term>
     <listitem>
      <para>
-      
+		 A array contains two elements name verify_checksums and fill_cache.
+		 read_options['verify_checksums'] may be set to true to force checksum verification of all data that is read from the file system on behalf of a particular read. By default, no such verification is done.
+		   When preforming a bulk read, the application mya be set the read_options['fill_cache'] to false to disable the caching so that the data processed by the bulk read does not end up displacing most of the cached contents.
+
      </para>
     </listitem>
    </varlistentry>
@@ -47,12 +49,15 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
+	  Returns a string.
+	  If the key is not found, it return false.
 
   </para>
  </refsect1>
 
  <refsect1 role="examples">
   &reftitle.examples;
+
   <example>
    <title><function>LevelDB::get</function> example</title>
    <programlisting role="php">
@@ -60,6 +65,16 @@
 <?php
 
 /* ... */
+$db = new LevelDB("/path/to/leveldb-test-db", array('comparator' => 'cmp'));
+function cmp($a, $b) {
+	return strcmp($a, $b);
+}
+
+$db->put("Key", "Value");
+$db->set("Key2", "Value2"); // set() is an alias of put()
+var_dump($db->get("Key"));
+var_dump($db->get("Key2"));
+
 
 ?>
 ]]>
@@ -67,11 +82,21 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+string(5) "Value"
+string(6) "Value2"
 ]]>
    </screen>
   </example>
  </refsect1>
+ <refsect1 role="seealso">
+	 &reftitle.seealso;
+	 <para>
+		 <simplelist>
+			 <member><methodname>LevelDB::set</methodname></member>
+		 </simplelist>
+	 </para>
+ </refsect1>
+
 
 
 </refentry>
