@@ -30,6 +30,10 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 
 	PHP-LevelDB havn't been hosted in PECL Yet
 
+## API Reference
+
+API Reference could be found here: <http://reeze.cn/php-leveldb/doc/>
+
 ## Usage
 Since PHP-LevelDB is a binding for LevelDB, most of the interface are the same as
 LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
