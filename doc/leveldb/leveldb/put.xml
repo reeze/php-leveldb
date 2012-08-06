@@ -16,11 +16,8 @@
    <methodparam choice="opt"><type>string</type><parameter>write_options</parameter></methodparam>
   </methodsynopsis>
   <para>
-
+	  Puts a key-value pair into the database. If the key exists the value will be replaced with the new value.
   </para>
-
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -30,7 +27,7 @@
     <term><parameter>key</parameter></term>
     <listitem>
      <para>
-      
+		 A string key of key-value pair. The key is case-sensitive.
      </para>
     </listitem>
    </varlistentry>
@@ -38,7 +35,7 @@
     <term><parameter>value</parameter></term>
     <listitem>
      <para>
-      
+		 A string value of key-value pair
      </para>
     </listitem>
    </varlistentry>
@@ -68,7 +65,15 @@
 <![CDATA[
 <?php
 
-/* ... */
+$db = new LevelDB("/path/to/leveldb-test-db", array('comparator' => 'cmp'));
+function cmp($a, $b) {
+	return strcmp($a, $b);
+}
+
+var_dump($db->put("KEY", "aa"));
+var_dump($db->put("key", "bb"));
+var_dump($db->get("KEY"));
+$db->close();
 
 ?>
 ]]>
@@ -76,11 +81,23 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+bool(true)
+bool(true)
+string(2) "aa"
 ]]>
    </screen>
   </example>
  </refsect1>
+
+ <refsect1 role="seealso">
+	 &reftitle.seealso;
+	 <para>
+		 <simplelist>
+			 <member><methodname>LevelDB::set</methodname></member>
+		 </simplelist>
+	 </para>
+ </refsect1>
+
 
 
 </refentry>
