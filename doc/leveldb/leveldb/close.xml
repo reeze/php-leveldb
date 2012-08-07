@@ -4,7 +4,7 @@
 <refentry xml:id="leveldb.close" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>LevelDB::close</refname>
-  <refpurpose>The close purpose</refpurpose>
+  <refpurpose>Close this database </refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -14,11 +14,9 @@
    <void />
   </methodsynopsis>
   <para>
+	  This closes the database currently being opend.
 
   </para>
-
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -41,7 +39,11 @@
 <![CDATA[
 <?php
 
-/* ... */
+$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
+function cmp($a, $b) {
+    return strcmp($a, $b);
+}
+var_dump($db->close());
 
 ?>
 ]]>
@@ -49,7 +51,7 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+bool(true)
 ]]>
    </screen>
   </example>

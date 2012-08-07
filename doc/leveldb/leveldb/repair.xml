@@ -4,7 +4,7 @@
 <refentry xml:id="leveldb.repair" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>LevelDB::repair</refname>
-  <refpurpose>The repair purpose</refpurpose>
+  <refpurpose>Repair this database</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,11 +15,8 @@
    <methodparam choice="opt"><type>string</type><parameter>options</parameter></methodparam>
   </methodsynopsis>
   <para>
-
+	  If a database cannot be opened, you may attempt to call this method to resurrect as much of the contents of the database as possible. Some data may be lost, so be careful when calling this function  on a database that contains important information.
   </para>
-
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,7 +26,7 @@
     <term><parameter>name</parameter></term>
     <listitem>
      <para>
-      
+		 Database name that corresponds to a file system directory. 
      </para>
     </listitem>
    </varlistentry>
@@ -37,7 +34,8 @@
     <term><parameter>options</parameter></term>
     <listitem>
      <para>
-      
+		 The open options. 
+		 see <function>LevelDB::__construct</function>
      </para>
     </listitem>
    </varlistentry>
@@ -59,7 +57,10 @@
 <![CDATA[
 <?php
 
-/* ... */
+function cmp($a, $b) {
+    return strcmp($a, $b);
+}
+var_dump(LevelDB::repair("/path/to/db", array('comparator' => 'cmp')));
 
 ?>
 ]]>
@@ -67,7 +68,7 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+bool(true)
 ]]>
    </screen>
   </example>
