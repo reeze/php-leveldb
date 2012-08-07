@@ -365,19 +365,18 @@ static void leveldb_custom_comparator_destructor(void *stat)
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
 {
+	TSRMLS_FETCH();
 	zval *callable = (zval *)stat;
 	zval *params[2], *result = NULL;
 	int ret;
 
 	MAKE_STD_ZVAL(params[0]);
 	MAKE_STD_ZVAL(params[1]);
+	MAKE_STD_ZVAL(result);
 
 	ZVAL_STRINGL(params[0], (char *)a, alen, 1);
 	ZVAL_STRINGL(params[1], (char *)b, blen, 1);
 
-	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(result);
 	if (call_user_function(EG(function_table), NULL, callable, result, 2, params TSRMLS_CC) == SUCCESS) {
 		convert_to_long(result);
 	}
