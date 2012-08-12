@@ -4,7 +4,7 @@
 <refentry xml:id="leveldb.delete" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>LevelDB::delete</refname>
-  <refpurpose>The delete purpose</refpurpose>
+  <refpurpose>Remove a record</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -15,11 +15,9 @@
    <methodparam choice="opt"><type>string</type><parameter>write_options</parameter></methodparam>
   </methodsynopsis>
   <para>
+	  Remove the database entry for key
 
   </para>
-
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,6 +27,7 @@
     <term><parameter>key</parameter></term>
     <listitem>
      <para>
+		 A string
       
      </para>
     </listitem>
@@ -47,7 +46,7 @@
  <refsect1 role="returnvalues">
   &reftitle.returnvalues;
   <para>
-
+	  Returns TRUE on success or FALSE on failure.
   </para>
  </refsect1>
 
@@ -59,7 +58,15 @@
 <![CDATA[
 <?php
 
-/* ... */
+$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
+function cmp($a, $b) {
+return strcmp($a, $b);
+}
+$db->put("key", "test value");
+var_dump($db->delete("key"));
+var_dump($db->get("key"));
+
+$db->close();
 
 ?>
 ]]>
@@ -67,7 +74,8 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+bool(true)
+bool(false)
 ]]>
    </screen>
   </example>
