@@ -4,22 +4,21 @@
 <refentry xml:id="leveldb.write" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>LevelDB::write</refname>
-  <refpurpose>The write purpose</refpurpose>
+  <refpurpose>
+	  Executes all of the operations added in the write batch. 
+	  </refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
   &reftitle.description;
   <methodsynopsis>
    <modifier>public</modifier> <type>void</type><methodname>LevelDB::write</methodname>
-   <methodparam><type>string</type><parameter>batch</parameter></methodparam>
+   <methodparam><type>LevelDBWriteBatch</type><parameter>batch</parameter></methodparam>
    <methodparam choice="opt"><type>string</type><parameter>write_options</parameter></methodparam>
   </methodsynopsis>
   <para>
-
+	  Use the write method can batch execute the operations for the LevelDBWriteBatch object, for example, put, set, or delete, etc. It improves the throughput of the database, and it is atomic. 
   </para>
-
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -29,7 +28,7 @@
     <term><parameter>batch</parameter></term>
     <listitem>
      <para>
-      
+     A LevelDBWriteBatch object
      </para>
     </listitem>
    </varlistentry>
@@ -61,13 +60,33 @@
 
 /* ... */
 
+$db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
+function cmp($a, $b) {
+return strcmp($a, $b);
+}
+
+$batch = new LevelDBWriteBatch();
+$batch->put("key2", "batch value");
+$batch->put("key3", "batch value");
+$batch->set("key4", "a bounch of values"); // set() is an alias of put()
+$batch->delete("key3");
+
+$db->write($batch);
+var_dump($db->get("key2"));
+var_dump($db->get("key3"));
+var_dump($db->get("key4"));
+
+$db->close();
+
 ?>
 ]]>
    </programlisting>
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+string(11) "batch value"
+bool(false)
+string(18) "a bounch of values"
 ]]>
    </screen>
   </example>
