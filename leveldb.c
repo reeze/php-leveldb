@@ -1242,7 +1242,7 @@ PHP_METHOD(LevelDBIterator, getError)
 	char *err = NULL;
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1267,7 +1267,7 @@ PHP_METHOD(LevelDBIterator, current)
 	int value_len;
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1291,7 +1291,7 @@ PHP_METHOD(LevelDBIterator, key)
 	int key_len;
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1313,7 +1313,7 @@ PHP_METHOD(LevelDBIterator, next)
 {
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1332,7 +1332,7 @@ PHP_METHOD(LevelDBIterator, prev)
 {
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1351,7 +1351,7 @@ PHP_METHOD(LevelDBIterator, rewind)
 {
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1368,7 +1368,7 @@ PHP_METHOD(LevelDBIterator, last)
 {
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -1387,7 +1387,7 @@ PHP_METHOD(LevelDBIterator, seek)
 	int key_len;
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE ) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE) {
 		return;
 	}
 
@@ -1404,7 +1404,7 @@ PHP_METHOD(LevelDBIterator, valid)
 {
 	leveldb_iterator_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE ) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
