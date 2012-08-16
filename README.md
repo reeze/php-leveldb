@@ -1,6 +1,10 @@
 # PHP-LevelDB: The PHP Binding for LevelDB
 [![Build Status](https://secure.travis-ci.org/reeze/php-leveldb.png)](http://travis-ci.org/reeze/php-leveldb)
 
+LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values.
+
+This extension is an wrapper for LevelDB
+
 ## Requirements
 - PHP >= 5.2
 - LevelDB
