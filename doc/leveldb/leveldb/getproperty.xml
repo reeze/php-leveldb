@@ -4,7 +4,7 @@
 <refentry xml:id="leveldb.getproperty" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
  <refnamediv>
   <refname>LevelDB::getProperty</refname>
-  <refpurpose>The getProperty purpose</refpurpose>
+  <refpurpose>get the property of db</refpurpose>
  </refnamediv>
 
  <refsect1 role="description">
@@ -17,8 +17,6 @@
 
   </para>
 
-  &warn.undocumented.func;
-
  </refsect1>
 
  <refsect1 role="parameters">
@@ -28,7 +26,41 @@
     <term><parameter>name</parameter></term>
     <listitem>
      <para>
-      
+		 The name parameter specifies the name of database property you require to get.  It must begin to leveldbIt may be any of the following:
+		 <table>
+			 <title>
+				 A list of possible names for <function>getProperty</function>
+				 using <parameter>name</parameter>
+			 </title>
+			 <tgroup cols="2">
+				 <thead>
+					 <row>
+						 <entry><parameter>name</parameter></entry>
+						 <entry>Description</entry>
+					 </row>
+				 </thead>
+				 <tbody>
+					 <row>
+						 <entry><literal>leveldb.stats</literal></entry>
+						 <entry>
+							 returns the status of the entire db
+						 </entry>
+					 </row>
+					 <row>
+						 <entry><literal>leveldb.num-files-at-level</literal></entry>
+						 <entry>
+							 return the number of files for each level. For example, you can use leveldb.num-files-at-level0 the number of files for zero level. 
+						 </entry>
+					 </row>
+					 <row>
+						 <entry><literal>leveldb.sstables</literal></entry>
+						 <entry>
+							 return current status of sstables 
+						 </entry>
+					 </row>
+				 </tbody>
+			 </tgroup>
+		 </table>
      </para>
     </listitem>
    </varlistentry>
@@ -49,8 +81,20 @@
    <programlisting role="php">
 <![CDATA[
 <?php
+$db = new LevelDB("/path/to/db_test", array('comparator' => 'cmp'));
 
-/* ... */
+function cmp($a, $b) {
+return strcmp($a, $b);
+}
+
+$db->put('key', 'value');
+$db->put('key2', 'value2');
+
+var_dump($db->getProperty('leveldb.stats'));
+var_dump($db->getProperty('leveldb.num-files-at-level0'));
+var_dump($db->getProperty('leveldb.sstables'));
+
+$db->close();
 
 ?>
 ]]>
@@ -58,7 +102,21 @@
    &example.outputs.similar;
    <screen>
 <![CDATA[
-...
+string(196) "                               Compactions
+Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
+--------------------------------------------------
+  0        1        0         0        0         0
+  "
+  string(1) "1"
+  string(152) "--- level 0 ---
+   5:141['key' @ 1 : 1 .. 'key2' @ 2 : 1]
+   --- level 1 ---
+   --- level 2 ---
+   --- level 3 ---
+   --- level 4 ---
+   --- level 5 ---
+   --- level 6 ---
+   "
 ]]>
    </screen>
   </example>
