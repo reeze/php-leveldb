@@ -35,6 +35,11 @@ var_dump($db->get("key3"));
 
 $snapshot->release();
 $snapshot->release();
+try {
+	$it = new LevelDBIterator($db, array('snapshot' => $snapshot));
+} catch(LevelDBException $e) {
+	var_dump($e->getMessage());
+}
 ?>
 ==DONE==
 --EXPECTF--
@@ -43,4 +48,5 @@ key1 => value1
 key2 => value2
 bool(false)
 string(6) "value3"
+string(48) "Invalid snapshot parameter, it has been released"
 ==DONE==
