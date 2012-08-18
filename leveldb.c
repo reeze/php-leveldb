@@ -356,6 +356,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_ME(LevelDB, compactRange, arginfo_leveldb_compactRange, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getIterator, arginfo_leveldb_get_iterator, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, getSnapshot, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME(LevelDB, repair, arginfo_leveldb_repair, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_FE_END
@@ -944,6 +945,21 @@ PHP_METHOD(LevelDB, getIterator)
 	zend_call_method(&return_value, php_leveldb_iterator_class_entry,
 		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct") - 1,
 		NULL, (readoptions_zv == NULL ? 1 : 2), getThis(), readoptions_zv TSRMLS_CC);
+}
+/*	}}} */
+
+/*	{{{ proto LevelDBSnapshot LevelDB::getSnapshot()
+	Gets a new snapshot for the db */
+PHP_METHOD(LevelDB, getSnapshot)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	object_init_ex(return_value, php_leveldb_snapshot_class_entry);
+
+	zend_call_method_with_1_params(&return_value, php_leveldb_snapshot_class_entry,
+		&php_leveldb_snapshot_class_entry->constructor, "__construct", NULL, getThis());
 }
 /*	}}} */
 

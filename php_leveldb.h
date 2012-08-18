@@ -49,6 +49,7 @@ PHP_METHOD(LevelDB, close);
 PHP_METHOD(LevelDB, getApproximateSizes);
 PHP_METHOD(LevelDB, compactRange);
 PHP_METHOD(LevelDB, getIterator);
+PHP_METHOD(LevelDB, getSnapshot);
 PHP_METHOD(LevelDB, destroy);
 PHP_METHOD(LevelDB, repair);
 

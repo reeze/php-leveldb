@@ -25,7 +25,7 @@ try {
 	var_dump($e->getMessage());
 }
 
-$it = new LevelDBIterator($db, array('snapshot' => $snapshot));
+$it = $db->getIterator(array('snapshot' => $snapshot));
 foreach($it as $k => $v) {
 	echo "$k => $v\n";
 }
