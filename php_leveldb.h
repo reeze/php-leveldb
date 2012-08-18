@@ -76,6 +76,9 @@ PHP_METHOD(LevelDBIterator, current);
 PHP_METHOD(LevelDBIterator, getError);
 PHP_METHOD(LevelDBIterator, destroy);
 
+PHP_METHOD(LevelDBSnapshot, __construct);
+PHP_METHOD(LevelDBSnapshot, release);
+
 #ifdef ZTS
 #define LDB_G(v) TSRMG(leveldb_globals_id, zend_leveldb_globals *, v)
 #else

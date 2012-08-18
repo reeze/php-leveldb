@@ -147,6 +147,7 @@ static zend_object_handlers leveldb_iterator_object_handlers;
 zend_class_entry *php_leveldb_class_entry;
 zend_class_entry *php_leveldb_write_batch_class_entry;
 zend_class_entry *php_leveldb_iterator_class_entry;
+zend_class_entry *php_leveldb_snapshot_class_entry;
 
 /* Objects */
 typedef struct {
@@ -180,6 +181,12 @@ typedef struct {
 	leveldb_iterator_t *iterator;
 	zval *db;
 } leveldb_iterator_object;
+
+typedef struct {
+	zend_object std;
+	zval *db;
+	leveldb_snapshot_t *snapshot;
+} leveldb_snapshot_object;
 
 void php_leveldb_object_free(void *object TSRMLS_DC)
 {
@@ -228,7 +235,9 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 		leveldb_iter_destroy(obj->iterator);
 	}
 
-	Z_DELREF_P(obj->db);
+	if (obj->db) {
+		Z_DELREF_P(obj->db);
+	}
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
 }
@@ -236,6 +245,27 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 static zend_object_value php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	php_leveldb_obj_new(leveldb_iterator_object, class_type);
+}
+
+/* Snapshot object operate */
+void php_leveldb_snapshot_object_free(void *object TSRMLS_DC)
+{
+	leveldb_t *db;
+	leveldb_snapshot_object *obj = (leveldb_snapshot_object *)object;
+
+	if (obj->snapshot) {
+		if((db = ((leveldb_object *)zend_object_store_get_object(obj->db TSRMLS_CC))->db) != NULL) {
+			leveldb_release_snapshot(db, obj->snapshot);
+		}
+		Z_DELREF_P(obj->db);
+	}
+
+	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
+}
+
+static zend_object_value php_leveldb_snapshot_object_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	php_leveldb_obj_new(leveldb_snapshot_object, class_type);
 }
 
 /* arg info */
@@ -307,6 +337,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_iterator_seek, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_leveldb_snapshot_construct, 0, 0, 1)
+	ZEND_ARG_INFO(0, db)
+ZEND_END_ARG_INFO()
+
 /* Methods */
 /* {{{ php_leveldb_class_methods */
 static zend_function_entry php_leveldb_class_methods[] = {
@@ -353,6 +387,14 @@ static zend_function_entry php_leveldb_iterator_class_methods[] = {
 	PHP_ME(LevelDBIterator, current, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBIterator, getError, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDBIterator, destroy, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+/* }}} */
+
+/* {{{ php_leveldb_iterator_class_methods */
+static zend_function_entry php_leveldb_snapshot_class_methods[] = {
+	PHP_ME(LevelDBSnapshot, __construct, arginfo_leveldb_snapshot_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(LevelDBSnapshot, release, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -482,7 +524,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 	return options;
 }
 
-static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object *intern, zval *options_zv)
+static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object *intern, zval *options_zv TSRMLS_DC)
 {
 	zval **value;
 	HashTable *ht;
@@ -503,6 +545,22 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 		leveldb_readoptions_set_fill_cache(readoptions, zend_is_true(*value));
 	} else {
 		leveldb_readoptions_set_fill_cache(readoptions, intern->fill_cache);
+	}
+
+	if (zend_hash_find(ht, "snapshot", sizeof("snapshot"), (void **)&value) == SUCCESS) {
+		if (Z_TYPE_PP(value) == IS_OBJECT && Z_OBJCE_PP(value) == php_leveldb_snapshot_class_entry) {
+			leveldb_snapshot_object *obj = (leveldb_snapshot_object *)zend_object_store_get_object(*value TSRMLS_CC);
+			if (obj->snapshot == NULL) {
+				zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
+					"Invalid snapshot parameter, it has been released");
+				return NULL;
+			}
+			leveldb_readoptions_set_snapshot(readoptions, obj->snapshot);
+		} else {
+			zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
+				"Invalid snapshot parameter, it must be an instance of LevelDBSnapshot");
+			return NULL;
+		}
 	}
 
 	return readoptions;
@@ -626,7 +684,7 @@ PHP_METHOD(LevelDB, get)
 	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
-	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv);
+	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv TSRMLS_CC);
 	value = leveldb_get(intern->db, readoptions, key, key_len, (size_t *)&value_len, &err);
 	leveldb_readoptions_destroy(readoptions);
 
@@ -1192,7 +1250,12 @@ PHP_METHOD(LevelDBIterator, __construct)
 	db_obj = (leveldb_object *)zend_object_store_get_object(db_zv TSRMLS_CC);
 	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
-	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv);
+	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv TSRMLS_CC);
+
+	if (!readoptions) {
+		return;
+	}
+
 	intern->iterator = leveldb_create_iterator(db_obj->db, readoptions);
 
 	leveldb_readoptions_destroy(readoptions);
@@ -1415,6 +1478,56 @@ PHP_METHOD(LevelDBIterator, valid)
 }
 /*	}}} */
 
+/*  {{{ proto LevelDBSnapshot LevelDBSnapshot::__construct(LevelDB $db)
+	Instantiates a LevelDBSnapshot object. */
+PHP_METHOD(LevelDBSnapshot, __construct)
+{
+	zval *db_zv = NULL;
+	leveldb_object *db_obj;
+	leveldb_snapshot_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O",
+			&db_zv, php_leveldb_class_entry) == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_snapshot_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	db_obj = (leveldb_object *)zend_object_store_get_object(db_zv TSRMLS_CC);
+	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
+
+	intern->snapshot = (leveldb_snapshot_t *)leveldb_create_snapshot(db_obj->db);
+
+	Z_ADDREF_P(db_zv);
+	intern->db = db_zv;
+}
+/*	}}} */
+
+/*  {{{ proto void LevelDBSnapshot::release()
+	Release the LevelDBSnapshot object. */
+PHP_METHOD(LevelDBSnapshot, release)
+{
+	leveldb_snapshot_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	intern = (leveldb_snapshot_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (!intern->db) {
+		return;
+	}
+
+	{
+		leveldb_object *db = (leveldb_object *)zend_object_store_get_object(intern->db TSRMLS_CC);
+		leveldb_release_snapshot(db->db, intern->snapshot);
+		zval_ptr_dtor(&intern->db);
+		intern->snapshot = NULL;
+		intern->db = NULL;
+	}
+}
+/*	}}} */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(leveldb)
@@ -1441,6 +1554,12 @@ PHP_MINIT_FUNCTION(leveldb)
 	ce.create_object = php_leveldb_iterator_object_new;
 	php_leveldb_iterator_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_leveldb_iterator_class_entry->get_iterator = leveldb_iterator_get_iterator;
+
+
+	/* Register LevelDBSnapshot Class */
+	INIT_CLASS_ENTRY(ce, "LevelDBSnapshot", php_leveldb_snapshot_class_methods);
+	ce.create_object = php_leveldb_snapshot_object_new;
+	php_leveldb_snapshot_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* Register LevelDBException class */
 	INIT_CLASS_ENTRY(ce, "LevelDBException", NULL);
