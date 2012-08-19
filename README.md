@@ -144,7 +144,7 @@ $batch->delete("some key");
 $db->write($batch);
 ````
 
-### Iterate throught db
+### Iterate through db
 
 You can iterate through the whole database by iteration:
 
