@@ -1295,7 +1295,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 	}
 
 /*	{{{ proto bool LevelDBIterator::destroy()
-	Destroy the iteratro */
+	Destroy the iterator */
 PHP_METHOD(LevelDBIterator, destroy)
 {
 	leveldb_iterator_object *intern;
