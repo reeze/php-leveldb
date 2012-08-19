@@ -1,9 +1,9 @@
 # PHP-LevelDB: The PHP Binding for LevelDB
-[![Build Status](https://secure.travis-ci.org/reeze/php-leveldb.png)](http://travis-ci.org/reeze/php-leveldb)
+Build Status: [![Build Status](https://secure.travis-ci.org/reeze/php-leveldb.png)](http://travis-ci.org/reeze/php-leveldb)
 
 LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values.
 
-This extension is an wrapper for LevelDB
+This extension is a binding for LevelDB
 
 ## Requirements
 - PHP >= 5.2
@@ -39,7 +39,7 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 API Reference could be found here: <http://reeze.cn/php-leveldb/doc/>
 
 ## Usage
-Since PHP-LevelDB is a binding for LevelDB, most of the interface are the same as
+Since PHP-LevelDB is a binding for LevelDB, most of the interfaces are the same as
 LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
 
 ### Open options
@@ -64,6 +64,7 @@ $options = array(
 $readoptions = array(
 	'verify_check_sum'	=> false,
 	'fill_cache'		=> true,
+	'snapshot'			=> null
 );
 
 /* default write options */
@@ -185,10 +186,49 @@ for($it->last(); $it->valid(); $it->prev()) {
 >it will seek to the latest key:
 >`db-with-key('a', 'b', 'd', 'e');  $db->seek('c');` iterator will point to `key 'd'`
 
+### Snapshots
+Snapshots provide consistent read-only views over the entire state of the key-value store.
+`$read_options['snapshot']` may be non-NULL to indicate that a read should operate on a
+particular version of the DB state. If `$read_options['snapshot']` is NULL, the read will
+operate on an implicit snapshot of the current state.
+
+Snapshots are created by the LevelDB::getSnapshot() method:
+
+````php
+<?php
+
+$db = new LevelDB("you-db-path.db");
+$db->put("key1", "value1");
+$db->put("key2", "value2");
+
+$snapshot = $db->getSnapshot();
+
+$db->put("key3", "value3");
+
+$read_options = array("snapshot" => $snapshot);
+$db->get("key3", $read_options); // false but not "value3"
+$db->get("key3"); // "value3" since not read from snapshot
+
+
+$it = $db->getIterator($read_options);
+foreach($it as $k => $v) {
+	printf("$k => $v\n");
+}
+/*
+Output:
+key1 => value1
+key2 => value2
+
+Not key3 found because read from snapshot
+*/
+
+?>
+````
+
 ## Operations on database
 
 ### LevelDB::close()
-Since leveldb can only accessed by a single proccess once, so you may want to
+Since leveldb can only accessed by a single proccess one time, so you may want to
 close it when you don't use it anymore.
 
 ````php
@@ -219,7 +259,7 @@ More info could be found at:
 
 - LevelDB project home: <http://code.google.com/p/leveldb/>
 - LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
-- A LevelDB internals analysis in Chinese <http://dirlt.com/LevelDB.html> 推荐关注博主的博客
+- A LevelDB internals analysis in Chinese <http://dirlt.com/LevelDB.html>
 
 ## License
 PHP-LevelDB is licensed under PHP License
