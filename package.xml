@@ -32,6 +32,29 @@ http://pear.php.net/dtd/package-2.0.xsd">
       <file name="config.m4" role="src" />
       <file name="leveldb.c" role="src" />
       <file name="php_leveldb.h" role="src" />
+      <file name="README.md" role="doc" />
+      <dir name="tests">
+		<file name="001-basic.phpt" role="test" />
+		<file name="002-db-management.phpt" role="test" />
+		<file name="003-openbasedir.phpt" role="test" />
+		<file name="004-write-batch.phpt" role="test" />
+		<file name="005-iterator.phpt" role="test" />
+		<file name="006-iterator-foreach.phpt" role="test" />
+		<file name="007-db-close.phpt" role="test" />
+		<file name="008-options.phpt" role="test" />
+		<file name="009-comparator.phpt" role="test" />
+		<file name="010-compression.phpt" role="test" />
+		<file name="011-getApproximateSizes.phpt" role="test" />
+		<file name="012-getProperty.phpt" role="test" />
+		<file name="013-compactRange.phpt" role="test" />
+		<file name="014-iterator-destroy.phpt" role="test" />
+		<file name="015-double-iterator.phpt" role="test" />
+		<file name="016-different-iterators-should-differ.phpt" role="test" />
+		<file name="017-db-getIterator.phpt" role="test" />
+		<file name="018-snapshot.phpt" role="test" />
+		<file name="leveldb.inc" role="test" />
+	    <file name="skipif.inc" role="test" />
+      </dir>
     </dir>
   </contents>
   <dependencies>
