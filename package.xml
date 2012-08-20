@@ -15,6 +15,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>reeze.xia@gmail.com</email>
     <active>yes</active>
   </lead>
+  <lead>
+    <name>Arpad Ray</name>
+    <user>arpad</user>
+    <email>arpad@php.net</email>
+    <active>yes</active>
+  </lead>
   <date>2012-??-??</date>
   <version>
     <release>0.1.0</release>

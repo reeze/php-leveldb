@@ -254,6 +254,11 @@ If you can't open a database, neither been locked or other error, if it's corrup
 you could use `LevelDB::repair('/path/to/db')` to repair it. it will try to recover
 as much data as possible.
 
+## Thanks
+
+Thanks Arpad <https://github.com/arraypad> for his original implementation: <http://github.com/arraypad/php-leveldb>
+and his generous.
+
 ## Reference
 More info could be found at:
 
