@@ -47,7 +47,7 @@
 
 #define LEVELDB_CHECK_DB_NOT_CLOSED(db_object) \
 	if ((db_object)->db == NULL) { \
-		zend_throw_exception(leveldb_ce_LevelDBException, "Can not operate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
+		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not operate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
 		return; \
 	}
 
@@ -99,13 +99,10 @@
 
 #define LEVELDB_CHECK_ERROR(err) \
 	if ((err) != NULL) { \
-		zend_throw_exception(leveldb_ce_LevelDBException, err, 0 TSRMLS_CC); \
+		zend_throw_exception(php_leveldb_ce_LevelDBException, err, 0 TSRMLS_CC); \
 		free(err); \
 		return; \
 	}
-
-zend_class_entry *leveldb_ce_LevelDBException;
-
 
 /* {{{ leveldb_functions[]
  */
@@ -144,6 +141,7 @@ static zend_object_handlers leveldb_object_handlers;
 static zend_object_handlers leveldb_iterator_object_handlers;
 
 /* Class entries */
+zend_class_entry *php_leveldb_ce_LevelDBException;
 zend_class_entry *php_leveldb_class_entry;
 zend_class_entry *php_leveldb_write_batch_class_entry;
 zend_class_entry *php_leveldb_iterator_class_entry;
@@ -502,7 +500,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
 		leveldb_comparator_t *comparator;
 		if (!zend_is_callable(*value, 0, callable_name TSRMLS_CC)) {
-			zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
+			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid open option: comparator, %s() is not callable", *callable_name);
 
 			efree(*callable_name);
@@ -552,13 +550,13 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 		if (Z_TYPE_PP(value) == IS_OBJECT && Z_OBJCE_PP(value) == php_leveldb_snapshot_class_entry) {
 			leveldb_snapshot_object *obj = (leveldb_snapshot_object *)zend_object_store_get_object(*value TSRMLS_CC);
 			if (obj->snapshot == NULL) {
-				zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
+				zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 					"Invalid snapshot parameter, it has been released");
 				return NULL;
 			}
 			leveldb_readoptions_set_snapshot(readoptions, obj->snapshot);
 		} else {
-			zend_throw_exception_ex(leveldb_ce_LevelDBException, 0 TSRMLS_CC,
+			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid snapshot parameter, it must be an instance of LevelDBSnapshot");
 			return NULL;
 		}
@@ -621,7 +619,7 @@ static inline void php_leveldb_set_writeoptions(leveldb_object *intern, zval *op
 }
 
 /* {{{ proto LevelDB LevelDB::__construct(string $name [, array $options [, array $readoptions [, array $writeoptions]]])
-   Instantiates a LevelDB object and opens the give database. */
+   Instantiates a LevelDB object and opens the give database */
 PHP_METHOD(LevelDB, __construct)
 {
 	char *name;
@@ -666,7 +664,7 @@ PHP_METHOD(LevelDB, __construct)
 /* }}} */
 
 /*	{{{ proto mixed LevelDB::get(string $key [, array $read_options])
-	Returns the value for the given key or false. */
+	Returns the value for the given key or false */
 PHP_METHOD(LevelDB, get)
 {
 	char *key, *value;
@@ -700,9 +698,9 @@ PHP_METHOD(LevelDB, get)
 /* }}} */
 
 /*	{{{ proto bool LevelDB::set(string $key, string $value [, array $write_options])
-	An alias method for LevelDB::put(). */
+	An alias method for LevelDB::put() */
 /*	proto bool LevelDB::put(string $key, string $value [, array $write_options])
-	Puts the value for the given key. */
+	Puts the value for the given key */
 PHP_METHOD(LevelDB, set)
 {
 	char *key, *value;
@@ -732,7 +730,7 @@ PHP_METHOD(LevelDB, set)
 /* }}} */
 
 /*	{{{ proto bool LevelDB::delete(string $key [, array $write_options])
-	Deletes the given key. */
+	Deletes the given key */
 PHP_METHOD(LevelDB, delete)
 {
 	char *key;
@@ -766,7 +764,7 @@ PHP_METHOD(LevelDB, delete)
 /* }}} */
 
 /*	{{{ proto bool LevelDB::write(LevelDBWriteBatch $batch [, array $write_options])
-	Executes all of the operations added in the write batch. */
+	Executes all of the operations added in the write batch */
 PHP_METHOD(LevelDB, write)
 {
 	zval *writeoptions_zv = NULL;
@@ -964,7 +962,7 @@ PHP_METHOD(LevelDB, getSnapshot)
 /*	}}} */
 
 /*	{{{ proto bool LevelDB::destroy(string $name [, array $options])
-	Destroy the contents of the specified database. */
+	Destroy the contents of the specified database */
 PHP_METHOD(LevelDB, destroy)
 {
 	char *name;
@@ -1004,7 +1002,7 @@ PHP_METHOD(LevelDB, destroy)
 /*	}}} */
 
 /*	{{{ proto bool LevelDB::repair(string $name [, array $options])
-	Repairs the given database. */
+	Repairs the given database */
 PHP_METHOD(LevelDB, repair)
 {
 	char *name;
@@ -1043,9 +1041,8 @@ PHP_METHOD(LevelDB, repair)
 }
 /*	}}} */
 
-
 /*  {{{ proto LevelDBWriteBatch LevelDBWriteBatch::__construct()
-	Instantiates a LevelDBWriteBatch object. */
+	Instantiates a LevelDBWriteBatch object */
 PHP_METHOD(LevelDBWriteBatch, __construct)
 {
 	leveldb_write_batch_object *intern;
@@ -1086,7 +1083,7 @@ PHP_METHOD(LevelDBWriteBatch, set)
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::delete(string $key)
-	Adds a deletion operation for the given key to the write batch. */
+	Adds a deletion operation for the given key to the write batch */
 PHP_METHOD(LevelDBWriteBatch, delete)
 {
 	char *key;
@@ -1102,12 +1099,11 @@ PHP_METHOD(LevelDBWriteBatch, delete)
 	leveldb_writebatch_delete(intern->batch, key, key_len);
 
 	RETURN_TRUE;
-
 }
 /* }}} */
 
 /*  {{{ proto bool LevelDBWriteBatch::clear()
-	Clears all of operations in the write batch. */
+	Clears all of operations in the write batch */
 PHP_METHOD(LevelDBWriteBatch, clear)
 {
 	leveldb_write_batch_object *intern;
@@ -1285,12 +1281,12 @@ PHP_METHOD(LevelDBIterator, __construct)
 
 #define LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern) \
 	if (intern->iterator == NULL) { \
-		zend_throw_exception(leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED TSRMLS_CC); \
+		zend_throw_exception(php_leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED TSRMLS_CC); \
 		return; \
 	} \
 	if (((leveldb_object *)zend_object_store_get_object((intern)->db TSRMLS_CC))->db == NULL) { \
 		(intern)->iterator = NULL; \
-		zend_throw_exception(leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
+		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
 		return; \
 	}
 
@@ -1495,7 +1491,7 @@ PHP_METHOD(LevelDBIterator, valid)
 /*	}}} */
 
 /*  {{{ proto LevelDBSnapshot LevelDBSnapshot::__construct(LevelDB $db)
-	Instantiates a LevelDBSnapshot object. */
+	Instantiates a LevelDBSnapshot object */
 PHP_METHOD(LevelDBSnapshot, __construct)
 {
 	zval *db_zv = NULL;
@@ -1519,7 +1515,7 @@ PHP_METHOD(LevelDBSnapshot, __construct)
 /*	}}} */
 
 /*  {{{ proto void LevelDBSnapshot::release()
-	Release the LevelDBSnapshot object. */
+	Release the LevelDBSnapshot object */
 PHP_METHOD(LevelDBSnapshot, release)
 {
 	leveldb_snapshot_object *intern;
@@ -1580,7 +1576,7 @@ PHP_MINIT_FUNCTION(leveldb)
 	/* Register LevelDBException class */
 	INIT_CLASS_ENTRY(ce, "LevelDBException", NULL);
 	ce.create_object = exception_ce->create_object;
-	leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce, NULL TSRMLS_CC);
+	php_leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce, NULL TSRMLS_CC);
 
 	/* Register constants */
 	REGISTER_LONG_CONSTANT("LEVELDB_NO_COMPRESSION", leveldb_no_compression, CONST_CS | CONST_PERSISTENT);
