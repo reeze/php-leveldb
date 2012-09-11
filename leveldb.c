@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Reeze Xia <reeze.xia@gmail.com>                              |
+  | Author: Reeze Xia <reeze@php.net>                                    |
   +----------------------------------------------------------------------+
 */
 
