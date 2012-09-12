@@ -12,7 +12,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <lead>
     <name>Reeze Xia</name>
     <user>reeze</user>
-    <email>reeze.xia@gmail.com</email>
+    <email>reeze@php.net</email>
     <active>yes</active>
   </lead>
   <lead>
@@ -21,7 +21,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>arpad@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-??-??</date>
+  <date>2012-09-12</date>
   <version>
     <release>0.1.0</release>
     <api>0.1.0</api>
@@ -32,6 +32,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
+	First release
   </notes>
   <contents>
     <dir name="/">
