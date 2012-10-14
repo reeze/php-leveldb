@@ -32,7 +32,7 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 
 1. Install from PECL
 
-	PHP-LevelDB havn't been hosted in PECL Yet
+	<http://pecl.php.net/package/leveldb>
 
 ## API Reference
 
