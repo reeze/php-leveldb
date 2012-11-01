@@ -233,7 +233,7 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 	}
 
 	if (obj->db) {
-		Z_DELREF_P(obj->db);
+		zval_ptr_dtor(&obj->db);
 	}
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
@@ -254,7 +254,7 @@ void php_leveldb_snapshot_object_free(void *object TSRMLS_DC)
 		if((db = ((leveldb_object *)zend_object_store_get_object(obj->db TSRMLS_CC))->db) != NULL) {
 			leveldb_release_snapshot(db, obj->snapshot);
 		}
-		Z_DELREF_P(obj->db);
+		zval_ptr_dtor(&obj->db);
 	}
 
 	zend_objects_free_object_storage((zend_object *)object TSRMLS_CC);
@@ -1173,7 +1173,7 @@ static void leveldb_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 	}
 
 	if (iterator->current) {
-		Z_DELREF_PP(iterator->current);
+		zval_ptr_dtor(iterator->current);
 		efree(iterator->current);
 	}
 
@@ -1197,7 +1197,7 @@ static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***da
 	leveldb_iterator_iterator *iterator = (leveldb_iterator_iterator *)iter;
 
 	if (iterator->current) {
-		Z_DELREF_PP(iterator->current);
+		zval_ptr_dtor(iterator->current);
 		efree(iterator->current);
 	}
 
