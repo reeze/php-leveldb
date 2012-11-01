@@ -21,7 +21,7 @@
 #ifndef PHP_LEVELDB_H
 #define PHP_LEVELDB_H
 
-#define PHP_LEVELDB_VERSION "0.1.0"
+#define PHP_LEVELDB_VERSION "0.1.1-dev"
 
 extern zend_module_entry leveldb_module_entry;
 #define phpext_leveldb_ptr &leveldb_module_entry

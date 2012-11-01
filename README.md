@@ -11,9 +11,9 @@ This extension is a binding for LevelDB
 
 You could get leveldb from: <http://code.google.com/p/leveldb/>
 
-	$ wget http://leveldb.googlecode.com/files/leveldb-1.5.0.tar.gz
-	$ tar zxvf leveldb-1.5.0.tar.gz
-	$ cd leveldb-1.5.0
+	$ wget http://leveldb.googlecode.com/files/leveldb-1.7.0.tar.gz
+	$ tar zxvf leveldb-1.7.0.tar.gz
+	$ cd leveldb-1.7.0
 	$ make
 
 >**NOTE** LevelDB didn't have make install target in Makefile:
@@ -40,10 +40,10 @@ API Reference could be found here: <http://reeze.cn/php-leveldb/doc/>
 
 ## Usage
 Since PHP-LevelDB is a binding for LevelDB, most of the interfaces are the same as
-LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
+LevelDB's: <http://leveldb.googlecode.com/git/doc/index.html>
 
 ### Open options
-When open a leveldb database you could specify options to override default value:
+When open a leveldb database you could specify options to override default values:
 
 ````php
 <?php
@@ -58,7 +58,7 @@ $options = array(
 	'max_open_files'	=> 1000,
 	'block_restart_interval' => 16,
 	'compression'		=> LEVELDB_SNAPPY_COMPRESSION,
-	'comparator'		=> NULL,   // any callable parameter return 0, -1, 1
+	'comparator'		=> NULL,   // any callable parameter which returns 0, -1, 1
 );
 /* default readoptions */
 $readoptions = array(
@@ -120,7 +120,7 @@ $db->delete("Key");
 >you could use set() to save value.
 
 ### Write in a batch
-If you want to do a sequence of update and want to make it atomically,
+If you want to do a sequence of updates and want to make it atomically,
 then writebatch will be your friend.
 
 >The WriteBatch holds a sequence of edits to be made to the database, 
@@ -219,7 +219,7 @@ Output:
 key1 => value1
 key2 => value2
 
-Not key3 found because read from snapshot
+key3 was not found because we are reading from snapshot
 */
 
 ?>
@@ -241,7 +241,7 @@ $it->next();				// noop you can't do that, exception thrown
 $db->set("key", "value");	// you can't do this either
 ````
 
-after database closed, you can't do anything related to it;
+after database been closed, you can't do anything on it.
 
 ### LevelDB::destroy()
 If you want to destroy a database, you could delete the whole database by hand:

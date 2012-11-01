@@ -7,7 +7,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <channel>pecl.php.net</channel>
   <summary>LevelDB PHP bindings</summary>
   <description>
-   This extension provides an OO interface for LevelDB
+   This extension is a PHP binding for Goolge LevelDB
   </description>
   <lead>
     <name>Reeze Xia</name>
