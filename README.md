@@ -249,6 +249,10 @@ If you want to destroy a database, you could delete the whole database by hand:
 
 Be careful with this.
 
+>**NOTE**
+>Before you destroy a database, please make sure it was closed. or
+>an exception will thrown. (LevelDB >= 1.7.0)
+
 ### LevelDB::repair()
 If you can't open a database, neither been locked or other error, if it's corrupted,
 you could use `LevelDB::repair('/path/to/db')` to repair it. it will try to recover
