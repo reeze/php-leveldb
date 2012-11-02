@@ -4,44 +4,36 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>PHP-LevelDB by reeze</title>
+
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/main.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
   <body>
-
+    <div class="wrapper">
       <header>
         <h1>PHP-LevelDB</h1>
         <p>The PHP Binding for LevelDB</p>
+        <p class="view"><a href="https://github.com/reeze/php-leveldb">View the Project on GitHub <small>reeze/php-leveldb</small></a></p>
+        <ul>
+          <li><a href="https://github.com/reeze/php-leveldb/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/reeze/php-leveldb/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/reeze/php-leveldb">View On <strong>GitHub</strong></a></li>
+        </ul>
       </header>
-
-      <div id="banner">
-        <span id="logo"></span>
-
-        <a href="https://github.com/reeze/php-leveldb" class="button fork"><strong>View On GitHub</strong></a>
-        <div class="downloads">
-          <span>Downloads:</span>
-          <ul>
-            <li><a href="https://github.com/reeze/php-leveldb/zipball/master" class="button">ZIP</a></li>
-            <li><a href="https://github.com/reeze/php-leveldb/tarball/master" class="button">TAR</a></li>
-          </ul>
-        </div>
-      </div><!-- end banner -->
-
-    <div class="wrapper">
-      <nav>
-        <ul></ul>
-      </nav>
       <section>
         <h1>PHP-LevelDB: The PHP Binding for LevelDB</h1>
 
 <p><a href="http://travis-ci.org/reeze/php-leveldb"><img src="https://secure.travis-ci.org/reeze/php-leveldb.png" alt="Build Status"></a></p>
+
+<p>LevelDB is a fast key-value storage library written at Google that provides an ordered mapping from string keys to string values.</p>
+
+<p>This extension is a binding for LevelDB</p>
 
 <h2>Requirements</h2>
 
@@ -50,9 +42,9 @@
 <li>LevelDB</li>
 </ul><p>You could get leveldb from: <a href="http://code.google.com/p/leveldb/">http://code.google.com/p/leveldb/</a></p>
 
-<pre><code>$ wget http://leveldb.googlecode.com/files/leveldb-1.5.0.tar.gz
-$ tar zxvf leveldb-1.5.0.tar.gz
-$ cd leveldb-1.5.0
+<pre><code>$ wget http://leveldb.googlecode.com/files/leveldb-1.7.0.tar.gz
+$ tar zxvf leveldb-1.7.0.tar.gz
+$ cd leveldb-1.7.0
 $ make
 </code></pre>
 
@@ -77,7 +69,7 @@ $ make install
 <li>
 <p>Install from PECL</p>
 
-<p>PHP-LevelDB havn't been hosted in PECL Yet</p>
+<p><a href="http://pecl.php.net/package/leveldb">http://pecl.php.net/package/leveldb</a></p>
 </li>
 </ol><h2>API Reference</h2>
 
@@ -86,13 +78,13 @@ $ make install
 <h2>Usage</h2>
 
 <p>Since PHP-LevelDB is a binding for LevelDB, most of the interfaces are the same as
-LevelDB document: <a href="http://leveldb.googlecode.com/git/doc/index.html">http://leveldb.googlecode.com/git/doc/index.html</a></p>
+LevelDB's: <a href="http://leveldb.googlecode.com/git/doc/index.html">http://leveldb.googlecode.com/git/doc/index.html</a></p>
 
 <h3>Open options</h3>
 
-<p>When open a leveldb database you could specify options to override default value:</p>
+<p>When open a leveldb database you could specify options to override default values:</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 <span class="cm">/* default open options */</span>
 <span class="nv">$options</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
     <span class="s1">'create_if_missing'</span> <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>    <span class="c1">// if the specified database didn't exist will create a new one</span>
@@ -104,12 +96,13 @@ LevelDB document: <a href="http://leveldb.googlecode.com/git/doc/index.html">htt
     <span class="s1">'max_open_files'</span>    <span class="o">=&gt;</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="s1">'block_restart_interval'</span> <span class="o">=&gt;</span> <span class="mi">16</span><span class="p">,</span>
     <span class="s1">'compression'</span>       <span class="o">=&gt;</span> <span class="nx">LEVELDB_SNAPPY_COMPRESSION</span><span class="p">,</span>
-    <span class="s1">'comparator'</span>        <span class="o">=&gt;</span> <span class="k">NULL</span><span class="p">,</span>   <span class="c1">// any callable parameter return 0, -1, 1</span>
+    <span class="s1">'comparator'</span>        <span class="o">=&gt;</span> <span class="k">NULL</span><span class="p">,</span>   <span class="c1">// any callable parameter which returns 0, -1, 1</span>
 <span class="p">);</span>
 <span class="cm">/* default readoptions */</span>
 <span class="nv">$readoptions</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
     <span class="s1">'verify_check_sum'</span>  <span class="o">=&gt;</span> <span class="k">false</span><span class="p">,</span>
     <span class="s1">'fill_cache'</span>        <span class="o">=&gt;</span> <span class="k">true</span><span class="p">,</span>
+    <span class="s1">'snapshot'</span>          <span class="o">=&gt;</span> <span class="k">null</span>
 <span class="p">);</span>
 
 <span class="cm">/* default write options */</span>
@@ -132,7 +125,7 @@ accessing</p>
 it the same as usort()'s compare function: <a href="http://php.net/usort">http://php.net/usort</a>, and the comparator
 could be:</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 <span class="nx">int</span> <span class="nx">callback</span><span class="p">(</span><span class="nx">string</span> <span class="nv">$a</span><span class="p">,</span> <span class="nx">string</span> <span class="nv">$b</span> <span class="p">);</span>
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/db"</span><span class="p">,</span> <span class="k">array</span><span class="p">(</span><span class="s1">'comparator'</span> <span class="o">=&gt;</span> <span class="s1">'cmp'</span><span class="p">));</span>
 <span class="k">function</span> <span class="nf">cmp</span><span class="p">(</span><span class="nv">$a</span><span class="p">,</span> <span class="nv">$b</span><span class="p">)</span>
@@ -151,7 +144,7 @@ with the same comparator.</p>
 
 <p>LevelDB is a key-value database, you could do those basic operations on it:</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
 
@@ -172,7 +165,7 @@ you could use set() to save value.</p>
 
 <h3>Write in a batch</h3>
 
-<p>If you want to do a sequence of update and want to make it atomically,
+<p>If you want to do a sequence of updates and want to make it atomically,
 then writebatch will be your friend.</p>
 
 <blockquote>
@@ -183,7 +176,7 @@ and these edits within the batch are applied in order.</p>
 bulk updates by placing lots of individual mutations into the same batch.</p>
 </blockquote>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
 
@@ -197,14 +190,14 @@ bulk updates by placing lots of individual mutations into the same batch.</p>
 <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">write</span><span class="p">(</span><span class="nv">$batch</span><span class="p">);</span>
 </pre></div>
 
-<h3>Iterate throught db</h3>
+<h3>Iterate through db</h3>
 
 <p>You can iterate through the whole database by iteration:</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
-<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
+<span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span> <span class="c1">// equals to： $it = $db-&gt;getIterator();</span>
 
 <span class="c1">// Loop in iterator style</span>
 <span class="k">while</span><span class="p">(</span><span class="nv">$it</span><span class="o">-&gt;</span><span class="na">valid</span><span class="p">())</span> <span class="p">{</span>
@@ -219,7 +212,7 @@ bulk updates by placing lots of individual mutations into the same batch.</p>
 
 <p>if you want to iterate by reverse order, you could:</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
 <span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
@@ -239,14 +232,53 @@ it will seek to the latest key:
 <code>db-with-key('a', 'b', 'd', 'e');  $db-&gt;seek('c');</code> iterator will point to <code>key 'd'</code></p>
 </blockquote>
 
+<h3>Snapshots</h3>
+
+<p>Snapshots provide consistent read-only views over the entire state of the key-value store.
+<code>$read_options['snapshot']</code> may be non-NULL to indicate that a read should operate on a
+particular version of the DB state. If <code>$read_options['snapshot']</code> is NULL, the read will
+operate on an implicit snapshot of the current state.</p>
+
+<p>Snapshots are created by the LevelDB::getSnapshot() method:</p>
+
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
+
+<span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"you-db-path.db"</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"key1"</span><span class="p">,</span> <span class="s2">"value1"</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"key2"</span><span class="p">,</span> <span class="s2">"value2"</span><span class="p">);</span>
+
+<span class="nv">$snapshot</span> <span class="o">=</span> <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">getSnapshot</span><span class="p">();</span>
+
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">put</span><span class="p">(</span><span class="s2">"key3"</span><span class="p">,</span> <span class="s2">"value3"</span><span class="p">);</span>
+
+<span class="nv">$read_options</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s2">"snapshot"</span> <span class="o">=&gt;</span> <span class="nv">$snapshot</span><span class="p">);</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s2">"key3"</span><span class="p">,</span> <span class="nv">$read_options</span><span class="p">);</span> <span class="c1">// false but not "value3"</span>
+<span class="nv">$db</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s2">"key3"</span><span class="p">);</span> <span class="c1">// "value3" since not read from snapshot</span>
+
+
+<span class="nv">$it</span> <span class="o">=</span> <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">getIterator</span><span class="p">(</span><span class="nv">$read_options</span><span class="p">);</span>
+<span class="k">foreach</span><span class="p">(</span><span class="nv">$it</span> <span class="k">as</span> <span class="nv">$k</span> <span class="o">=&gt;</span> <span class="nv">$v</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nb">printf</span><span class="p">(</span><span class="s2">"</span><span class="si">$k</span><span class="s2"> =&gt; </span><span class="si">$v</span><span class="se">\n</span><span class="s2">"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="cm">/*</span>
+<span class="cm">Output:</span>
+<span class="cm">key1 =&gt; value1</span>
+<span class="cm">key2 =&gt; value2</span>
+
+<span class="cm">key3 was not found because we are reading from snapshot</span>
+<span class="cm">*/</span>
+
+<span class="cp">?&gt;</span><span class="x"></span>
+</pre></div>
+
 <h2>Operations on database</h2>
 
 <h3>LevelDB::close()</h3>
 
-<p>Since leveldb can only accessed by a single proccess once, so you may want to
+<p>Since leveldb can only accessed by a single proccess one time, so you may want to
 close it when you don't use it anymore.</p>
 
-<div class="highlight"><pre><span class="cp">&lt;?php</span>
+<div class="highlight"><pre><span class="o">&lt;?</span><span class="nx">php</span>
 
 <span class="nv">$db</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDB</span><span class="p">(</span><span class="s2">"/path/to/leveldb-test-db"</span><span class="p">);</span>
 <span class="nv">$it</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LevelDBIterator</span><span class="p">(</span><span class="nv">$db</span><span class="p">);</span>
@@ -255,7 +287,7 @@ close it when you don't use it anymore.</p>
 <span class="nv">$db</span><span class="o">-&gt;</span><span class="na">set</span><span class="p">(</span><span class="s2">"key"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">);</span>   <span class="c1">// you can't do this either</span>
 </pre></div>
 
-<p>after database closed, you can't do anything related to it;</p>
+<p>after database been closed, you can't do anything on it.</p>
 
 <h3>LevelDB::destroy()</h3>
 
@@ -264,11 +296,22 @@ close it when you don't use it anymore.</p>
 
 <p>Be careful with this.</p>
 
+<blockquote>
+<p><strong>NOTE</strong>
+Before you destroy a database, please make sure it was closed. or
+an exception will thrown. (LevelDB &gt;= 1.7.0)</p>
+</blockquote>
+
 <h3>LevelDB::repair()</h3>
 
 <p>If you can't open a database, neither been locked or other error, if it's corrupted,
 you could use <code>LevelDB::repair('/path/to/db')</code> to repair it. it will try to recover
 as much data as possible.</p>
+
+<h2>Thanks</h2>
+
+<p>Thanks Arpad <a href="https://github.com/arraypad">https://github.com/arraypad</a> for his original implementation: <a href="http://github.com/arraypad/php-leveldb">http://github.com/arraypad/php-leveldb</a>
+and his generous.</p>
 
 <h2>Reference</h2>
 
@@ -279,17 +322,18 @@ as much data as possible.</p>
 </li>
 <li>LevelDB document: <a href="http://leveldb.googlecode.com/git/doc/index.html">http://leveldb.googlecode.com/git/doc/index.html</a>
 </li>
-<li>A LevelDB internals analysis in Chinese <a href="http://dirlt.com/LevelDB.html">http://dirlt.com/LevelDB.html</a> 推荐关注博主的博客</li>
+<li>A LevelDB internals analysis in Chinese <a href="http://dirlt.com/LevelDB.html">http://dirlt.com/LevelDB.html</a>
+</li>
 </ul><h2>License</h2>
 
 <p>PHP-LevelDB is licensed under PHP License</p>
       </section>
-      <footer>
-        <p>Project maintained by <a href="https://github.com/reeze">reeze</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
-      </footer>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    <footer>
+      <p>Project maintained by <a href="https://github.com/reeze">reeze</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
