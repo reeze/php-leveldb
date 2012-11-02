@@ -21,10 +21,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>arpad@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-09-12</date>
+  <date>2012-11-03</date>
   <version>
-    <release>0.1.0</release>
-    <api>0.1.0</api>
+    <release>0.1.1</release>
+    <api>0.1.1</api>
   </version>
   <stability>
     <release>beta</release>
@@ -32,7 +32,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-	First release
+2012-11-03 - leveldb 0.1.1
+
++ Fixed bugs:
+	- Fixed #3 Iterator leaks.
+
   </notes>
   <contents>
     <dir name="/">
