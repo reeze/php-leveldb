@@ -24,6 +24,7 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
+$db->close();
 try {
 	$db = new LevelDB($leveldb_path, array("error_if_exists" => true));
 } catch(LevelDBException $e) {

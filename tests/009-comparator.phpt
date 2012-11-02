@@ -54,6 +54,8 @@ try {
 	echo $e->getMessage() . "\n";
 }
 
+$db3->close();
+
 // reverse DESC
 function custom_comparator($a, $b) {
    if ($a == $b) {
@@ -80,7 +82,7 @@ Invalid open option: comparator, invaid_func() is not callable
 2
 1
 *** custom comparator can only open with the same comparator again ***
-Invalid argument: php_leveldb.custom_comparatordoes not match existing comparator : leveldb.BytewiseComparator
+Invalid argument: php_leveldb.custom_comparator%s leveldb.BytewiseComparator
 bool(true)
 *** custom comparator which throw exception ***
 Oops!

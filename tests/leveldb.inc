@@ -5,8 +5,11 @@ function cleanup_leveldb_on_shutdown() {
 }
 
 function cleanup_leveldb() {
-	global $leveldb_path;
+	global $leveldb_path, $db;
 	if (file_exists($leveldb_path)) {
+		if($db instanceof LevelDB) {
+			$db->close();
+		}
 		LevelDB::destroy($leveldb_path);
 	}
 }

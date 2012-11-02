@@ -15,6 +15,8 @@ $db->close();
 
 $db2 = new LevelDB($leveldb_path, array('compression' => LEVELDB_SNAPPY_COMPRESSION));
 $db2->set("key", "value");
+
+$db2->close();
 ?>
 ==DONE==
 --EXPECTF--
