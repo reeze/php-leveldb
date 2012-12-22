@@ -510,7 +510,8 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 		Z_ADDREF_PP(value);
 		comparator = leveldb_comparator_create((void *)(*value),
-			leveldb_custom_comparator_destructor, leveldb_custom_comparator_compare, leveldb_custom_comparator_name);
+			leveldb_custom_comparator_destructor, leveldb_custom_comparator_compare,
+			leveldb_custom_comparator_name);
 
 		if (comparator) {
 			*out_comparator = comparator;
@@ -692,7 +693,8 @@ PHP_METHOD(LevelDB, get)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(value, value_len, 1);
+	RETVAL_STRINGL(value, value_len, 1);
+	free(value);
 }
 /* }}} */
 
@@ -815,7 +817,7 @@ PHP_METHOD(LevelDB, getProperty)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(property, 1);
+	RETVAL_STRING(property, 1);
 	free(property);
 }
 /* }}} */
