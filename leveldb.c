@@ -505,6 +505,8 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 			efree(*callable_name);
 			*callable_name = NULL;
 
+			leveldb_options_destroy(options);
+
 			return NULL;
 		}
 
