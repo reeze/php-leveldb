@@ -554,14 +554,18 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 			if (obj->snapshot == NULL) {
 				zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 					"Invalid snapshot parameter, it has been released");
-				return NULL;
+				goto invalid_snapshot_param;
 			}
 			leveldb_readoptions_set_snapshot(readoptions, obj->snapshot);
 		} else {
 			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid snapshot parameter, it must be an instance of LevelDBSnapshot");
-			return NULL;
+			goto invalid_snapshot_param;
 		}
+
+invalid_snapshot_param:
+		leveldb_readoptions_destroy(readoptions);
+		return NULL;
 	}
 
 	return readoptions;
@@ -1313,8 +1317,8 @@ PHP_METHOD(LevelDBIterator, destroy)
 }
 /*	}}} */
 
-/*	{{{ proto string LevelDBIterator::current()
-	Return current element */
+/*	{{{ proto string LevelDBIterator::getError()
+	Return last iterator error */
 PHP_METHOD(LevelDBIterator, getError)
 {
 	char *err = NULL;
@@ -1333,7 +1337,8 @@ PHP_METHOD(LevelDBIterator, getError)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(err, 1);
+	RETVAL_STRING(err, 1);
+	free(err);
 }
 /*	}}} */
 
