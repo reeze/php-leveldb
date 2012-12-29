@@ -554,13 +554,16 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 			if (obj->snapshot == NULL) {
 				zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 					"Invalid snapshot parameter, it has been released");
+
 				leveldb_readoptions_destroy(readoptions);
 				return NULL;
 			}
+
 			leveldb_readoptions_set_snapshot(readoptions, obj->snapshot);
 		} else {
 			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid snapshot parameter, it must be an instance of LevelDBSnapshot");
+
 			leveldb_readoptions_destroy(readoptions);
 			return NULL;
 		}
