@@ -496,7 +496,8 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 		}
 	}
 
-	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS) {
+	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS
+		&& !ZVAL_IS_NULL(*value)) {
 		leveldb_comparator_t *comparator;
 		if (!zend_is_callable(*value, 0, callable_name TSRMLS_CC)) {
 			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
