@@ -21,10 +21,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>arpad@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-11-03</date>
+  <date>2013-02-??</date>
   <version>
-    <release>0.1.1</release>
-    <api>0.1.1</api>
+    <release>0.1.2</release>
+    <api>0.1.2</api>
   </version>
   <stability>
     <release>beta</release>
@@ -32,10 +32,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-2012-11-03 - leveldb 0.1.1
-
-+ Fixed bugs:
-	- Fixed #3 Iterator leaks.
+	2013-02-?? - leveldb 0.1.2
+	- Fixed bug when explict specify NULL comparator raises exception
+	- Fixed memory leaks when sepecify invalid snapshot
+	- Fixed memory leaks of LevelDB::get()
 
   </notes>
   <contents>
@@ -63,6 +63,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 		<file name="016-different-iterators-should-differ.phpt" role="test" />
 		<file name="017-db-getIterator.phpt" role="test" />
 		<file name="018-snapshot.phpt" role="test" />
+		<file name="019-null-comparator.phpt" role="test" />
 		<file name="leveldb.inc" role="test" />
 	    <file name="skipif.inc" role="test" />
       </dir>
