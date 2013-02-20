@@ -8,7 +8,7 @@ leveldb - compression
 include "leveldb.inc";
 cleanup_leveldb_on_shutdown();
 
-$leveldb_path = dirname(__FILE__) . '/leveldb-comparator.test-db';
+$leveldb_path = dirname(__FILE__) . '/leveldb-compression.test-db';
 
 $db = new LevelDB($leveldb_path, array('compression' => 33));
 $db->close();
