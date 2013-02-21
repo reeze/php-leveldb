@@ -3,7 +3,7 @@ dnl config.m4 for extension leveldb
 
 PHP_ARG_WITH(leveldb, for leveldb support,
 Make sure that the comment is aligned:
-[  --with-leveldb             Include leveldb support])
+[  --with-leveldb[=Path]             Include leveldb support])
 
 if test "$PHP_LEVELDB" != "no"; then
   dnl Write more examples of tests here...
