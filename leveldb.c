@@ -549,7 +549,8 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 		leveldb_readoptions_set_fill_cache(readoptions, intern->fill_cache);
 	}
 
-	if (zend_hash_find(ht, "snapshot", sizeof("snapshot"), (void **)&value) == SUCCESS) {
+	if (zend_hash_find(ht, "snapshot", sizeof("snapshot"), (void **)&value) == SUCCESS
+		&& !ZVAL_IS_NULL(*value)) {
 		if (Z_TYPE_PP(value) == IS_OBJECT && Z_OBJCE_PP(value) == php_leveldb_snapshot_class_entry) {
 			leveldb_snapshot_object *obj = (leveldb_snapshot_object *)zend_object_store_get_object(*value TSRMLS_CC);
 			if (obj->snapshot == NULL) {
