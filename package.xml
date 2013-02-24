@@ -21,10 +21,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>arpad@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2013-02-24</date>
+  <date>2013-03-??</date>
   <version>
-    <release>0.1.2</release>
-    <api>0.1.2</api>
+    <release>0.2.0</release>
+    <api>0.2.0</api>
   </version>
   <stability>
     <release>beta</release>
@@ -32,11 +32,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-	2013-02-24 - leveldb 0.1.2
-	- Fixed bug when explict specify NULL comparator/snapshot raises exception
-	- Fixed memory leaks when sepecify invalid snapshot
-	- Fixed memory leaks of LevelDB::get()
-
   </notes>
   <contents>
     <dir name="/">
@@ -78,6 +73,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
       <pearinstaller>
         <min>1.4.0b1</min>
       </pearinstaller>
+      <leveldb>
+        <min>1.7.0</min>
+      </levldb>
     </required>
   </dependencies>
   <providesextension>leveldb</providesextension>
