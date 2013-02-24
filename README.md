@@ -5,6 +5,8 @@ LevelDB is a fast key-value storage library written at Google that provides an o
 
 This extension is a binding for LevelDB
 
+Please send Feature Request or Bug report  with [Github Issue](https://github.com/reeze/php-leveldb/issues).
+
 ## Requirements
 - PHP >= 5.2
 - LevelDB >= 1.7
