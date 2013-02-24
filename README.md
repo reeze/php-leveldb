@@ -7,13 +7,13 @@ This extension is a binding for LevelDB
 
 ## Requirements
 - PHP >= 5.2
-- LevelDB
+- LevelDB >= 1.7
 
 You could get leveldb from: <http://code.google.com/p/leveldb/>
 
-	$ wget http://leveldb.googlecode.com/files/leveldb-1.7.0.tar.gz
-	$ tar zxvf leveldb-1.7.0.tar.gz
-	$ cd leveldb-1.7.0
+	$ wget http://leveldb.googlecode.com/files/leveldb-1.9.0.tar.gz
+	$ tar zxvf leveldb-1.9.0.tar.gz
+	$ cd leveldb-1.9.0
 	$ make
 
 >**NOTE** LevelDB didn't have make install target in Makefile:
