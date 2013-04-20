@@ -13,26 +13,25 @@ if test "$PHP_LEVELDB" != "no"; then
   SEARCH_FOR="include/leveldb/c.h"  # you most likely want to change this
   SEARCH_LIB="libleveldb.a"
 
-  # path given as parameter
-  if test -r $PHP_LEVELDB/$SEARCH_FOR && test -r $PHP_LEVELDB/$SEARCH_LIB; then 
-    dnl simply build leveldb without install
-    LEVELDB_INCLUDE_DIR=$PHP_LEVELDB
-	LEVELDB_LIB_DIR=$PHP_LEVELDB
-  else
-	dnl search default path list
-    AC_MSG_CHECKING([for leveldb files in default path])
-    for i in $SEARCH_PATH ; do
-      if test -r $i/$SEARCH_FOR; then
-        LEVELDB_INCLUDE_DIR=$i
-        AC_MSG_RESULT(leveldb headers found in $i)
-      fi
+  dnl search leveldb
+  AC_MSG_CHECKING([for leveldb location])
+  for i in $PHP_LEVELDB $SEARCH_PATH ; do
+    if test -r $i/$SEARCH_FOR; then
+	  LEVELDB_INCLUDE_DIR=$i
+	  AC_MSG_RESULT(leveldb headers found in $i)
+    fi
 
-      if test -r $i/lib/$SEARCH_LIB; then
-		LEVELDB_LIB_DIR=$i/lib
-        AC_MSG_RESULT(leveldb lib found in $i)
-	  fi
-    done
-  fi
+    if test -r $i/lib/$SEARCH_LIB; then
+	  LEVELDB_LIB_DIR=$i/lib
+	  AC_MSG_RESULT(leveldb lib found in $i/lib)
+    fi
+
+	dnl from Leveldb build dir
+    if test -r $i/$SEARCH_LIB; then
+	  LEVELDB_LIB_DIR=$i
+	  AC_MSG_RESULT(leveldb lib found in $i)
+    fi
+  done
   
   if test -z "$LEVELDB_INCLUDE_DIR" || test -z "$LEVELDB_LIB_DIR"; then
     AC_MSG_RESULT([leveldb not found])
