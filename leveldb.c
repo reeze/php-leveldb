@@ -499,7 +499,11 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 	if (zend_hash_find(ht, "comparator", sizeof("comparator"), (void **)&value) == SUCCESS
 		&& !ZVAL_IS_NULL(*value)) {
 		leveldb_comparator_t *comparator;
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 3)
+		if (!zend_is_callable(*value, 0, callable_name)) {
+#else
 		if (!zend_is_callable(*value, 0, callable_name TSRMLS_CC)) {
+#endif
 			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid open option: comparator, %s() is not callable", *callable_name);
 
