@@ -5,7 +5,7 @@ make install
 
 export TEST_PHP_EXECUTABLE=`which php`
 
-php -d extension=leveldb.so run-tests.php -m tests/*.phpt
+php run-tests.php -d extension=leveldb.so -m tests/*.phpt
 
 cat tests/*.mem
 
