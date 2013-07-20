@@ -1138,7 +1138,12 @@ PHP_METHOD(LevelDBWriteBatch, clear)
 static void leveldb_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int leveldb_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
 static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 4)
+static void leveldb_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC);
+#else
 static int leveldb_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+#endif
 static void leveldb_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
 static void leveldb_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
@@ -1227,16 +1232,24 @@ static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***da
 /* }}} */
 
 /* {{{ leveldb_iterator_current_key */
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 4)
+static void leveldb_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
+#else
 static int leveldb_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+#endif
 {
-	char *key;
+	char *cur_key;
+	size_t cur_key_len = 0;
 	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
 
-	key = (char *)leveldb_iter_key(iterator, (size_t *)str_key_len);
-	*str_key = estrndup(key, *str_key_len);
-	*str_key_len = *str_key_len + 1; /* adding the \0 like HashTable does */
-
+	cur_key = (char *)leveldb_iter_key(iterator, &cur_key_len);
+#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION > 4)
+	ZVAL_STRINGL(key, cur_key, cur_key_len, 1);
+#else
+	*str_key = estrndup(cur_key, cur_key_len);
+	*str_key_len = cur_key_len + 1; /* adding the \0 like HashTable does */
 	return HASH_KEY_IS_STRING;
+#endif
 }
 /* }}} */
 
