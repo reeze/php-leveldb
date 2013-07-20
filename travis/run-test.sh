@@ -1,6 +1,13 @@
 #!/bin/sh
 
-make test
+make install
+#make test
+
+export TEST_PHP_EXECUTABLE=`which php`
+
+php run-tests.php -m tests/*.phpt
+
+cat tests/*.mem
 
 # make test didn't return status code correctly
 # use this to find whether the make test failed
