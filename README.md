@@ -13,9 +13,9 @@ Please send Feature Request or Bug report  with [Github Issue](https://github.co
 
 You could get leveldb from: <http://code.google.com/p/leveldb/>
 
-	$ wget http://leveldb.googlecode.com/files/leveldb-1.9.0.tar.gz
-	$ tar zxvf leveldb-1.9.0.tar.gz
-	$ cd leveldb-1.9.0
+	$ wget http://leveldb.googlecode.com/files/leveldb-1.12.0.tar.gz
+	$ tar zxvf leveldb-1.12.0.tar.gz
+	$ cd leveldb-1.12.0
 	$ make
 
 >**NOTE** LevelDB didn't have make install target in Makefile:
