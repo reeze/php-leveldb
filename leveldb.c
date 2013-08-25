@@ -1626,9 +1626,13 @@ PHP_MSHUTDOWN_FUNCTION(leveldb)
  */
 PHP_MINFO_FUNCTION(leveldb)
 {
+	char tmp[32];
+	snprintf(tmp, 32, "%d.%d", leveldb_major_version(), leveldb_minor_version());
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "leveldb support", "enabled");
-	php_info_print_table_row(2, "leveldb version", PHP_LEVELDB_VERSION);
+	php_info_print_table_row(2, "leveldb extension version", PHP_LEVELDB_VERSION);
+	php_info_print_table_row(2, "leveldb library version", tmp);
 	php_info_print_table_end();
 }
 /* }}} */
