@@ -13,8 +13,8 @@ Please send Feature Request or Bug report  with [Github Issue](https://github.co
 
 You could get leveldb from: <http://code.google.com/p/leveldb/>
 
-	$ wget http://leveldb.googlecode.com/files/leveldb-1.12.0.tar.gz
-	$ tar zxvf leveldb-1.12.0.tar.gz
+	$ wget http://leveldb.googlecode.com/files/leveldb-1.13.0.tar.gz
+	$ tar zxvf leveldb-1.13.0.tar.gz
 	$ cd leveldb-1.12.0
 	$ make
 
@@ -24,6 +24,8 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 >`make INSTALL_PATH=/Your/Path/`
 
 ## Installation
+
+1. Install from source
 
 	$ git clone https://github.com/reeze/php-leveldb.git
 	$ cd php-leveldb
@@ -38,7 +40,7 @@ You could get leveldb from: <http://code.google.com/p/leveldb/>
 
 ## API Reference
 
-API Reference could be found here: <http://reeze.cn/php-leveldb/doc/>
+API Reference could be found here: <http://reeze.cn/php-leveldb/>
 
 ## Usage
 Since PHP-LevelDB is a binding for LevelDB, most of the interfaces are the same as
@@ -82,13 +84,13 @@ $db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
 >accessing
 
 ### Using custom comparator
-You could write your own comparator, the comparator can be anything callale in php
+You could write your own comparator, the comparator can be anything callable in php
 it the same as usort()'s compare function: <http://php.net/usort>, and the comparator
 could be:
 
 ````php
 <?php
-int callback(string $a, string $b );
+//int callback(string $a, string $b );
 $db = new LevelDB("/path/to/db", array('comparator' => 'cmp'));
 function cmp($a, $b)
 {
@@ -118,7 +120,7 @@ $db->delete("Key");
 ````
 
 >**NOTE**
->Some key-value db use set instead of put to set value, so if like set(),
+>Some key-value db use set instead of put to set value, so if prefer set(),
 >you could use set() to save value.
 
 ### Write in a batch
@@ -185,7 +187,7 @@ for($it->last(); $it->valid(); $it->prev()) {
 ````
 
 >**NOTE** In LevelDB LevelDB::seek() will success even when the key didn't exists,
->it will seek to the latest key:
+>it will seek to the latest key eg:
 >`db-with-key('a', 'b', 'd', 'e');  $db->seek('c');` iterator will point to `key 'd'`
 
 ### Snapshots
@@ -230,7 +232,7 @@ key3 was not found because we are reading from snapshot
 ## Operations on database
 
 ### LevelDB::close()
-Since leveldb can only accessed by a single proccess one time, so you may want to
+Since leveldb can only accessed by a single proccess a time, so you may want to
 close it when you don't use it anymore.
 
 ````php
