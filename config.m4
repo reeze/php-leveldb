@@ -9,7 +9,7 @@ if test "$PHP_LEVELDB" != "no"; then
   # --with-leveldb -> check with-path
   SEARCH_PATH="/usr/local /usr"
   SEARCH_FOR="include/leveldb/c.h"
-  SEARCH_LIB="libleveldb.a"
+  SEARCH_LIB="libleveldb"
 
   dnl search leveldb
   AC_MSG_CHECKING([for leveldb location])
@@ -19,13 +19,13 @@ if test "$PHP_LEVELDB" != "no"; then
 	  AC_MSG_RESULT(leveldb headers found in $i)
     fi
 
-    if test -r $i/lib/$SEARCH_LIB; then
-	  LEVELDB_LIB_DIR=$i/lib
+    if test -r $i/$PHP_LIBDIR/$SEARCH_LIB.a || test -r $i/$PHP_LIBDIR/$SEARCH_LIB.$SHLIB_SUFFIX_NAME; then
+	  LEVELDB_LIB_DIR=$i/$PHP_LIBDIR
 	  AC_MSG_RESULT(leveldb lib found in $i/lib)
     fi
 
 	dnl from Leveldb build dir
-    if test -r $i/$SEARCH_LIB; then
+    if test -r $i/$SEARCH_LIB.a || test -r $i/$SEARCH_LIB.$SHLIB_SUFFIX_NAME; then
 	  LEVELDB_LIB_DIR=$i
 	  AC_MSG_RESULT(leveldb lib found in $i)
     fi
