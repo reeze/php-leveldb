@@ -681,7 +681,8 @@ PHP_METHOD(LevelDB, __construct)
 PHP_METHOD(LevelDB, get)
 {
 	char *key, *value;
-	int key_len, value_len;
+	int key_len;
+	size_t value_len;
 	zval *readoptions_zv = NULL;
 
 	char *err = NULL;
@@ -697,7 +698,7 @@ PHP_METHOD(LevelDB, get)
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv TSRMLS_CC);
-	value = leveldb_get(intern->db, readoptions, key, key_len, (size_t *)&value_len, &err);
+	value = leveldb_get(intern->db, readoptions, key, key_len, &value_len, &err);
 	leveldb_readoptions_destroy(readoptions);
 
 	LEVELDB_CHECK_ERROR(err);
@@ -1487,7 +1488,7 @@ PHP_METHOD(LevelDBIterator, last)
 PHP_METHOD(LevelDBIterator, seek)
 {
 	char *key;
-	size_t key_len;
+	int key_len;
 	leveldb_iterator_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE) {
@@ -1497,7 +1498,7 @@ PHP_METHOD(LevelDBIterator, seek)
 	intern = (leveldb_iterator_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
-	leveldb_iter_seek(intern->iterator, key, key_len);
+	leveldb_iter_seek(intern->iterator, key, (size_t)key_len);
 }
 /*	}}} */
 
