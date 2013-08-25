@@ -1213,7 +1213,7 @@ static int leveldb_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
 static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
 	char *value;
-	int value_len;
+	size_t value_len;
 	leveldb_iterator_iterator *iterator = (leveldb_iterator_iterator *)iter;
 
 	if (iterator->current) {
@@ -1222,7 +1222,7 @@ static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***da
 	}
 
 	*data = (zval **) emalloc(sizeof(zval *));
-	value = (char *)leveldb_iter_value(iterator->iterator, (size_t *)&value_len);
+	value = (char *)leveldb_iter_value(iterator->iterator, &value_len);
 
 	MAKE_STD_ZVAL(**data);
 	ZVAL_STRINGL(**data, value, value_len, 1);
@@ -1367,7 +1367,7 @@ PHP_METHOD(LevelDBIterator, getError)
 PHP_METHOD(LevelDBIterator, current)
 {
 	char *value = NULL;
-	int value_len;
+	size_t value_len;
 	leveldb_iterator_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1378,7 +1378,7 @@ PHP_METHOD(LevelDBIterator, current)
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (!leveldb_iter_valid(intern->iterator) ||
-			!(value = (char *)leveldb_iter_value(intern->iterator, (size_t *)&value_len))) {
+			!(value = (char *)leveldb_iter_value(intern->iterator, &value_len))) {
 		RETURN_FALSE;
 	}
 
@@ -1391,7 +1391,7 @@ PHP_METHOD(LevelDBIterator, current)
 PHP_METHOD(LevelDBIterator, key)
 {
 	char *key = NULL;
-	int key_len;
+	size_t key_len;
 	leveldb_iterator_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1402,7 +1402,7 @@ PHP_METHOD(LevelDBIterator, key)
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (!leveldb_iter_valid(intern->iterator) ||
-			!(key = (char *)leveldb_iter_key(intern->iterator, (size_t *)&key_len))) {
+			!(key = (char *)leveldb_iter_key(intern->iterator, &key_len))) {
 		RETURN_FALSE;
 	}
 
@@ -1487,7 +1487,7 @@ PHP_METHOD(LevelDBIterator, last)
 PHP_METHOD(LevelDBIterator, seek)
 {
 	char *key;
-	int key_len;
+	size_t key_len;
 	leveldb_iterator_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE) {
