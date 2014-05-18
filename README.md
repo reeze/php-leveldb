@@ -260,6 +260,15 @@ If you can't open a database, neither been locked or other error, if it's corrup
 you could use `LevelDB::repair('/path/to/db')` to repair it. it will try to recover
 as much data as possible.
 
+## Know limitations
+
+LevelDB was designed to be thread-safe but not process-safe, so if you
+use php in multi-thread mode (eg, php-fpm) you might not able to open
+the single db concurrently.
+
+> If you app is not designed to serve massive requests, you could try
+> to catch fail to open exception and try to open it again.
+
 ## Thanks
 
 Thanks Arpad <https://github.com/arraypad> for his original implementation: <http://github.com/arraypad/php-leveldb>
