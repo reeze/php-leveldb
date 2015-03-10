@@ -8,7 +8,7 @@ This extension is a binding for LevelDB
 Please send Feature Request or Bug report  with [Github Issue](https://github.com/reeze/php-leveldb/issues).
 
 ## Requirements
-- PHP >= 5.2
+- PHP >= 7
 - LevelDB >= 1.7
 
 You could get leveldb from: <http://code.google.com/p/leveldb/>
