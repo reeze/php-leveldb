@@ -32,9 +32,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-- Fixed build on some linux for issue #6, pecl bug #65353
-- Compatible with PHP5.5
-- Fixed build break for PHP5.2
+- Fixed pecl installation
 
   </notes>
   <contents>

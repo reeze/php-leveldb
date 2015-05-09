@@ -11,11 +11,15 @@ Please send Feature Request or Bug report  with [Github Issue](https://github.co
 - PHP >= 5.2
 - LevelDB >= 1.7
 
-You could get leveldb from: <http://code.google.com/p/leveldb/>
+You can install leveldb from your os distribution:
 
-	$ wget http://leveldb.googlecode.com/files/leveldb-1.12.0.tar.gz
-	$ tar zxvf leveldb-1.12.0.tar.gz
-	$ cd leveldb-1.12.0
+	$ sudo apt-get install libleveldb-dev
+
+
+Or you could get leveldb from: <https://github.com/google/leveldb.git>
+
+	$ git clone https://github.com/google/leveldb.git
+	$ cd leveldb
 	$ make
 
 >**NOTE** LevelDB didn't have make install target in Makefile:

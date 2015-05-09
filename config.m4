@@ -29,6 +29,16 @@ if test "$PHP_LEVELDB" != "no"; then
 	  LEVELDB_LIB_DIR=$i
 	  AC_MSG_RESULT(leveldb lib found in $i)
     fi
+
+    if test -z "$LEVELDB_LIB_DIR"; then
+      for j in "lib/x86_64-linux-gnu" "lib/x86_64-linux-gnu"; do
+        echo find "--$i/$j"
+        if test -r $i/$j/$SEARCH_LIB.a || test -r $i/$j/$SEARCH_LIB.$SHLIB_SUFFIX_NAME; then
+          LEVELDB_LIB_DIR=$i/$j
+          AC_MSG_RESULT(leveldb lib found in $i/$j)
+        fi
+      done
+    fi
   done
   
   if test -z "$LEVELDB_INCLUDE_DIR" || test -z "$LEVELDB_LIB_DIR"; then
