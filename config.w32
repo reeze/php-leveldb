@@ -1,13 +1,13 @@
 // $Id$
 // vim:ft=javascript
 
-If your extension references something external, use ARG_WITH
-ARG_WITH("leveldb", "for leveldb support", "no");
-
-// Otherwise, use ARG_ENABLE
-// ARG_ENABLE("leveldb", "enable leveldb support", "no");
+ARG_WITH("leveldb", "leveldb support", "no");
 
 if (PHP_LEVELDB != "no") {
-	EXTENSION("leveldb", "leveldb.c");
+	if (CHECK_LIB("leveldb.lib", "leveldb", PHP_LEVELDB) &&
+	    CHECK_HEADER_ADD_INCLUDE("c.h", "CFLAGS_LEVELDB",  PHP_LEVELDB+ ";" + PHP_PHP_BUILD + "\\include\\leveldb")) {
+		EXTENSION("leveldb", "leveldb.c", PHP_LEVELDB_SHARED, "");
+	} else {
+		WARNING("leveldb not enabled; libraries and headers not found");
+	}
 }
-
