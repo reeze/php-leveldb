@@ -405,10 +405,10 @@ static void leveldb_custom_comparator_destructor(void *stat)
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
 {
-	TSRMLS_FETCH();
 	zval *callable = (zval *)stat;
 	zval *params[2], *result = NULL;
 	int ret;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(params[0]);
 	MAKE_STD_ZVAL(params[1]);
