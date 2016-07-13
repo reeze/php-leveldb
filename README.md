@@ -86,8 +86,7 @@ $db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
 >accessing
 
 ### Using custom comparator
-You could write your own comparator, the comparator can be anything callale in php
-it the same as usort()'s compare function: <http://php.net/usort>, and the comparator
+You could write your own comparator, the comparator can be anything callable in php the same as usort()'s compare function: <http://php.net/usort>, and the comparator
 could be:
 
 ````php
