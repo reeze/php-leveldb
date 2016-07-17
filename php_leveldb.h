@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #ifndef PHP_LEVELDB_H
 #define PHP_LEVELDB_H
 
-#define PHP_LEVELDB_VERSION "0.1.5-dev"
+#define PHP_LEVELDB_VERSION "0.1.5"
 
 extern zend_module_entry leveldb_module_entry;
 #define phpext_leveldb_ptr &leveldb_module_entry
