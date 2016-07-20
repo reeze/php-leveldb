@@ -717,7 +717,7 @@ PHP_METHOD(LevelDB, get)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(value, value_len, 1);
+	RETVAL_STRINGL(value, value_len);
 	free(value);
 }
 /* }}} */
@@ -841,7 +841,7 @@ PHP_METHOD(LevelDB, getProperty)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(property, 1);
+	RETVAL_STRINGL(property, 1);
 	free(property);
 }
 /* }}} */
@@ -994,7 +994,8 @@ PHP_METHOD(LevelDB, destroy)
 	int name_len;
 	zval *options_zv = NULL;
 
-	char *err = NULL, *callable_name = NULL;
+	char *err = NULL;
+	zend_string *callable_name = NULL;
 	leveldb_options_t *options;
 	leveldb_comparator_t *comparator = NULL;
 
@@ -1015,7 +1016,7 @@ PHP_METHOD(LevelDB, destroy)
 
 	if (comparator) {
 		leveldb_comparator_destroy(comparator);
-		efree(callable_name);
+		zend_string_free(callable_name);
 	}
 
 	leveldb_options_destroy(options);
@@ -1034,7 +1035,8 @@ PHP_METHOD(LevelDB, repair)
 	int name_len;
 	zval *options_zv;
 
-	char *err = NULL, *callable_name = NULL;
+	char *err = NULL;
+	zend_string *callable_name = NULL;
 	leveldb_options_t *options;
 	leveldb_comparator_t *comparator = NULL;
 
@@ -1055,7 +1057,7 @@ PHP_METHOD(LevelDB, repair)
 
 	if (comparator) {
 		leveldb_comparator_destroy(comparator);
-		efree(callable_name);
+		zend_string_free(callable_name);
 	}
 
 	leveldb_options_destroy(options);
@@ -1236,7 +1238,7 @@ static void leveldb_iterator_current_data(zend_object_iterator *iter, zval ***da
 	value = (char *)leveldb_iter_value(iterator->iterator, &value_len);
 
 	MAKE_STD_ZVAL(**data);
-	ZVAL_STRINGL(**data, value, value_len, 1);
+	ZVAL_STRINGL(**data, value, value_len);
 
 	iterator->current = *data;
 }
@@ -1368,7 +1370,7 @@ PHP_METHOD(LevelDBIterator, getError)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(err, 1);
+	RETVAL_STRINGL(err, 1);
 	free(err);
 }
 /*	}}} */
@@ -1393,7 +1395,7 @@ PHP_METHOD(LevelDBIterator, current)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(value, value_len, 1);
+	RETURN_STRINGL(value, value_len);
 }
 /*	}}} */
 
@@ -1417,7 +1419,7 @@ PHP_METHOD(LevelDBIterator, key)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(key, key_len, 1);
+	RETURN_STRINGL(key, key_len);
 }
 /*	}}} */
 
