@@ -234,6 +234,19 @@ static inline leveldb_object* leveldb_object_fetch_object(zend_object *obj)
 
 #define LEVELDB_OBJ_P(zv) leveldb_object_fetch_object(Z_OBJ_P(zv))
 
+static inline leveldb_snapshot_object* leveldb_snapshot_fetch_object(zend_object *obj)
+{
+      return (leveldb_snapshot_object *)((char *)obj - XtOffsetOf(leveldb_snapshot_object, std));
+}
+#define LEVELDB_SNAPSHOT_P(zv) leveldb_snapshot_fetch_object(Z_OBJ_P(zv))
+
+static inline leveldb_write_batch_object* leveldb_write_batch_object_fetch_object(zend_object *obj)
+{
+      return (leveldb_write_batch_object *)((char *)obj - XtOffsetOf(leveldb_write_batch_object, std));
+}
+
+#define LEVELDB_WRITE_BATCH_OBJ_P(zv) leveldb_write_batch_object_fetch_object(Z_OBJ_P(zv))
+
 /* Iterator object operate */
 void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 {
@@ -566,7 +579,7 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 	if ((value = zend_hash_find(ht, STR_VALUE("snapshot"))) != NULL
 		&& !ZVAL_IS_NULL(value)) {
 		if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == php_leveldb_snapshot_class_entry) {
-			leveldb_snapshot_object *obj = (leveldb_snapshot_object *)zend_object_store_get_object(value TSRMLS_CC);
+			leveldb_snapshot_object *obj = LEVELDB_SNAPSHOT_P(value);
 			if (obj->snapshot == NULL) {
 				zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 					"Invalid snapshot parameter, it has been released");
@@ -661,7 +674,7 @@ PHP_METHOD(LevelDB, __construct)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 
 	if (intern->db) {
 		leveldb_close(db);
@@ -704,7 +717,7 @@ PHP_METHOD(LevelDB, get)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv TSRMLS_CC);
@@ -741,7 +754,7 @@ PHP_METHOD(LevelDB, set)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
@@ -771,7 +784,7 @@ PHP_METHOD(LevelDB, delete)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
@@ -805,11 +818,11 @@ PHP_METHOD(LevelDB, write)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
-	write_batch_object = (leveldb_write_batch_object *)zend_object_store_get_object(write_batch TSRMLS_CC);
+	write_batch_object = LEVELDB_WRITE_BATCH_OBJ_P(write_batch);
 
 	leveldb_write(intern->db, writeoptions, write_batch_object->batch, &err);
 	leveldb_writeoptions_destroy(writeoptions);
@@ -832,7 +845,7 @@ PHP_METHOD(LevelDB, getProperty)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	property = leveldb_property_value(intern->db, (const char *)name);
@@ -858,7 +871,7 @@ PHP_METHOD(LevelDB, compactRange)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	leveldb_compact_range(intern->db, (const char *)start, (size_t)start_len, (const char *)limit, (size_t)limit_len);
@@ -871,7 +884,7 @@ PHP_METHOD(LevelDB, compactRange)
 PHP_METHOD(LevelDB, getApproximateSizes)
 {
 	leveldb_object *intern;
-	zval *start, *limit, **start_val, **limit_val;
+	zval *start, *limit, *start_val, *limit_val;
 	char **start_key, **limit_key;
 	size_t *start_len, *limit_len;
 	uint num_ranges, i = 0;
@@ -882,7 +895,7 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	num_ranges = zend_hash_num_elements(Z_ARRVAL_P(start));
@@ -903,13 +916,13 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(start), &pos_start);
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(limit), &pos_limit);
 
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(start), (void **)&start_val, &pos_start) == SUCCESS &&
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(limit), (void **)&limit_val, &pos_limit) == SUCCESS) {
+	while ((start_val = zend_hash_get_current_data_ex(Z_ARRVAL_P(start), &pos_start)) != NULL &&
+		(limit_val = zend_hash_get_current_data_ex(Z_ARRVAL_P(limit), &pos_limit)) != NULL) {
 
-		start_key[i] = Z_STRVAL_PP(start_val);
-		start_len[i] = Z_STRLEN_PP(start_val);
-		limit_key[i] = Z_STRVAL_PP(limit_val);
-		limit_len[i] = Z_STRLEN_PP(limit_val);
+		start_key[i] = Z_STRVAL_P(start_val);
+		start_len[i] = Z_STRLEN_P(start_val);
+		limit_key[i] = Z_STRVAL_P(limit_val);
+		limit_len[i] = Z_STRLEN_P(limit_val);
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(start), &pos_start);
 		zend_hash_move_forward_ex(Z_ARRVAL_P(limit), &pos_limit);
@@ -943,7 +956,7 @@ PHP_METHOD(LevelDB, close)
 		return;
 	}
 
-	intern = (leveldb_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_OBJ_P(getThis());
 	if (intern->db) {
 		leveldb_close(intern->db);
 		intern->db = NULL;
@@ -965,7 +978,7 @@ PHP_METHOD(LevelDB, getIterator)
 
 	object_init_ex(return_value, php_leveldb_iterator_class_entry);
 
-	zend_call_method(&return_value, php_leveldb_iterator_class_entry,
+	zend_call_method(return_value, php_leveldb_iterator_class_entry,
 		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct") - 1,
 		NULL, (readoptions_zv == NULL ? 1 : 2), getThis(), readoptions_zv TSRMLS_CC);
 }
@@ -981,7 +994,7 @@ PHP_METHOD(LevelDB, getSnapshot)
 
 	object_init_ex(return_value, php_leveldb_snapshot_class_entry);
 
-	zend_call_method_with_1_params(&return_value, php_leveldb_snapshot_class_entry,
+	zend_call_method_with_1_params(return_value, php_leveldb_snapshot_class_entry,
 		&php_leveldb_snapshot_class_entry->constructor, "__construct", NULL, getThis());
 }
 /*	}}} */
@@ -1079,7 +1092,7 @@ PHP_METHOD(LevelDBWriteBatch, __construct)
 		return;
 	}
 
-	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_WRITE_BATCH_OBJ_P(getThis());
 	batch = leveldb_writebatch_create();
 
 	intern->batch = batch;
@@ -1102,7 +1115,7 @@ PHP_METHOD(LevelDBWriteBatch, set)
 		return;
 	}
 
-	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_WRITE_BATCH_OBJ_P(getThis());
 	leveldb_writebatch_put(intern->batch, key, key_len, value, value_len);
 
 	RETURN_TRUE;
@@ -1122,7 +1135,7 @@ PHP_METHOD(LevelDBWriteBatch, delete)
 		return;
 	}
 
-	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_WRITE_BATCH_OBJ_P(getThis());
 	leveldb_writebatch_delete(intern->batch, key, key_len);
 
 	RETURN_TRUE;
@@ -1139,7 +1152,7 @@ PHP_METHOD(LevelDBWriteBatch, clear)
 		return;
 	}
 
-	intern = (leveldb_write_batch_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern = LEVELDB_WRITE_BATCH_OBJ_P(getThis());
 	leveldb_writebatch_clear(intern->batch);
 
 	RETURN_TRUE;
@@ -1617,7 +1630,7 @@ PHP_MINIT_FUNCTION(leveldb)
 	/* Register LevelDBException class */
 	INIT_CLASS_ENTRY(ce, "LevelDBException", NULL);
 	ce.create_object = exception_ce->create_object;
-	php_leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce, NULL TSRMLS_CC);
+	php_leveldb_ce_LevelDBException = zend_register_internal_class_ex(&ce, exception_ce TSRMLS_CC);
 
 	/* Register constants */
 	REGISTER_LONG_CONSTANT("LEVELDB_NO_COMPRESSION", leveldb_no_compression, CONST_CS | CONST_PERSISTENT);
