@@ -91,7 +91,7 @@
                                                                 \
   intern->std.handlers = &leveldb_default_handlers;					\
                                                                 \
-  return (zend_object *)intern;
+  return &intern->std;
 
 /*
   retval.handle = zend_objects_store_put(intern,				\
