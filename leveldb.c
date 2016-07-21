@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2015 The PHP Group                                |
+  | Copyright (c) 1997-2016 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -198,10 +198,10 @@ void php_leveldb_object_free(void *object TSRMLS_DC)
 
 	if (obj->comparator) {
 		leveldb_comparator_destroy(obj->comparator);
-		efree(obj->callable_name);
+		zend_string_free(obj->callable_name);
 	}
 
-	zend_object_std_dtor((zend_object *)object TSRMLS_CC);
+	zend_object_std_dtor(&obj->std TSRMLS_CC);
 }
 
 static zend_object* php_leveldb_object_new(zend_class_entry *class_type TSRMLS_DC)
@@ -218,7 +218,7 @@ void php_leveldb_write_batch_object_free(void *object TSRMLS_DC)
 		leveldb_writebatch_destroy(obj->batch);
 	}
 
-	zend_object_std_dtor((zend_object *)object TSRMLS_CC);
+	zend_object_std_dtor(&obj->std TSRMLS_CC);
 }
 
 static zend_object* php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_DC)
@@ -258,7 +258,7 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 		zval_ptr_dtor(obj->db);
 	}
 
-	zend_object_std_dtor((zend_object *)object TSRMLS_CC);
+	zend_object_std_dtor(&obj->std TSRMLS_CC);
 }
 
 static zend_object* php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_DC)
@@ -279,7 +279,7 @@ void php_leveldb_snapshot_object_free(void *object TSRMLS_DC)
 		zval_ptr_dtor(obj->db);
 	}
 
-	zend_object_std_dtor((zend_object *)object TSRMLS_CC);
+	zend_object_std_dtor(&obj->std TSRMLS_CC);
 }
 
 static zend_object* php_leveldb_snapshot_object_new(zend_class_entry *class_type TSRMLS_DC)
