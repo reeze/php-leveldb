@@ -1544,6 +1544,7 @@ PHP_METHOD(LevelDBSnapshot, __construct)
 	}
 
 	intern = FETCH_LEVELDB_SNAPSHOT_OBJ(getThis());
+	db_obj = FETCH_LEVELDB_OBJ(db_zv);
 	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
 	intern->snapshot = (leveldb_snapshot_t *)leveldb_create_snapshot(db_obj->db);
