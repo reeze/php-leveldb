@@ -30,6 +30,13 @@
 
 #include <leveldb/c.h>
 
+// The code below assumes snappy and zlib are enabled so re-define them here in case there were not enabled during leveldb compile
+enum {
+  leveldb_no_compression = 0,
+  leveldb_snappy_compression = 1,
+  leveldb_zlib_compression = 2
+};
+
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
 # define LEVELDB_SAFE_MODE_CHECK(file) || (PG(safe_mode) && !php_checkuid((file), "rb+", CHECKUID_CHECK_MODE_PARAM))
 #else
@@ -514,7 +521,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if ((value = zend_hash_find(ht, STR_VALUE("compression"))) != NULL) {
 		convert_to_long(value);
-		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression) {
+		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression) && Z_LVAL_P(value) != leveldb_zlib_compression) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression type");
 		} else {
 			leveldb_options_set_compression(options, Z_LVAL_P(value));
@@ -657,7 +664,7 @@ static inline void php_leveldb_set_writeoptions(leveldb_object *intern, zval *op
 PHP_METHOD(LevelDB, __construct)
 {
 	char *name;
-	int name_len;
+	size_t name_len;
 	zval *options_zv = NULL, *readoptions_zv = NULL, *writeoptions_zv = NULL;
 
 	char *err = NULL;
@@ -702,7 +709,7 @@ PHP_METHOD(LevelDB, __construct)
 PHP_METHOD(LevelDB, get)
 {
 	char *key, *value;
-	int key_len;
+	size_t key_len;
 	size_t value_len;
 	zval *readoptions_zv = NULL;
 
@@ -740,7 +747,7 @@ PHP_METHOD(LevelDB, get)
 PHP_METHOD(LevelDB, set)
 {
 	char *key, *value;
-	int key_len, value_len;
+	size_t key_len, value_len;
 	zval *writeoptions_zv = NULL;
 
 	char *err = NULL;
@@ -770,7 +777,7 @@ PHP_METHOD(LevelDB, set)
 PHP_METHOD(LevelDB, delete)
 {
 	char *key;
-	int key_len;
+	size_t key_len;
 	zval *writeoptions_zv = NULL;
 
 	char *err = NULL;
@@ -836,7 +843,7 @@ PHP_METHOD(LevelDB, write)
 PHP_METHOD(LevelDB, getProperty)
 {
 	char *name, *property;
-	int name_len;
+	size_t name_len;
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
@@ -862,7 +869,7 @@ PHP_METHOD(LevelDB, getProperty)
 PHP_METHOD(LevelDB, compactRange)
 {
 	char *start, *limit;
-	int start_len, limit_len;
+	size_t start_len, limit_len;
 	leveldb_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &start, &start_len, &limit, &limit_len) == FAILURE) {
@@ -1002,7 +1009,7 @@ PHP_METHOD(LevelDB, getSnapshot)
 PHP_METHOD(LevelDB, destroy)
 {
 	char *name;
-	int name_len;
+	size_t name_len;
 	zval *options_zv = NULL;
 
 	char *err = NULL;
@@ -1043,7 +1050,7 @@ PHP_METHOD(LevelDB, destroy)
 PHP_METHOD(LevelDB, repair)
 {
 	char *name;
-	int name_len;
+	size_t name_len;
 	zval *options_zv;
 
 	char *err = NULL;
@@ -1104,7 +1111,7 @@ PHP_METHOD(LevelDBWriteBatch, __construct)
 PHP_METHOD(LevelDBWriteBatch, set)
 {
 	char *key, *value;
-	int key_len, value_len;
+	size_t key_len, value_len;
 
 	leveldb_write_batch_object *intern;
 
@@ -1125,7 +1132,7 @@ PHP_METHOD(LevelDBWriteBatch, set)
 PHP_METHOD(LevelDBWriteBatch, delete)
 {
 	char *key;
-	int key_len;
+	size_t key_len;
 
 	leveldb_write_batch_object *intern;
 
@@ -1499,7 +1506,7 @@ PHP_METHOD(LevelDBIterator, last)
 PHP_METHOD(LevelDBIterator, seek)
 {
 	char *key;
-	int key_len;
+	size_t key_len;
 	leveldb_iterator_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len ) == FAILURE) {
@@ -1621,6 +1628,7 @@ PHP_MINIT_FUNCTION(leveldb)
 	/* Register constants */
 	REGISTER_LONG_CONSTANT("LEVELDB_NO_COMPRESSION", leveldb_no_compression, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LEVELDB_SNAPPY_COMPRESSION", leveldb_snappy_compression, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LEVELDB_ZLIB_COMPRESSION", leveldb_zlib_compression, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
