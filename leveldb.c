@@ -522,7 +522,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if ((value = zend_hash_find(ht, STR_VALUE("compression"))) != NULL) {
 		convert_to_long(value);
-		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression) && Z_LVAL_P(value) != leveldb_zlib_compression) {
+		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression && Z_LVAL_P(value) != leveldb_zlib_compression) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression type");
 		} else {
 			leveldb_options_set_compression(options, Z_LVAL_P(value));
