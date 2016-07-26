@@ -31,11 +31,12 @@
 #include <leveldb/c.h>
 
 // The code below assumes snappy and zlib are enabled so re-define them here in case there were not enabled during leveldb compile
-enum {
-  leveldb_no_compression = 0,
-  leveldb_snappy_compression = 1,
-  leveldb_zlib_compression = 2
-};
+#ifndef leveldb_snappy_compression
+	#define leveldb_snappy_compression	1
+#endif
+#ifndef leveldb_zlib_compression
+	#define leveldb_zlib_compression	2
+#endif
 
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
 # define LEVELDB_SAFE_MODE_CHECK(file) || (PG(safe_mode) && !php_checkuid((file), "rb+", CHECKUID_CHECK_MODE_PARAM))
