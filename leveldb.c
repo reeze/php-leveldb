@@ -89,23 +89,17 @@
 /* PHP-LevelDB MAGIC identifier don't change this */
 #define PHP_LEVELDB_CUSTOM_COMPARATOR_NAME "php_leveldb.custom_comparator"
 
-#define php_leveldb_obj_new(obj, class_type)					\
-  obj *intern;													\
+#define php_leveldb_obj_new(class_type, ce)					\
+  class_type *intern;													\
 																\
-  intern = (obj *)ecalloc(1, sizeof(obj) + zend_object_properties_size(class_type));               			\
+  intern = (class_type *)ecalloc(1, sizeof(class_type) + zend_object_properties_size(ce));               			\
                                                                 \
-  zend_object_std_init(&intern->std, class_type TSRMLS_CC);     \
+  zend_object_std_init(&intern->std, ce TSRMLS_CC);     \
   init_properties(intern);										\
                                                                 \
-  intern->std.handlers = &leveldb_default_handlers;					\
+  intern->std.handlers = & class_type##_handlers;				\
                                                                 \
   return &intern->std;
-
-/*
-  retval.handle = zend_objects_store_put(intern,				\
-     (zend_objects_store_dtor_t) zend_objects_destroy_object,	\
-     php_##obj##_free, NULL TSRMLS_CC);							\
-*/
 
 #define LEVELDB_CHECK_ERROR(err) \
 	if ((err) != NULL) { \
@@ -146,8 +140,9 @@ ZEND_GET_MODULE(leveldb)
 #endif
 
 /* Handlers */
-static zend_object_handlers leveldb_default_handlers;
 static zend_object_handlers leveldb_object_handlers;
+static zend_object_handlers leveldb_snapshot_object_handlers;
+static zend_object_handlers leveldb_write_batch_object_handlers;
 static zend_object_handlers leveldb_iterator_object_handlers;
 
 /* Class entries */
@@ -196,45 +191,6 @@ typedef struct {
 	zend_object std;
 } leveldb_snapshot_object;
 
-void php_leveldb_object_free(void *object TSRMLS_DC)
-{
-	leveldb_object *obj = (leveldb_object *)object;
-
-	if (obj->db) {
-		leveldb_close(obj->db);
-	}
-
-	if (obj->comparator) {
-		leveldb_comparator_destroy(obj->comparator);
-		zend_string_free(obj->callable_name);
-	}
-
-	zend_object_std_dtor(&obj->std TSRMLS_CC);
-}
-
-static zend_object* php_leveldb_object_new(zend_class_entry *class_type TSRMLS_DC)
-{
-	php_leveldb_obj_new(leveldb_object, class_type);
-}
-
-/* Write batch object operate */
-void php_leveldb_write_batch_object_free(void *object TSRMLS_DC)
-{
-	leveldb_write_batch_object *obj = (leveldb_write_batch_object *)object;
-
-	if (obj->batch) {
-		leveldb_writebatch_destroy(obj->batch);
-	}
-
-	zend_object_std_dtor(&obj->std TSRMLS_CC);
-}
-
-static zend_object* php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_DC)
-{
-	php_leveldb_obj_new(leveldb_write_batch_object, class_type);
-}
-
-
 #define DECLARE_FETCH_OBJECT(class_name) \
 	static inline class_name * class_name##_fetch_object(zend_object *obj) \
 	{ \
@@ -247,18 +203,66 @@ DECLARE_FETCH_OBJECT(leveldb_write_batch_object)
 DECLARE_FETCH_OBJECT(leveldb_iterator_object)
 
 #define LEVELDB_FETCH_OBJ(obj_name, zv) obj_name##_fetch_object(Z_OBJ_P(zv))
+#define LEVELDB_FETCH_ZOBJ(obj_name, obj) obj_name##_fetch_object(obj)
 
-#define FETCH_LEVELDB_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_object, zv)
-#define FETCH_LEVELDB_SNAPSHOT_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_snapshot_object, zv)
-#define FETCH_LEVELDB_WRITE_BATCH_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_write_batch_object, zv)
-#define FETCH_LEVELDB_ITERATOR_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_iterator_object, zv)
+#define FETCH_LEVELDB_Z_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_object, zv)
+#define FETCH_LEVELDB_Z_SNAPSHOT_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_snapshot_object, zv)
+#define FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_write_batch_object, zv)
+#define FETCH_LEVELDB_Z_ITERATOR_OBJ(zv) LEVELDB_FETCH_OBJ(leveldb_iterator_object, zv)
+
+#define FETCH_LEVELDB_OBJ(obj) LEVELDB_FETCH_ZOBJ(leveldb_object, obj)
+#define FETCH_LEVELDB_SNAPSHOT_OBJ(obj) LEVELDB_FETCH_ZOBJ(leveldb_snapshot_object, obj)
+#define FETCH_LEVELDB_WRITE_BATCH_OBJ(obj) LEVELDB_FETCH_ZOBJ(leveldb_write_batch_object, obj)
+#define FETCH_LEVELDB_ITERATOR_OBJ(obj) LEVELDB_FETCH_ZOBJ(leveldb_iterator_object, obj)
+
+void php_leveldb_object_free(zend_object *std TSRMLS_DC)
+{
+	leveldb_object *obj = FETCH_LEVELDB_OBJ(std);
+
+	if (obj->db) {
+		leveldb_close(obj->db);
+	}
+
+	if (obj->comparator) {
+		leveldb_comparator_destroy(obj->comparator);
+		zend_string_free(obj->callable_name);
+	}
+
+	zend_object_std_dtor(std);
+	efree(obj);
+}
+
+static zend_object* php_leveldb_object_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	php_leveldb_obj_new(leveldb_object, class_type);
+}
+
+/* Write batch object operate */
+void php_leveldb_write_batch_object_free(zend_object *std TSRMLS_DC)
+{
+	leveldb_write_batch_object *obj = FETCH_LEVELDB_WRITE_BATCH_OBJ(std);
+
+	if (obj->batch) {
+		leveldb_writebatch_destroy(obj->batch);
+	}
+
+	zend_object_std_dtor(std TSRMLS_CC);
+	efree(obj);
+}
+
+static zend_object* php_leveldb_write_batch_object_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	php_leveldb_obj_new(leveldb_write_batch_object, class_type);
+}
+
+
 
 /* Iterator object operate */
-void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
+void php_leveldb_iterator_object_free(zend_object *std TSRMLS_DC)
 {
-	leveldb_iterator_object *obj = (leveldb_iterator_object *)object;
+	leveldb_iterator_object *obj = FETCH_LEVELDB_ITERATOR_OBJ(std);
 
-	if (obj->iterator && (FETCH_LEVELDB_OBJ(obj->db))->db != NULL) {
+	if (obj->iterator && (FETCH_LEVELDB_Z_OBJ(obj->db))->db != NULL) {
 		leveldb_iter_destroy(obj->iterator);
 	}
 
@@ -266,7 +270,8 @@ void php_leveldb_iterator_object_free(void *object TSRMLS_DC)
 		zval_ptr_dtor(obj->db);
 	}
 
-	zend_object_std_dtor(&obj->std TSRMLS_CC);
+	zend_object_std_dtor(std);
+	efree(obj);
 }
 
 static zend_object* php_leveldb_iterator_object_new(zend_class_entry *class_type TSRMLS_DC)
@@ -275,19 +280,20 @@ static zend_object* php_leveldb_iterator_object_new(zend_class_entry *class_type
 }
 
 /* Snapshot object operate */
-void php_leveldb_snapshot_object_free(void *object TSRMLS_DC)
+void php_leveldb_snapshot_object_free(zend_object *std TSRMLS_DC)
 {
 	leveldb_t *db;
-	leveldb_snapshot_object *obj = (leveldb_snapshot_object *)object;
+	leveldb_snapshot_object *obj = FETCH_LEVELDB_SNAPSHOT_OBJ(std);
 
 	if (obj->snapshot) {
-		if((db = (FETCH_LEVELDB_OBJ(obj->db))->db) != NULL) {
+		if((db = (FETCH_LEVELDB_Z_OBJ(obj->db))->db) != NULL) {
 			leveldb_release_snapshot(db, obj->snapshot);
 		}
 		zval_ptr_dtor(obj->db);
 	}
 
-	zend_object_std_dtor(&obj->std TSRMLS_CC);
+	zend_object_std_dtor(std TSRMLS_CC);
+	efree(obj);
 }
 
 static zend_object* php_leveldb_snapshot_object_new(zend_class_entry *class_type TSRMLS_DC)
@@ -585,7 +591,7 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 	if ((value = zend_hash_find(ht, STR_VALUE("snapshot"))) != NULL
 		&& !ZVAL_IS_NULL(value)) {
 		if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == php_leveldb_snapshot_class_entry) {
-			leveldb_snapshot_object *obj = FETCH_LEVELDB_SNAPSHOT_OBJ(value);
+			leveldb_snapshot_object *obj = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(value);
 			if (obj->snapshot == NULL) {
 				zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 					"Invalid snapshot parameter, it has been released");
@@ -680,7 +686,7 @@ PHP_METHOD(LevelDB, __construct)
 
 	LEVELDB_CHECK_OPEN_BASEDIR(name);
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 
 	if (intern->db) {
 		leveldb_close(db);
@@ -723,7 +729,7 @@ PHP_METHOD(LevelDB, get)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv TSRMLS_CC);
@@ -760,7 +766,7 @@ PHP_METHOD(LevelDB, set)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
@@ -790,7 +796,7 @@ PHP_METHOD(LevelDB, delete)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
@@ -824,11 +830,11 @@ PHP_METHOD(LevelDB, write)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	writeoptions = php_leveldb_get_writeoptions(intern, writeoptions_zv);
-	write_batch_object = FETCH_LEVELDB_WRITE_BATCH_OBJ(write_batch);
+	write_batch_object = FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(write_batch);
 
 	leveldb_write(intern->db, writeoptions, write_batch_object->batch, &err);
 	leveldb_writeoptions_destroy(writeoptions);
@@ -851,7 +857,7 @@ PHP_METHOD(LevelDB, getProperty)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	property = leveldb_property_value(intern->db, (const char *)name);
@@ -877,7 +883,7 @@ PHP_METHOD(LevelDB, compactRange)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	leveldb_compact_range(intern->db, (const char *)start, (size_t)start_len, (const char *)limit, (size_t)limit_len);
@@ -901,7 +907,7 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	num_ranges = zend_hash_num_elements(Z_ARRVAL_P(start));
@@ -962,7 +968,7 @@ PHP_METHOD(LevelDB, close)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 	if (intern->db) {
 		leveldb_close(intern->db);
 		intern->db = NULL;
@@ -1098,7 +1104,7 @@ PHP_METHOD(LevelDBWriteBatch, __construct)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_WRITE_BATCH_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(getThis());
 	batch = leveldb_writebatch_create();
 
 	intern->batch = batch;
@@ -1121,7 +1127,7 @@ PHP_METHOD(LevelDBWriteBatch, set)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_WRITE_BATCH_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(getThis());
 	leveldb_writebatch_put(intern->batch, key, key_len, value, value_len);
 
 	RETURN_TRUE;
@@ -1141,7 +1147,7 @@ PHP_METHOD(LevelDBWriteBatch, delete)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_WRITE_BATCH_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(getThis());
 	leveldb_writebatch_delete(intern->batch, key, key_len);
 
 	RETURN_TRUE;
@@ -1158,7 +1164,7 @@ PHP_METHOD(LevelDBWriteBatch, clear)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_WRITE_BATCH_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_WRITE_BATCH_OBJ(getThis());
 	leveldb_writebatch_clear(intern->batch);
 
 	RETURN_TRUE;
@@ -1198,7 +1204,7 @@ zend_object_iterator *leveldb_iterator_get_iterator(zend_class_entry *ce, zval *
 
 	Z_ADDREF_P(object);
 
-	it_object = FETCH_LEVELDB_ITERATOR_OBJ(object);
+	it_object = FETCH_LEVELDB_Z_ITERATOR_OBJ(object);
 	iterator = emalloc(sizeof(leveldb_iterator_iterator));
 
 	zend_iterator_init((zend_object_iterator*)iterator);
@@ -1306,7 +1312,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
 	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv TSRMLS_CC);
@@ -1331,7 +1337,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 		zend_throw_exception(php_leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED TSRMLS_CC); \
 		return; \
 	} \
-	if ((FETCH_LEVELDB_OBJ((intern)->db))->db == NULL) { \
+	if ((FETCH_LEVELDB_Z_OBJ((intern)->db))->db == NULL) { \
 		(intern)->iterator = NULL; \
 		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
 		return; \
@@ -1347,7 +1353,7 @@ PHP_METHOD(LevelDBIterator, destroy)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	if (intern->iterator) {
 		leveldb_iter_destroy(intern->iterator);
 		intern->iterator = NULL;
@@ -1368,7 +1374,7 @@ PHP_METHOD(LevelDBIterator, getError)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	leveldb_iter_get_error(intern->iterator, &err);
@@ -1394,7 +1400,7 @@ PHP_METHOD(LevelDBIterator, current)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (!leveldb_iter_valid(intern->iterator) ||
@@ -1418,7 +1424,7 @@ PHP_METHOD(LevelDBIterator, key)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (!leveldb_iter_valid(intern->iterator) ||
@@ -1440,7 +1446,7 @@ PHP_METHOD(LevelDBIterator, next)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (leveldb_iter_valid(intern->iterator)) {
@@ -1459,7 +1465,7 @@ PHP_METHOD(LevelDBIterator, prev)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	if (leveldb_iter_valid(intern->iterator)) {
@@ -1478,7 +1484,7 @@ PHP_METHOD(LevelDBIterator, rewind)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	leveldb_iter_seek_to_first(intern->iterator);
@@ -1495,7 +1501,7 @@ PHP_METHOD(LevelDBIterator, last)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	leveldb_iter_seek_to_last(intern->iterator);
@@ -1514,7 +1520,7 @@ PHP_METHOD(LevelDBIterator, seek)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	leveldb_iter_seek(intern->iterator, key, (size_t)key_len);
@@ -1531,7 +1537,7 @@ PHP_METHOD(LevelDBIterator, valid)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_ITERATOR_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
 	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern);
 
 	RETURN_BOOL(leveldb_iter_valid(intern->iterator));
@@ -1551,8 +1557,8 @@ PHP_METHOD(LevelDBSnapshot, __construct)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_SNAPSHOT_OBJ(getThis());
-	db_obj = FETCH_LEVELDB_OBJ(db_zv);
+	intern = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(getThis());
+	db_obj = FETCH_LEVELDB_Z_OBJ(db_zv);
 	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
 	intern->snapshot = (leveldb_snapshot_t *)leveldb_create_snapshot(db_obj->db);
@@ -1572,14 +1578,14 @@ PHP_METHOD(LevelDBSnapshot, release)
 		return;
 	}
 
-	intern = FETCH_LEVELDB_SNAPSHOT_OBJ(getThis());
+	intern = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(getThis());
 
 	if (!intern->db) {
 		return;
 	}
 
 	{
-		leveldb_object *db = FETCH_LEVELDB_OBJ(intern->db);
+		leveldb_object *db = FETCH_LEVELDB_Z_OBJ(intern->db);
 		leveldb_release_snapshot(db->db, intern->snapshot);
 		zval_ptr_dtor(intern->db);
 		intern->snapshot = NULL;
@@ -1595,9 +1601,16 @@ PHP_MINIT_FUNCTION(leveldb)
 	zend_class_entry ce;
 	zend_class_entry *exception_ce = zend_exception_get_default(TSRMLS_C);
 
-	memcpy(&leveldb_default_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	memcpy(&leveldb_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	memcpy(&leveldb_iterator_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+#define DECLARE_OBJ_HANDLERS(class_type) \
+	memcpy(& class_type##_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+	class_type##_handlers.offset = XtOffsetOf(class_type, std); \
+	class_type##_handlers.dtor_obj = zend_objects_destroy_object;\
+	leveldb_object_handlers.free_obj = php_##class_type##_free;
+
+	DECLARE_OBJ_HANDLERS(leveldb_object);
+	DECLARE_OBJ_HANDLERS(leveldb_snapshot_object);
+	DECLARE_OBJ_HANDLERS(leveldb_write_batch_object);
+	DECLARE_OBJ_HANDLERS(leveldb_iterator_object);
 
 	/* Register LevelDB Class */
 	INIT_CLASS_ENTRY(ce, "LevelDB", php_leveldb_class_methods);
