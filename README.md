@@ -266,8 +266,8 @@ as much data as possible.
 ## Know limitations
 
 LevelDB was designed to be thread-safe but not process-safe, so if you
-use php in multi-thread mode (eg, php-fpm) you might not able to open
-the single db concurrently.
+use php in multi-process mode (e.g. PHP-FPM) you might not able to open
+the single DB concurrently.
 
 > If you app is not designed to serve massive requests, you could try
 > to catch fail to open exception and try to open it again.
