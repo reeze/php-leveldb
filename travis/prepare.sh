@@ -1,6 +1,6 @@
 #!/bin/sh
 
-wget http://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz
+curl -fsSL https://github.com/google/leveldb/archive/v$LEVELDB_VERSION.tar.gz -o leveldb-$LEVELDB_VERSION.tar.gz
 tar zxvf leveldb-$LEVELDB_VERSION.tar.gz
 cd leveldb-$LEVELDB_VERSION && make
 cd ..

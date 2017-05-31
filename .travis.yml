@@ -4,13 +4,16 @@ php:
   - 7.0
 
 env:
-  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1 LEVELDB_VERSION=1.7.0
-  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1 LEVELDB_VERSION=1.15.0
+  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1 LEVELDB_VERSION=1.7
+  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1 LEVELDB_VERSION=1.15
 
-before_script: sh travis/prepare.sh
+before_script:
+ - sudo apt-get update -qq
+ - sudo apt-get install valgrind -qq
+ - sh travis/prepare.sh
 
 script: sh travis/run-test.sh
 
-notifications:
-  email:
-    - reeze.xia@gmail.com
+#notifications:
+#  email:
+#    - reeze.xia@gmail.com
