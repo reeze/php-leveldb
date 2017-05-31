@@ -1313,6 +1313,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 	}
 
 	intern = FETCH_LEVELDB_Z_ITERATOR_OBJ(getThis());
+	db_obj = FETCH_LEVELDB_Z_OBJ(db_zv);
 	LEVELDB_CHECK_DB_NOT_CLOSED(db_obj);
 
 	readoptions = php_leveldb_get_readoptions(db_obj, readoptions_zv TSRMLS_CC);
