@@ -441,12 +441,13 @@ static void leveldb_custom_comparator_destructor(void *stat)
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
 {
+	/*
+	FIXME
 	zval *callable = (zval *)stat;
 	zval *params[2], *result = NULL;
 	int ret;
 	TSRMLS_FETCH();
-	/*
-	FIXME
+
 
 	MAKE_STD_ZVAL(params[0]);
 	MAKE_STD_ZVAL(params[1]);
@@ -464,9 +465,10 @@ static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t a
 
 	ret = Z_LVAL_P(result);
 	zval_ptr_dtor(result);
-	*/
 
 	return ret;
+	*/
+	return 0;
 }
 
 static const char* leveldb_custom_comparator_name(void *stat)
