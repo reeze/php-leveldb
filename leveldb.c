@@ -691,7 +691,7 @@ PHP_METHOD(LevelDB, __construct)
 	intern = FETCH_LEVELDB_Z_OBJ(getThis());
 
 	if (intern->db) {
-		leveldb_close(db);
+		leveldb_close(intern->db);
 	}
 
 	openoptions = php_leveldb_get_open_options(options_zv, &intern->comparator, &intern->callable_name TSRMLS_CC);
