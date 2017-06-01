@@ -181,7 +181,7 @@ typedef struct {
 
 typedef struct {
 	leveldb_iterator_t *iterator;
-	zval *db;
+	leveldb_object *db;
 	zend_object std;
 } leveldb_iterator_object;
 
@@ -262,12 +262,8 @@ void php_leveldb_iterator_object_free(zend_object *std TSRMLS_DC)
 {
 	leveldb_iterator_object *obj = FETCH_LEVELDB_ITERATOR_OBJ(std);
 
-	if (obj->iterator && (FETCH_LEVELDB_Z_OBJ(obj->db))->db != NULL) {
+	if (obj->iterator && obj->db != NULL) {
 		leveldb_iter_destroy(obj->iterator);
-	}
-
-	if (obj->db) {
-		zval_ptr_dtor(obj->db);
 	}
 
 	zend_object_std_dtor(std);
@@ -1365,8 +1361,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 
 	leveldb_readoptions_destroy(readoptions);
 
-	Z_ADDREF_P(db_zv);
-	intern->db = db_zv;
+	intern->db = db_obj;
 
 	leveldb_iter_seek_to_first(intern->iterator);
 }
@@ -1377,7 +1372,7 @@ PHP_METHOD(LevelDBIterator, __construct)
 		zend_throw_exception(php_leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED TSRMLS_CC); \
 		return; \
 	} \
-	if ((FETCH_LEVELDB_Z_OBJ((intern)->db))->db == NULL) { \
+	if ((intern)->db->db == NULL) { \
 		(intern)->iterator = NULL; \
 		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED TSRMLS_CC); \
 		return; \
