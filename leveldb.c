@@ -563,7 +563,7 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 			zend_throw_exception_ex(php_leveldb_ce_LevelDBException, 0 TSRMLS_CC,
 				"Invalid open option: comparator, %s() is not callable", ZSTR_VAL(*callable_name));
 
-			zend_string_free(*callable_name);
+			zend_string_release(*callable_name);
 			*callable_name = NULL;
 
 			leveldb_options_destroy(options);
