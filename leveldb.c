@@ -229,7 +229,6 @@ void php_leveldb_object_free(zend_object *std)
 	}
 
 	zend_object_std_dtor(std);
-	efree(obj);
 }
 
 static zend_object* php_leveldb_object_new(zend_class_entry *class_type)
@@ -247,7 +246,6 @@ void php_leveldb_write_batch_object_free(zend_object *std)
 	}
 
 	zend_object_std_dtor(std);
-	efree(obj);
 }
 
 static zend_object* php_leveldb_write_batch_object_new(zend_class_entry *class_type)
@@ -267,7 +265,6 @@ void php_leveldb_iterator_object_free(zend_object *std)
 	}
 
 	zend_object_std_dtor(std);
-	efree(obj);
 }
 
 static zend_object* php_leveldb_iterator_object_new(zend_class_entry *class_type)
@@ -289,7 +286,6 @@ void php_leveldb_snapshot_object_free(zend_object *std)
 	}
 
 	zend_object_std_dtor(std);
-	efree(obj);
 }
 
 static zend_object* php_leveldb_snapshot_object_new(zend_class_entry *class_type)
@@ -1265,8 +1261,6 @@ static void leveldb_iterator_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(iterator->current);
 		efree(iterator->current);
 	}
-
-	efree(iterator);
 }
 /* }}} */
 
