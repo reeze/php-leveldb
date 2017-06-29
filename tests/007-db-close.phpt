@@ -29,7 +29,23 @@ try {
 } catch(LevelDBException $e) {
 	echo $e->getMessage() . "\n";
 }
+
+try{
+	$it->rewind();
+}catch(LevelDBException $e){
+	echo $e->getMessage() . "\n";
+}
+
+try{
+	foreach($it as $key => $value){
+		echo "$key => $value\n";
+	}
+}catch(LevelDBException $e){
+	echo $e->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
 Can not operate on closed db
+Can not iterate on closed db
+Iterator has been destroyed
 Can not iterate on closed db
