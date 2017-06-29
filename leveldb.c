@@ -84,7 +84,7 @@
 } while(0)
 #endif
 
-#define STR_VALUE(str) zend_string_init(str, sizeof(str)-1, 0)
+#define STR_VALUE_LEN(str) str, sizeof(str) - 1
 
 /* PHP-LevelDB MAGIC identifier don't change this */
 #define PHP_LEVELDB_CUSTOM_COMPARATOR_NAME "php_leveldb.custom_comparator"
@@ -482,61 +482,44 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	ht = Z_ARRVAL_P(options_zv);
 
-	zend_string *create_if_missing = STR_VALUE("create_if_missing");
-	if ((value = zend_hash_find(ht, create_if_missing)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("create_if_missing"))) != NULL) {
 		leveldb_options_set_create_if_missing(options, zend_is_true(value));
 	}
-	zend_string_free(create_if_missing);
 
-	zend_string *error_if_exists = STR_VALUE("error_if_exists");
-	if ((value = zend_hash_find(ht, error_if_exists)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("error_if_exists"))) != NULL) {
 		leveldb_options_set_error_if_exists(options, zend_is_true(value));
 	}
-	zend_string_free(error_if_exists);
 
-	zend_string *paranoid_checks = STR_VALUE("paranoid_checks");
-	if ((value = zend_hash_find(ht, paranoid_checks)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("paranoid_checks"))) != NULL) {
 		leveldb_options_set_paranoid_checks(options, zend_is_true(value));
 	}
-	zend_string_free(paranoid_checks);
 
-	zend_string *write_buffer_size = STR_VALUE("write_buffer_size");
-	if ((value = zend_hash_find(ht, write_buffer_size)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("write_buffer_size"))) != NULL) {
 		convert_to_long(value);
 		leveldb_options_set_write_buffer_size(options, Z_LVAL_P(value));
 	}
-	zend_string_free(write_buffer_size);
 
-	zend_string *max_open_files = STR_VALUE("max_open_files");
-	if ((value = zend_hash_find(ht, max_open_files)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("max_open_files"))) != NULL) {
 		convert_to_long(value);
 		leveldb_options_set_max_open_files(options, Z_LVAL_P(value));
 	}
-	zend_string_free(max_open_files);
 
-	zend_string *block_size = STR_VALUE("block_size");
-	if ((value = zend_hash_find(ht, block_size)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("block_size"))) != NULL) {
 		convert_to_long(value);
 		leveldb_options_set_block_size(options, Z_LVAL_P(value));
 	}
-	zend_string_free(block_size);
 
-	zend_string *block_cache_size = STR_VALUE("block_cache_size");
-	if ((value = zend_hash_find(ht, block_cache_size)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("block_cache_size"))) != NULL) {
 		convert_to_long(value);
 		leveldb_options_set_cache(options, leveldb_cache_create_lru(Z_LVAL_P(value)));
 	}
-	zend_string_free(block_cache_size);
 
-	zend_string *block_restart_interval = STR_VALUE("block_restart_interval");
-	if ((value = zend_hash_find(ht, block_restart_interval)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("block_restart_interval"))) != NULL) {
 		convert_to_long(value);
 		leveldb_options_set_block_restart_interval(options, Z_LVAL_P(value));
 	}
-	zend_string_free(block_restart_interval);
 
-	zend_string *compression = STR_VALUE("compression");
-	if ((value = zend_hash_find(ht, compression)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("compression"))) != NULL) {
 		convert_to_long(value);
 		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression && Z_LVAL_P(value) != leveldb_zlib_compression) {
 			php_error_docref(NULL, E_WARNING, "Invalid compression type");
@@ -544,10 +527,8 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 			leveldb_options_set_compression(options, Z_LVAL_P(value));
 		}
 	}
-	zend_string_free(compression);
 
-	zend_string *comparator = STR_VALUE("comparator");
-	if ((value = zend_hash_find(ht, comparator)) != NULL
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("comparator"))) != NULL
 		&& !ZVAL_IS_NULL(value)) {
 		leveldb_comparator_t *comparator;
 		if (!zend_is_callable(value, 0, callable_name)) {
@@ -574,8 +555,6 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 		leveldb_options_set_comparator(options, comparator);
 	}
 
-	zend_string_free(comparator);
-
 	return options;
 }
 
@@ -591,23 +570,19 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 
 	ht = Z_ARRVAL_P(options_zv);
 
-	zend_string *verify_check_sum = STR_VALUE("verify_check_sum");
-	if ((value = zend_hash_find(ht, verify_check_sum)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("verify_check_sum"))) != NULL) {
 		leveldb_readoptions_set_verify_checksums(readoptions, zend_is_true(value));
 	} else {
 		leveldb_readoptions_set_verify_checksums(readoptions, intern->verify_check_sum);
 	}
-	zend_string_free(verify_check_sum);
 
-	zend_string *fill_cache = STR_VALUE("fill_cache");
-	if ((value = zend_hash_find(ht, fill_cache)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("fill_cache"))) != NULL) {
 		leveldb_readoptions_set_fill_cache(readoptions, zend_is_true(value));
 	} else {
 		leveldb_readoptions_set_fill_cache(readoptions, intern->fill_cache);
 	}
-	zend_string_free(fill_cache);
 
-	if ((value = zend_hash_str_find(ht, "snapshot", sizeof("snapshot") - 1)) != NULL
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("snapshot"))) != NULL
 		&& !ZVAL_IS_NULL(value)) {
 		if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == php_leveldb_snapshot_class_entry) {
 			leveldb_snapshot_object *obj = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(value);
@@ -643,17 +618,13 @@ static inline void php_leveldb_set_readoptions(leveldb_object *intern, zval *opt
 
 	ht = Z_ARRVAL_P(options_zv);
 
-	zend_string *verify_check_sum = STR_VALUE("verify_check_sum");
-	if ((value = zend_hash_find(ht, verify_check_sum)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("verify_check_sum"))) != NULL) {
 		intern->verify_check_sum = zend_is_true(value);
 	}
-	zend_string_free(verify_check_sum);
 
-	zend_string *fill_cache = STR_VALUE("fill_cache");
-	if ((value = zend_hash_find(ht, fill_cache)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("fill_cache"))) != NULL) {
 		intern->fill_cache = zend_is_true(value);
 	}
-	zend_string_free(fill_cache);
 }
 
 static inline leveldb_writeoptions_t *php_leveldb_get_writeoptions(leveldb_object *intern, zval *options_zv)
@@ -668,13 +639,11 @@ static inline leveldb_writeoptions_t *php_leveldb_get_writeoptions(leveldb_objec
 
 	ht = Z_ARRVAL_P(options_zv);
 
-	zend_string *sync = STR_VALUE("sync");
-	if ((value = zend_hash_find(ht, sync)) != NULL) {
+	if ((value = zend_hash_str_find(ht, STR_VALUE_LEN("sync"))) != NULL) {
 		leveldb_writeoptions_set_sync(writeoptions, zend_is_true(value));
 	} else {
 		leveldb_writeoptions_set_sync(writeoptions, intern->sync);
 	}
-	zend_string_free(sync);
 
 	return writeoptions;
 }
@@ -687,11 +656,9 @@ static inline void php_leveldb_set_writeoptions(leveldb_object *intern, zval *op
 		return;
 	}
 
-	zend_string *sync = STR_VALUE("sync");
-	if ((value = zend_hash_find(Z_ARRVAL_P(options_zv), sync)) != NULL) {
+	if ((value = zend_hash_str_find(Z_ARRVAL_P(options_zv), STR_VALUE_LEN("sync"))) != NULL) {
 		intern->sync = zend_is_true(value);
 	}
-	zend_string_free(sync);
 }
 
 /* {{{ proto LevelDB LevelDB::__construct(string $name [, array $options [, array $readoptions [, array $writeoptions]]])
