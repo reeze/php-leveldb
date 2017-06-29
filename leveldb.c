@@ -186,7 +186,7 @@ typedef struct {
 } leveldb_iterator_object;
 
 typedef struct {
-	zval *db;
+	leveldb_object *db;
 	leveldb_snapshot_t *snapshot;
 	zend_object std;
 } leveldb_snapshot_object;
@@ -278,11 +278,10 @@ void php_leveldb_snapshot_object_free(zend_object *std)
 	leveldb_t *db;
 	leveldb_snapshot_object *obj = FETCH_LEVELDB_SNAPSHOT_OBJ(std);
 
-	if (obj->snapshot) {
-		if((db = (FETCH_LEVELDB_Z_OBJ(obj->db))->db) != NULL) {
+	if (obj->snapshot && obj->db) {
+		if((db = obj->db->db) != NULL) {
 			leveldb_release_snapshot(db, obj->snapshot);
 		}
-		zval_ptr_dtor(obj->db);
 	}
 
 	zend_object_std_dtor(std);
@@ -608,8 +607,7 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 	}
 	zend_string_free(fill_cache);
 
-	zend_string *snapshot = STR_VALUE("snapshot");
-	if ((value = zend_hash_find(ht, snapshot)) != NULL
+	if ((value = zend_hash_str_find(ht, "snapshot", sizeof("snapshot") - 1)) != NULL
 		&& !ZVAL_IS_NULL(value)) {
 		if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == php_leveldb_snapshot_class_entry) {
 			leveldb_snapshot_object *obj = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(value);
@@ -630,7 +628,6 @@ static inline leveldb_readoptions_t *php_leveldb_get_readoptions(leveldb_object 
 			return NULL;
 		}
 	}
-	zend_string_free(snapshot);
 
 	return readoptions;
 }
@@ -1590,8 +1587,7 @@ PHP_METHOD(LevelDBSnapshot, __construct)
 
 	intern->snapshot = (leveldb_snapshot_t *)leveldb_create_snapshot(db_obj->db);
 
-	Z_ADDREF_P(db_zv);
-	intern->db = db_zv;
+	intern->db = db_obj;
 }
 /*	}}} */
 
@@ -1607,17 +1603,14 @@ PHP_METHOD(LevelDBSnapshot, release)
 
 	intern = FETCH_LEVELDB_Z_SNAPSHOT_OBJ(getThis());
 
-	if (!intern->db) {
+	if (intern->db == NULL || intern->snapshot == NULL) {
 		return;
 	}
 
-	{
-		leveldb_object *db = FETCH_LEVELDB_Z_OBJ(intern->db);
-		leveldb_release_snapshot(db->db, intern->snapshot);
-		zval_ptr_dtor(intern->db);
-		intern->snapshot = NULL;
-		intern->db = NULL;
-	}
+	leveldb_object *db = intern->db;
+	leveldb_release_snapshot(db->db, intern->snapshot);
+	intern->snapshot = NULL;
+	intern->db = NULL;
 }
 /*	}}} */
 
