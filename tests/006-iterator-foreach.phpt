@@ -26,9 +26,21 @@ echo "*** Loop through in foreach style ***\n";
 foreach ($it as $key => $value) {
 	echo "{$key} => {$value}\n";
 }
+
+echo "*** Loop through in foreach with newly-created iterator ***\n";
+foreach(new LevelDBIterator($db) as $key => $value){
+	echo "{$key} => {$value}\n";
+}
 ?>
 --EXPECTF--
 *** Loop through in foreach style ***
+ => 
+10 => 10
+First => First
+Last => Last
+Second => Second
+Third => Third
+*** Loop through in foreach with newly-created iterator ***
  => 
 10 => 10
 First => First

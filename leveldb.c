@@ -1233,8 +1233,6 @@ zend_object_iterator *leveldb_iterator_get_iterator(zend_class_entry *ce, zval *
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
-	Z_ADDREF_P(object);
-
 	it_object = FETCH_LEVELDB_Z_ITERATOR_OBJ(object);
 	iterator = emalloc(sizeof(leveldb_iterator_iterator));
 
