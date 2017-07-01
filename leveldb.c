@@ -433,34 +433,28 @@ static void leveldb_custom_comparator_destructor(void *stat)
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
 {
-	/*
-	FIXME
 	zval *callable = (zval *)stat;
-	zval *params[2], *result = NULL;
+	zval params[2], result;
 	int ret;
-	TSRMLS_FETCH();
 
+	ZVAL_STRINGL(&params[0], (char *)a, alen);
+	ZVAL_STRINGL(&params[1], (char *)b, blen);
+	ZVAL_NULL(&result);
 
-	MAKE_STD_ZVAL(params[0]);
-	MAKE_STD_ZVAL(params[1]);
-	MAKE_STD_ZVAL(result);
+	assert(!ZVAL_IS_NULL(callable));
 
-	ZVAL_STRINGL(params[0], (char *)a, alen, 1);
-	ZVAL_STRINGL(params[1], (char *)b, blen, 1);
-
-	if (call_user_function(EG(function_table), NULL, callable, result, 2, params) == SUCCESS) {
-		convert_to_long(result);
+	if (call_user_function(EG(function_table), NULL, callable, &result, 2, params) == SUCCESS && !Z_ISUNDEF(result)) {
+		convert_to_long(&result);
+		ret = Z_LVAL(result);
+	}else{
+		ret = 0;
 	}
 
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&params[1]);
-
-	ret = Z_LVAL_P(result);
-	zval_ptr_dtor(result);
+	zval_ptr_dtor(&result);
 
 	return ret;
-	*/
-	return 0;
 }
 
 static const char* leveldb_custom_comparator_name(void *stat)
@@ -544,8 +538,10 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 			return NULL;
 		}
 
-		Z_ADDREF_P(value);
-		comparator = leveldb_comparator_create((void *)(value),
+		zval *z2 = (zval *)emalloc(sizeof(zval));
+		ZVAL_COPY(z2, value);
+
+		comparator = leveldb_comparator_create((void *)(z2),
 			leveldb_custom_comparator_destructor, leveldb_custom_comparator_compare,
 			leveldb_custom_comparator_name);
 
