@@ -48,4 +48,4 @@ try{
 Can not operate on closed db
 Can not iterate on closed db
 Iterator has been destroyed
-Can not iterate on closed db
+Iterator has been destroyed

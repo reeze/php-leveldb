@@ -172,18 +172,19 @@ typedef struct {
 	zend_object std;
 } leveldb_write_batch_object;
 
-/* define an overloaded iterator structure */
-typedef struct {
-	zend_object_iterator  intern;
-	leveldb_iterator_t *iterator;
-	zval *current;
-} leveldb_iterator_iterator;
-
 typedef struct {
 	leveldb_iterator_t *iterator;
 	leveldb_object *db;
 	zend_object std;
 } leveldb_iterator_object;
+
+/* define an overloaded iterator structure */
+typedef struct {
+	zend_object_iterator  intern;
+	leveldb_iterator_object *iterator_obj;
+	zval *current;
+} leveldb_iterator_iterator;
+
 
 typedef struct {
 	leveldb_object *db;
@@ -1176,6 +1177,25 @@ static void leveldb_iterator_current_key(zend_object_iterator *iter, zval *key);
 static void leveldb_iterator_move_forward(zend_object_iterator *iter);
 static void leveldb_iterator_rewind(zend_object_iterator *iter);
 
+static int php_leveldb_check_iter_db_not_closed(leveldb_iterator_object *intern) {
+	if (intern->iterator == NULL) {
+		zend_throw_exception(php_leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED);
+		return FAILURE;
+	}
+	if (intern->db->db == NULL) {
+		intern->iterator = NULL;
+		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED);
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
+#define LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern) \
+	if(php_leveldb_check_iter_db_not_closed(intern) != SUCCESS){ \
+		return; \
+	}
+
 /* iterator handler table */
 zend_object_iterator_funcs leveldb_iterator_funcs = {
 	leveldb_iterator_dtor,
@@ -1204,7 +1224,7 @@ zend_object_iterator *leveldb_iterator_get_iterator(zend_class_entry *ce, zval *
 
 	iterator->intern.funcs = &leveldb_iterator_funcs;
 	ZVAL_COPY(&iterator->intern.data, object);
-	iterator->iterator = it_object->iterator;
+	iterator->iterator_obj = it_object;
 	iterator->current = NULL;
 
 	return (zend_object_iterator*)iterator;
@@ -1223,14 +1243,21 @@ static void leveldb_iterator_dtor(zend_object_iterator *iter)
 		zval_ptr_dtor(iterator->current);
 		efree(iterator->current);
 	}
+
+	iterator->iterator_obj = NULL;
 }
 /* }}} */
 
 /* {{{ leveldb_iterator_valid */
 static int leveldb_iterator_valid(zend_object_iterator *iter)
 {
-	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
-	return leveldb_iter_valid(iterator) ? SUCCESS : FAILURE;
+	leveldb_iterator_object *iterator_obj = ((leveldb_iterator_iterator *)iter)->iterator_obj;
+
+	if (php_leveldb_check_iter_db_not_closed(iterator_obj) != SUCCESS) {
+		return FAILURE;
+	}
+
+	return leveldb_iter_valid(iterator_obj->iterator) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -1243,15 +1270,22 @@ static zval* leveldb_iterator_current_data(zend_object_iterator *iter)
 
 	leveldb_iterator_iterator *iterator = (leveldb_iterator_iterator *)iter;
 
-	if (iterator->current) {
-		zval_ptr_dtor(iterator->current);
-		efree(iterator->current);
+	leveldb_iterator_object *iterator_obj = iterator->iterator_obj;
+
+	current = (zval *)emalloc(sizeof(zval));
+
+	if (php_leveldb_check_iter_db_not_closed(iterator_obj) != SUCCESS) {
+		ZVAL_NULL(current);
+	} else {
+		if (iterator->current) {
+			zval_ptr_dtor(iterator->current);
+			efree(iterator->current);
+		}
+
+		value = (char *)leveldb_iter_value(iterator_obj->iterator, &value_len);
+
+		ZVAL_STRINGL(current, value, value_len);
 	}
-
-	current = (zval *) emalloc(sizeof(zval));
-	value = (char *)leveldb_iter_value(iterator->iterator, &value_len);
-
-	ZVAL_STRINGL(current, value, value_len);
 
 	iterator->current = current;
 
@@ -1264,9 +1298,10 @@ static void leveldb_iterator_current_key(zend_object_iterator *iter, zval *key)
 {
 	char *cur_key;
 	size_t cur_key_len = 0;
-	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
+	leveldb_iterator_object *iterator_obj = ((leveldb_iterator_iterator *)iter)->iterator_obj;
+	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(iterator_obj);
 
-	cur_key = (char *)leveldb_iter_key(iterator, &cur_key_len);
+	cur_key = (char *)leveldb_iter_key(iterator_obj->iterator, &cur_key_len);
 	ZVAL_STRINGL(key, cur_key, cur_key_len);
 }
 /* }}} */
@@ -1274,16 +1309,20 @@ static void leveldb_iterator_current_key(zend_object_iterator *iter, zval *key)
 /* {{{ leveldb_iterator_move_forward */
 static void leveldb_iterator_move_forward(zend_object_iterator *iter)
 {
-	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
-	leveldb_iter_next(iterator);
+	leveldb_iterator_object *iterator_obj = ((leveldb_iterator_iterator *)iter)->iterator_obj;
+	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(iterator_obj);
+
+	leveldb_iter_next(iterator_obj->iterator);
 }
 /* }}} */
 
 /* {{{ leveldb_iterator_rewind */
 static void leveldb_iterator_rewind(zend_object_iterator *iter)
 {
-	leveldb_iterator_t *iterator = ((leveldb_iterator_iterator *)iter)->iterator;
-	leveldb_iter_seek_to_first(iterator);
+	leveldb_iterator_object *iterator_obj = ((leveldb_iterator_iterator *)iter)->iterator_obj;
+	LEVELDB_CHECK_ITER_DB_NOT_CLOSED(iterator_obj);
+
+	leveldb_iter_seek_to_first(iterator_obj->iterator);
 }
 /* }}} */
 
@@ -1322,17 +1361,6 @@ PHP_METHOD(LevelDBIterator, __construct)
 	leveldb_iter_seek_to_first(intern->iterator);
 }
 /*	}}} */
-
-#define LEVELDB_CHECK_ITER_DB_NOT_CLOSED(intern) \
-	if (intern->iterator == NULL) { \
-		zend_throw_exception(php_leveldb_ce_LevelDBException, "Iterator has been destroyed", PHP_LEVELDB_ERROR_ITERATOR_CLOSED); \
-		return; \
-	} \
-	if ((intern)->db->db == NULL) { \
-		(intern)->iterator = NULL; \
-		zend_throw_exception(php_leveldb_ce_LevelDBException, "Can not iterate on closed db", PHP_LEVELDB_ERROR_DB_CLOSED); \
-		return; \
-	}
 
 /*	{{{ proto bool LevelDBIterator::destroy()
 	Destroy the iterator */
