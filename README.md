@@ -6,7 +6,7 @@ LevelDB is a fast key-value storage library written at Google that provides an o
 
 This extension is a binding for LevelDB
 
-Please send Feature Request or Bug report  with [Github Issue](https://github.com/reeze/php-leveldb/issues).
+Please send Feature Request or Bug report  with [GitHub Issue](https://github.com/reeze/php-leveldb/issues).
 
 ## Requirements
 - PHP >= 7
@@ -47,10 +47,10 @@ API Reference could be found here: <http://reeze.cn/php-leveldb/doc/>
 
 ## Usage
 Since PHP-LevelDB is a binding for LevelDB, most of the interfaces are the same as
-LevelDB's: <http://leveldb.googlecode.com/git/doc/index.html>
+LevelDB's: <https://github.com/google/leveldb/blob/master/doc/index.md>
 
 ### Open options
-When open a leveldb database you could specify options to override default values:
+When opening a leveldb database you could specify options to override default values:
 
 ````php
 <?php
@@ -82,8 +82,8 @@ $writeoptions = array(
 $db = new LevelDB("/path/to/db", $options, $readoptions, $writeoptions);
 ````
 
->**NOTE** The readoptions and writeoptions will take effect when operate on
->db afterward, but you could override it by specify read/write options when
+>**NOTE** The readoptions and writeoptions will take effect when operating on
+>the db afterward, but you could override it by specify read/write options when
 >accessing
 
 ### Using custom comparator
@@ -171,7 +171,7 @@ foreach($it as $key => $value) {
 }
 ````
 
-if you want to iterate by reverse order, you could:
+If you want to iterate by reverse order, you could:
 
 ````php
 <?php
@@ -188,8 +188,8 @@ for($it->last(); $it->valid(); $it->prev()) {
  */
 ````
 
->**NOTE** In LevelDB LevelDB::seek() will success even when the key didn't exists,
->it will seek to the latest key:
+>**NOTE** In LevelDB LevelDB::seek() will success even when the key doesn't exist.
+>It will seek to the latest key:
 >`db-with-key('a', 'b', 'd', 'e');  $db->seek('c');` iterator will point to `key 'd'`
 
 ### Snapshots
@@ -234,8 +234,8 @@ key3 was not found because we are reading from snapshot
 ## Operations on database
 
 ### LevelDB::close()
-Since leveldb can only accessed by a single proccess one time, so you may want to
-close it when you don't use it anymore.
+Since leveldb can only accessed by a single proccess one time, you may want to
+close it when you aren't using it anymore.
 
 ````php
 <?php
@@ -261,13 +261,13 @@ Be careful with this.
 
 ### LevelDB::repair()
 If you can't open a database, neither been locked or other error, if it's corrupted,
-you could use `LevelDB::repair('/path/to/db')` to repair it. it will try to recover
+you could use `LevelDB::repair('/path/to/db')` to repair it. It will try to recover
 as much data as possible.
 
-## Know limitations
+## Known limitations
 
 LevelDB was designed to be thread-safe but not process-safe, so if you
-use php in multi-thread mode (eg, php-fpm) you might not able to open
+use php in multi-process mode (eg, php-fpm) you might not able to open
 the single db concurrently.
 
 > If you app is not designed to serve massive requests, you could try
@@ -281,9 +281,9 @@ and his generous.
 ## Reference
 More info could be found at:
 
-- LevelDB project home: <http://code.google.com/p/leveldb/>
-- LevelDB document: <http://leveldb.googlecode.com/git/doc/index.html>
+- LevelDB project home: <https://github.com/google/leveldb>
+- LevelDB document: <https://github.com/google/leveldb/blob/master/doc/index.md>
 - A LevelDB internals analysis in Chinese <http://dirlt.com/LevelDB.html>
 
 ## License
-PHP-LevelDB is licensed under PHP License
+PHP-LevelDB is licensed under the PHP License
