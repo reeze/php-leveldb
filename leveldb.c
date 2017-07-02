@@ -261,7 +261,7 @@ void php_leveldb_iterator_object_free(zend_object *std)
 {
 	leveldb_iterator_object *obj = FETCH_LEVELDB_ITERATOR_OBJ(std);
 
-	if (obj->iterator && obj->db != NULL) {
+	if (obj->db && obj->db->db && obj->iterator) {
 		leveldb_iter_destroy(obj->iterator);
 	}
 
