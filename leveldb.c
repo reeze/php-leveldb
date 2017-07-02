@@ -1616,7 +1616,7 @@ PHP_MINIT_FUNCTION(leveldb)
 	memcpy(& class_type##_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 	class_type##_handlers.offset = XtOffsetOf(class_type, std); \
 	class_type##_handlers.dtor_obj = zend_objects_destroy_object;\
-	leveldb_object_handlers.free_obj = php_##class_type##_free;
+	class_type##_handlers.free_obj = php_##class_type##_free;
 
 	DECLARE_OBJ_HANDLERS(leveldb_object);
 	DECLARE_OBJ_HANDLERS(leveldb_snapshot_object);
