@@ -429,6 +429,7 @@ static void leveldb_custom_comparator_destructor(void *stat)
 {
 	zval *callable = (zval *)stat;
 	zval_ptr_dtor(callable);
+	efree(callable);
 }
 
 static int leveldb_custom_comparator_compare(void *stat, const char *a, size_t alen, const char *b, size_t blen)
