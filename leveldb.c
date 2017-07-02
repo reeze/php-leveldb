@@ -859,7 +859,7 @@ PHP_METHOD(LevelDB, getProperty)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(property, 1);
+	RETVAL_STRING(property);
 	free(property);
 }
 /* }}} */
@@ -1399,7 +1399,7 @@ PHP_METHOD(LevelDBIterator, getError)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(err, 1);
+	RETVAL_STRING(err);
 	free(err);
 }
 /*	}}} */
