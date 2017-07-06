@@ -388,7 +388,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 
 /* {{{ php_leveldb_write_batch_class_methods */
 static zend_function_entry php_leveldb_write_batch_class_methods[] = {
-	PHP_ME(LevelDBWriteBatch, __construct, arginfo_leveldb_construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+	PHP_ME(LevelDBWriteBatch, __construct, arginfo_leveldb_void, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 	PHP_ME(LevelDBWriteBatch, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
 	/* make put an alias of set, since leveldb use put */
 	PHP_MALIAS(LevelDBWriteBatch, put, set, arginfo_leveldb_set, ZEND_ACC_PUBLIC)
