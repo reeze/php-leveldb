@@ -15,6 +15,10 @@ before_script:
 
 script: sh travis/run-test.sh
 
+cache:
+ directories:
+  - leveldb-$LEVELDB_VERSION
+
 #notifications:
 #  email:
 #    - reeze.xia@gmail.com
