@@ -13,7 +13,7 @@ cat tests/*.mem
 
 # make test didn't return status code correctly
 # use this to find whether the make test failed
-cat tests/*.diff
+cat tests/*.log
 
 if [ $? -eq 0 ]; then
 	exit 1;

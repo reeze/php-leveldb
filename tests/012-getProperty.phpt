@@ -31,9 +31,9 @@ Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
 --------------------------------------------------
   2        1        2         %d        0         2
 "
-string(1) "0"
-string(1) "1"
-string(1) "0"
+string(1) "%d"
+string(1) "%d"
+string(1) "%d"
 string(160) "--- level 0 ---
 --- level 1 ---
 --- level 2 ---
