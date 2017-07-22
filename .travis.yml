@@ -3,6 +3,7 @@ language: php
 php:
   - 7.0
   - 7.1
+  - nightly
 
 env:
   - REPORT_EXIT_STATUS=1 NO_INTERACTION=1 LEVELDB_VERSION=1.18 SHLIB_DIR=""
