@@ -34,6 +34,8 @@ extern zend_module_entry leveldb_module_entry;
 #	define PHP_LEVELDB_API
 #endif
 
+#define DLLX
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif
