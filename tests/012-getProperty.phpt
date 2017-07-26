@@ -15,34 +15,29 @@ for($i=0; $i < 99999; ++$i) {
 	$db->set("b{$i}", "value{$i}");
 }
 
-var_dump($db->getProperty('leveldb.stats'));
+$stats = $db->getProperty('leveldb.stats');
+var_dump($stats !== false);
+var_dump(strlen($stats) > 1);
 var_dump($db->getProperty('leveldb.num-files-at-level1'));
 var_dump($db->getProperty('leveldb.num-files-at-level2'));
 var_dump($db->getProperty('leveldb.num-files-at-level3'));
-var_dump($db->getProperty('leveldb.sstables'));
+
+$sstables = $db->getProperty('leveldb.sstables');
+var_dump($sstables !== false);
+var_dump(strlen($sstables) > 1);
 
 var_dump($db->getProperty('leveldb.anything'));
 var_dump($db->getProperty('anythingelse'));
 ?>
 ==DONE==
 --EXPECTF--
-string(%d) "                               Compactions
-Level  Files Size(MB) Time(sec) Read(MB) Write(MB)
---------------------------------------------------
-  2        1        2         %d        0         2
-"
+bool(true)
+bool(true)
 string(1) "%d"
 string(1) "%d"
 string(1) "%d"
-string(160) "--- level 0 ---
---- level 1 ---
---- level 2 ---
- 5:1901489['b0' @ 1 : 1 .. 'b9999' @ 10000 : 1]
---- level 3 ---
---- level 4 ---
---- level 5 ---
---- level 6 ---
-"
+bool(true)
+bool(true)
 bool(false)
 bool(false)
 ==DONE==
