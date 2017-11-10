@@ -30,14 +30,6 @@
 
 #include <leveldb/c.h>
 
-// The code below assumes snappy and zlib are enabled so re-define them here in case there were not enabled during leveldb compile
-#ifndef leveldb_snappy_compression
-	#define leveldb_snappy_compression	1
-#endif
-#ifndef leveldb_zlib_compression
-	#define leveldb_zlib_compression	2
-#endif
-
 #if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
 # define LEVELDB_SAFE_MODE_CHECK(file) || (PG(safe_mode) && !php_checkuid((file), "rb+", CHECKUID_CHECK_MODE_PARAM))
 #else
@@ -515,10 +507,20 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if ((value = zend_hash_str_find(ht, ZEND_STRL("compression"))) != NULL) {
 		convert_to_long(value);
-		if (Z_LVAL_P(value) != leveldb_no_compression && Z_LVAL_P(value) != leveldb_snappy_compression && Z_LVAL_P(value) != leveldb_zlib_compression) {
-			php_error_docref(NULL, E_WARNING, "Invalid compression type");
-		} else {
+
+		switch (Z_LVAL_P(value))
+		{
+		case leveldb_no_compression:
+		case leveldb_snappy_compression:
+#ifdef MOJANG_LEVELDB
+		case leveldb_zlib_compression:
+		case leveldb_zlib_raw_compression:
+#endif
 			leveldb_options_set_compression(options, Z_LVAL_P(value));
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Unsupported compression type");
+			break;
 		}
 	}
 
@@ -1652,7 +1654,11 @@ PHP_MINIT_FUNCTION(leveldb)
 	/* Register constants */
 	REGISTER_LONG_CONSTANT("LEVELDB_NO_COMPRESSION", leveldb_no_compression, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LEVELDB_SNAPPY_COMPRESSION", leveldb_snappy_compression, CONST_CS | CONST_PERSISTENT);
+
+#ifdef MOJANG_LEVELDB
 	REGISTER_LONG_CONSTANT("LEVELDB_ZLIB_COMPRESSION", leveldb_zlib_compression, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LEVELDB_ZLIB_RAW_COMPRESSION", leveldb_zlib_raw_compression, CONST_CS | CONST_PERSISTENT);
+#endif // MOJANG_LEVELDB
 
 	return SUCCESS;
 }
