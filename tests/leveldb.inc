@@ -15,7 +15,7 @@ function cleanup_leveldb() {
 }
 
 function leveldb_empty($db) {
-	$it = new LevelDbIterator($db);
+	$it = new LevelDBIterator($db);
 
 	for($it->rewind(); $it->valid(); $it->next()) {
 		$db->delete($it->key());
