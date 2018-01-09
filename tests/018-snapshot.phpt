@@ -19,6 +19,7 @@ $snapshot = new LevelDBSnapshot($db);
 
 $db->put("key3", "value3");
 
+
 try {
 	$it = new LevelDBIterator($db, array('snapshot' => ''));
 } catch(LevelDBException $e) {
@@ -33,8 +34,12 @@ foreach($it as $k => $v) {
 var_dump($db->get("key3", array('snapshot' => $snapshot)));
 var_dump($db->get("key3"));
 
+echo "*** Release snapshot x1 ***\n";
 $snapshot->release();
+echo "*** Release snapshot x2 ***\n";
 $snapshot->release();
+
+echo "*** Try to use released snapshot ***\n";
 try {
 	$it = new LevelDBIterator($db, array('snapshot' => $snapshot));
 } catch(LevelDBException $e) {
@@ -48,5 +53,8 @@ key1 => value1
 key2 => value2
 bool(false)
 string(6) "value3"
+*** Release snapshot x1 ***
+*** Release snapshot x2 ***
+*** Try to use released snapshot ***
 string(48) "Invalid snapshot parameter, it has been released"
 ==DONE==

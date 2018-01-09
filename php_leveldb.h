@@ -21,7 +21,7 @@
 #ifndef PHP_LEVELDB_H
 #define PHP_LEVELDB_H
 
-#define PHP_LEVELDB_VERSION "0.1.5"
+#define PHP_LEVELDB_VERSION "0.2.1"
 
 extern zend_module_entry leveldb_module_entry;
 #define phpext_leveldb_ptr &leveldb_module_entry
@@ -33,6 +33,8 @@ extern zend_module_entry leveldb_module_entry;
 #else
 #	define PHP_LEVELDB_API
 #endif
+
+#define DLLX
 
 #ifdef ZTS
 #include "TSRM.h"

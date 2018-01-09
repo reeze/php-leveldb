@@ -20,5 +20,5 @@ $db2->close();
 ?>
 ==DONE==
 --EXPECTF--
-Warning: LevelDB::__construct(): Invalid compression type in %s on line %s
+Warning: LevelDB::__construct(): Unsupported compression type in %s on line %s
 ==DONE==
