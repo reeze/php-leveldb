@@ -94,7 +94,7 @@
 #define LEVELDB_CHECK_ERROR(err) \
 	if ((err) != NULL) { \
 		zend_throw_exception(php_leveldb_ce_LevelDBException, err, 0); \
-		free(err); \
+		leveldb_free(err); \
 		return; \
 	}
 
@@ -736,7 +736,7 @@ PHP_METHOD(LevelDB, get)
 	}
 
 	RETVAL_STRINGL(value, value_len);
-	free(value);
+	leveldb_free(value);
 }
 /* }}} */
 
@@ -860,7 +860,7 @@ PHP_METHOD(LevelDB, getProperty)
 	}
 
 	RETVAL_STRING(property);
-	free(property);
+	leveldb_free(property);
 }
 /* }}} */
 
@@ -1400,7 +1400,7 @@ PHP_METHOD(LevelDBIterator, getError)
 	}
 
 	RETVAL_STRING(err);
-	free(err);
+	leveldb_free(err);
 }
 /*	}}} */
 
