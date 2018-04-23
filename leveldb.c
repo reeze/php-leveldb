@@ -30,14 +30,8 @@
 
 #include <leveldb/c.h>
 
-#if (PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION < 4)
-# define LEVELDB_SAFE_MODE_CHECK(file) || (PG(safe_mode) && !php_checkuid((file), "rb+", CHECKUID_CHECK_MODE_PARAM))
-#else
-# define LEVELDB_SAFE_MODE_CHECK(file)
-#endif
-
 #define LEVELDB_CHECK_OPEN_BASEDIR(file) \
-	if (php_check_open_basedir((file)) LEVELDB_SAFE_MODE_CHECK((file))){ \
+	if (php_check_open_basedir((file))){ \
 		RETURN_FALSE; \
 	}
 
@@ -50,45 +44,19 @@
 		return; \
 	}
 
-#ifndef PHP_FE_END
-# define PHP_FE_END { NULL, NULL, NULL, 0, 0 }
-#endif
-
-#if ZEND_MODULE_API_NO < 20090626
-# define Z_ADDREF_P(arg) ZVAL_ADDREF(arg)
-# define Z_ADDREF_PP(arg) ZVAL_ADDREF(*(arg))
-# define Z_DELREF_P(arg) ZVAL_DELREF(arg)
-# define Z_DELREF_PP(arg) ZVAL_DELREF(*(arg))
-#endif
-
-#ifndef zend_parse_parameters_none
-# define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS(), "")
-#endif
-
-#if ZEND_MODULE_API_NO >= 20100525
-#define init_properties(intern) object_properties_init(&intern->std, class_type)
-#else
-#define init_properties(intern) do { \
-	zval *tmp; \
-	zend_hash_copy(intern->std.properties, \
-    &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,  \
-    (void *) &tmp, sizeof(zval *)); \
-} while(0)
-#endif
-
 /* PHP-LevelDB MAGIC identifier don't change this */
 #define PHP_LEVELDB_CUSTOM_COMPARATOR_NAME "php_leveldb.custom_comparator"
 
-#define php_leveldb_obj_new(class_type, ce)					\
-  class_type *intern;													\
-																\
-  intern = (class_type *)ecalloc(1, sizeof(class_type) + zend_object_properties_size(ce));               			\
-                                                                \
-  zend_object_std_init(&intern->std, ce);     \
-  init_properties(intern);										\
-                                                                \
-  intern->std.handlers = & class_type##_handlers;				\
-                                                                \
+#define php_leveldb_obj_new(class_type, ce) \
+  class_type *intern; \
+                      \
+  intern = (class_type *)ecalloc(1, sizeof(class_type) + zend_object_properties_size(ce)); \
+                                                                                           \
+  zend_object_std_init(&intern->std, ce); \
+  object_properties_init(&intern->std, ce); \
+                                      \
+  intern->std.handlers = & class_type##_handlers; \
+                                                  \
   return &intern->std;
 
 #define LEVELDB_CHECK_ERROR(err) \
@@ -108,9 +76,7 @@ const zend_function_entry leveldb_functions[] = {
 /* {{{ leveldb_module_entry
  */
 zend_module_entry leveldb_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
-#endif
 	"leveldb",
 	leveldb_functions,
 	PHP_MINIT(leveldb),
@@ -118,9 +84,7 @@ zend_module_entry leveldb_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(leveldb),
-#if ZEND_MODULE_API_NO >= 20010901
 	PHP_LEVELDB_VERSION,
-#endif
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
