@@ -1164,7 +1164,8 @@ zend_object_iterator_funcs leveldb_iterator_funcs = {
 	leveldb_iterator_current_data,
 	leveldb_iterator_current_key,
 	leveldb_iterator_move_forward,
-	leveldb_iterator_rewind
+	leveldb_iterator_rewind,
+	NULL
 };
 /* }}} */
 
