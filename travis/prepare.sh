@@ -4,7 +4,7 @@ if [ ! -d leveldb-$LEVELDB_VERSION ] || [ ! -f leveldb-$LEVELDB_VERSION/liblevel
 	rm -rf leveldb-$LEVELDB_VERSION 2>/dev/null
 	curl -fsSL https://github.com/google/leveldb/archive/v$LEVELDB_VERSION.tar.gz -o leveldb-$LEVELDB_VERSION.tar.gz
 	tar zxvf leveldb-$LEVELDB_VERSION.tar.gz
-	cd leveldb-$LEVELDB_VERSION && make -j4
+	cd leveldb-$LEVELDB_VERSION && OPT=-g2 make -j4
 	if [ "$SHLIB_DIR" != "" ]; then
 		cp $SHLIB_DIR/libleveldb.* .
 	fi
