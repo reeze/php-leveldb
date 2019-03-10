@@ -147,7 +147,7 @@ typedef struct {
 } leveldb_snapshot_object;
 
 #define LEVELDB_INTERNAL_OBJ_FROM_ZOBJ(class_name, obj) ((class_name *)((char *)(obj) - XtOffsetOf(class_name, std)))
-#define LEVELDB_INTERNAL_OBJ_FROM_ZV(obj_name, zv) LEVELDB_INTERNAL_OBJ_FROM_ZOBJ(Z_OBJ_P(zv))
+#define LEVELDB_INTERNAL_OBJ_FROM_ZV(obj_name, zv) LEVELDB_INTERNAL_OBJ_FROM_ZOBJ(obj_name, Z_OBJ_P(zv))
 
 #define LEVELDB_OBJ_FROM_ZV(zv) LEVELDB_INTERNAL_OBJ_FROM_ZV(leveldb_object, zv)
 #define LEVELDB_SNAPSHOT_OBJ_FROM_ZV(zv) LEVELDB_INTERNAL_OBJ_FROM_ZV(leveldb_snapshot_object, zv)
