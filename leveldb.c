@@ -845,7 +845,7 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 	zval *start, *limit, *start_val, *limit_val;
 	char **start_key, **limit_key;
 	size_t *start_len, *limit_len;
-	uint num_ranges, i = 0;
+	unsigned int num_ranges, i = 0;
 	HashPosition pos_start, pos_limit;
 	uint64_t *sizes;
 
