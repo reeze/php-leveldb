@@ -5,9 +5,6 @@ leveldb - snapshot
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb-snapshot.test-db';
 @unlink($leveldb_path);
 
@@ -47,6 +44,11 @@ try {
 }
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb-snapshot.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 string(69) "Invalid snapshot parameter, it must be an instance of LevelDBSnapshot"
 key1 => value1

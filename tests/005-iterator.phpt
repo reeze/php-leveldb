@@ -5,9 +5,6 @@ leveldb - iterate through db
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -63,6 +60,11 @@ $it->next();
 var_dump($it->current());
 
 var_dump($it->getError());
+?>
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator.test-db';
+LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
 *** Loop through ***

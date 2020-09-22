@@ -129,6 +129,7 @@ typedef struct {
 typedef struct {
 	leveldb_iterator_t *iterator;
 	leveldb_object *db;
+	zval zdb;
 	zend_object std;
 } leveldb_iterator_object;
 
@@ -142,6 +143,7 @@ typedef struct {
 
 typedef struct {
 	leveldb_object *db;
+	zval zdb;
 	leveldb_snapshot_t *snapshot;
 	zend_object std;
 } leveldb_snapshot_object;
@@ -206,6 +208,8 @@ void php_leveldb_iterator_object_free(zend_object *std)
 
 	if (obj->db && obj->db->db && obj->iterator) {
 		leveldb_iter_destroy(obj->iterator);
+		/* decr. obj counter */
+		zval_ptr_dtor(&obj->zdb);
 	}
 
 	zend_object_std_dtor(std);
@@ -226,6 +230,8 @@ void php_leveldb_snapshot_object_free(zend_object *std)
 		if((db = obj->db->db) != NULL) {
 			leveldb_release_snapshot(db, obj->snapshot);
 		}
+		/* decr. obj counter */
+		zval_ptr_dtor(&obj->zdb);
 	}
 
 	zend_object_std_dtor(std);
@@ -322,7 +328,7 @@ static zend_function_entry php_leveldb_class_methods[] = {
 	PHP_ME(LevelDB, getProperty, arginfo_leveldb_getProperty, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getApproximateSizes, arginfo_leveldb_getApproximateSizes, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, compactRange, arginfo_leveldb_compactRange, ZEND_ACC_PUBLIC)
-	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
+	PHP_ME(LevelDB, close, arginfo_leveldb_void, ZEND_ACC_PUBLIC | ZEND_ACC_DEPRECATED)
 	PHP_ME(LevelDB, getIterator, arginfo_leveldb_get_iterator, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, getSnapshot, arginfo_leveldb_void, ZEND_ACC_PUBLIC)
 	PHP_ME(LevelDB, destroy, arginfo_leveldb_destroy, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -908,17 +914,10 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 	Close the opened db */
 PHP_METHOD(LevelDB, close)
 {
-	leveldb_object *intern;
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-
-	intern = LEVELDB_OBJ_FROM_ZV(getThis());
-	if (intern->db) {
-		leveldb_close(intern->db);
-		intern->db = NULL;
-	}
+	/* NOOP and deprecated function */
 
 	RETURN_TRUE;
 }
@@ -1308,6 +1307,8 @@ PHP_METHOD(LevelDBIterator, __construct)
 	leveldb_readoptions_destroy(readoptions);
 
 	intern->db = db_obj;
+	/* Incr. obj counter */
+	ZVAL_COPY(&intern->zdb, db_zv);
 
 	leveldb_iter_seek_to_first(intern->iterator);
 }
@@ -1534,6 +1535,8 @@ PHP_METHOD(LevelDBSnapshot, __construct)
 	intern->snapshot = (leveldb_snapshot_t *)leveldb_create_snapshot(db_obj->db);
 
 	intern->db = db_obj;
+	/* Incr. obj counter */
+	ZVAL_COPY(&intern->zdb, db_zv);
 }
 /*	}}} */
 

@@ -5,20 +5,21 @@ leveldb - compression
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb-compression.test-db';
 
 $db = new LevelDB($leveldb_path, array('compression' => 33));
-$db->close();
+unset($db);
 
-$db2 = new LevelDB($leveldb_path, array('compression' => LEVELDB_SNAPPY_COMPRESSION));
-$db2->set("key", "value");
+$db = new LevelDB($leveldb_path, array('compression' => LEVELDB_SNAPPY_COMPRESSION));
+$db->set("key", "value");
 
-$db2->close();
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb-compression.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 Warning: LevelDB::__construct(): Unsupported compression type in %s on line %s
 ==DONE==

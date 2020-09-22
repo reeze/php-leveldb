@@ -8,9 +8,6 @@ open with null shouldn't throw exception
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/null-comparator.test-db';
 
 $db = new LevelDB($leveldb_path, array('comparator' => NULL));
@@ -18,6 +15,11 @@ $db = new LevelDB($leveldb_path, array('comparator' => NULL));
 ?>
 Should no exception
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/null-comparator.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECT--
 Should no exception
 ==DONE==

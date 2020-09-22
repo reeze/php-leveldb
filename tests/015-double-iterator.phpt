@@ -5,9 +5,6 @@ leveldb - Fixed bug segfault when double construct iterator
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator_double_construct.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -18,5 +15,10 @@ $it1->destroy();
 $it2->destroy();
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator_double_construct.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 ==DONE==

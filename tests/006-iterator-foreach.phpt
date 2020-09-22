@@ -5,9 +5,6 @@ leveldb - iterate through db by foreach
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator-foreach.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -31,6 +28,11 @@ echo "*** Loop through in foreach with newly-created iterator ***\n";
 foreach(new LevelDBIterator($db) as $key => $value){
 	echo "{$key} => {$value}\n";
 }
+?>
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator-foreach.test-db';
+LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
 *** Loop through in foreach style ***

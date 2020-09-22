@@ -5,9 +5,6 @@ leveldb - write batch
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_batch.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -31,6 +28,11 @@ var_dump($db->write($batch));
 
 var_dump($db->get('batch_foo2'));
 var_dump($db->get('batch_foo'));
+?>
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_batch.test-db';
+LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
 * batch write with setting
