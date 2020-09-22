@@ -936,7 +936,11 @@ PHP_METHOD(LevelDB, getIterator)
 
 	object_init_ex(return_value, php_leveldb_iterator_class_entry);
 
+#if PHP_VERSION_ID < 80000
 	zend_call_method(return_value, php_leveldb_iterator_class_entry,
+#else
+	zend_call_method(Z_OBJ_P(return_value), php_leveldb_iterator_class_entry,
+#endif
 		&php_leveldb_iterator_class_entry->constructor, "__construct", sizeof("__construct") - 1,
 		NULL, (readoptions_zv == NULL ? 1 : 2), getThis(), readoptions_zv);
 }
@@ -952,7 +956,11 @@ PHP_METHOD(LevelDB, getSnapshot)
 
 	object_init_ex(return_value, php_leveldb_snapshot_class_entry);
 
+#if PHP_VERSION_ID < 80000
 	zend_call_method_with_1_params(return_value, php_leveldb_snapshot_class_entry,
+#else
+	zend_call_method_with_1_params(Z_OBJ_P(return_value), php_leveldb_snapshot_class_entry,
+#endif
 		&php_leveldb_snapshot_class_entry->constructor, "__construct", NULL, getThis());
 }
 /*	}}} */
