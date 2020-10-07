@@ -5,9 +5,6 @@ leveldb - different iterators should not affect each other
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator_should_not_affect_eachother.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -32,6 +29,11 @@ $it1->destroy();
 $it2->destroy();
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator_should_not_affect_eachother.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 1 => 1
 2 => 2

@@ -5,9 +5,6 @@ leveldb - getProperty
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb-getProperty.test-db';
 
 $db = new LevelDB($leveldb_path);
@@ -30,6 +27,11 @@ var_dump($db->getProperty('leveldb.anything'));
 var_dump($db->getProperty('anythingelse'));
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb-getProperty.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 bool(true)
 bool(true)

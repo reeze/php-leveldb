@@ -5,9 +5,6 @@ leveldb - iterator destroy
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
 $leveldb_path = dirname(__FILE__) . '/leveldb_iterator_destroy.test-db';
 $db = new LevelDB($leveldb_path);
 
@@ -22,6 +19,11 @@ try {
 }
 ?>
 ==DONE==
+--CLEAN--
+<?php
+$leveldb_path = dirname(__FILE__) . '/leveldb_iterator_destroy.test-db';
+LevelDB::destroy($leveldb_path);
+?>
 --EXPECTF--
 Iterator has been destroyed
 ==DONE==

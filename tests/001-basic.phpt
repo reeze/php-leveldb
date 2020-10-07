@@ -5,10 +5,7 @@ leveldb - basic: get(), set(), put(), delete()
 --FILE--
 <?php
 
-include "leveldb.inc";
-cleanup_leveldb_on_shutdown();
-
-$leveldb_path = dirname(__FILE__) . '/leveldb-basic.test-db';
+$leveldb_path = __DIR__ . '/leveldb-basic.test-db';
 $db = new LevelDB($leveldb_path);
 
 var_dump($db->set('key', 'value'));
@@ -18,6 +15,11 @@ var_dump($db->put('name', 'reeze'));
 var_dump($db->get('name'));
 var_dump($db->delete('name'));
 var_dump($db->get('name'));
+?>
+--CLEAN--
+<?php
+$leveldb_path = __DIR__ . '/leveldb-basic.test-db';
+LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
 bool(true)
