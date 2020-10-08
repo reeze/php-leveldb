@@ -957,10 +957,12 @@ PHP_METHOD(LevelDB, getSnapshot)
 
 #if PHP_VERSION_ID < 80000
 	zend_call_method_with_1_params(return_value, php_leveldb_snapshot_class_entry,
+		&php_leveldb_snapshot_class_entry->constructor, "__construct", NULL, getThis());
 #else
 	zend_call_method_with_1_params(Z_OBJ_P(return_value), php_leveldb_snapshot_class_entry,
-#endif
 		&php_leveldb_snapshot_class_entry->constructor, "__construct", NULL, getThis());
+#endif
+
 }
 /*	}}} */
 
