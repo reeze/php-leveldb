@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: PHP ${{ matrix.php }}, ZTS ${{ matrix.zts }}
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, '[ci skip]')"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          - 7.0.33
+          - 7.1.33
+          - 7.2.34
+          - 7.3.27
+          - 7.4.15
+          - 8.0.2
+        leveldb: [1.22]
+        zts: [off, on]
+
+    env:
+      CFLAGS: "-march=x86-64"
+      CXXFLAGS: "-march=x86-64"
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Valgrind
+        run: sudo apt-get update && sudo apt-get install valgrind
+
+      - name: Restore LevelDB build cache
+        id: leveldb-build-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/leveldb
+          key: leveldb-${{ matrix.leveldb }}-${{ hashFiles('.github/workflows/main.yml') }}
+
+      - name: Compile LevelDB
+        if: steps.leveldb-build-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt update && sudo apt install cmake
+          curl -sSL https://github.com/google/leveldb/archive/${{ matrix.leveldb }}.tar.gz | tar -xz
+          cd leveldb-${{ matrix.leveldb }}
+          cmake \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/leveldb" \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/leveldb" \
+            -DCMAKE_INSTALL_LIBDIR=lib \
+            -DLEVELDB_BUILD_TESTS=OFF \
+            -DLEVELDB_BUILD_BENCHMARKS=OFF \
+            -DLEVELDB_SNAPPY=OFF \
+            -DLEVELDB_ZSTD=OFF \
+            -DLEVELDB_TCMALLOC=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON .
+          make -j8 install
+
+      - name: Restore PHP build cache
+        id: php-build-cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ github.workspace }}/php
+          key: php-build-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-${{ hashFiles('.github/workflows/main.yml') }}
+
+      - name: "Install cached PHP's dependencies"
+        if: steps.php-build-cache.outputs.cache-hit == 'true'
+        run: ${{ github.workspace }}/php/install-dependencies.sh
+
+      - name: Clone php-build repository
+        if: steps.php-build-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: php-build/php-build
+          path: php-build
+
+      - name: Compile PHP
+        if: steps.php-build-cache.outputs.cache-hit != 'true'
+        run: |
+          cd $GITHUB_WORKSPACE/php-build
+          ./install-dependencies.sh
+          echo \
+            --disable-all \
+            --enable-cli \
+            --with-valgrind \
+            --enable-debug > ./share/php-build/default_configure_options
+          PHP_BUILD_ZTS_ENABLE=${{ matrix.zts }} ./bin/php-build ${{ matrix.php }} $GITHUB_WORKSPACE/php
+          cp install-dependencies.sh ${{ github.workspace }}/php
+
+      - name: Dump PHP info
+        run: $GITHUB_WORKSPACE/php/bin/php -i
+
+      - name: Build extension
+        run: |
+          $GITHUB_WORKSPACE/php/bin/phpize
+          ./configure --with-php-config=$GITHUB_WORKSPACE/php/bin/php-config --with-leveldb=${{ github.workspace }}/leveldb
+          make install
+
+      - name: Run .phpt tests
+        run: REPORT_EXIT_STATUS=1 NO_INTERACTION=1 TEST_PHP_ARGS="-m --show-diff" make test
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.php }}-leveldb-${{ matrix.leveldb }}
+          path: |
+            ${{ github.workspace }}/tests/*
+            !${{ github.workspace }}/tests/*.phpt
