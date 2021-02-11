@@ -21,12 +21,8 @@ Or you could get leveldb from: <https://github.com/google/leveldb.git>
 
 	$ git clone https://github.com/google/leveldb.git
 	$ cd leveldb
+	$ cmake .
 	$ make
-
->**NOTE** LevelDB didn't have make install target in Makefile:
-><http://code.google.com/p/leveldb/issues/detail?id=27>，
->If you want to install to a specific dir, you could:
->`make INSTALL_PATH=/Your/Path/`
 
 ## Installation
 
