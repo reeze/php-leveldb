@@ -171,7 +171,7 @@ void php_leveldb_object_free(zend_object *std)
 
 	if (obj->comparator) {
 		leveldb_comparator_destroy(obj->comparator);
-		zend_string_free(obj->callable_name);
+		zend_string_release(obj->callable_name);
 	}
 
 	zend_object_std_dtor(std);
@@ -996,7 +996,7 @@ PHP_METHOD(LevelDB, destroy)
 
 	if (comparator) {
 		leveldb_comparator_destroy(comparator);
-		zend_string_free(callable_name);
+		zend_string_release(callable_name);
 	}
 
 	leveldb_options_destroy(options);
@@ -1037,7 +1037,7 @@ PHP_METHOD(LevelDB, repair)
 
 	if (comparator) {
 		leveldb_comparator_destroy(comparator);
-		zend_string_free(callable_name);
+		zend_string_release(callable_name);
 	}
 
 	leveldb_options_destroy(options);
