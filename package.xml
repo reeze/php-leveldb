@@ -16,9 +16,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <active>yes</active>
   </lead>
   <lead>
-    <name>Dylan K. Taylor <odigiman@gmail.com></name>
-    <user>odigiman</user>
-    <email>odigiman@gmail.com</email>
+    <name>Dylan K. Taylor</name>
+    <user>dktapps</user>
+    <email>dktapps@pmmp.io</email>
     <active>yes</active>
   </lead>
   <lead>
@@ -27,10 +27,10 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <email>arpad@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2015-05-09</date>
+  <date>2021-02-18</date>
   <version>
-    <release>0.2.1</release>
-    <api>0.1.3</api>
+    <release>0.3.0</release>
+    <api>0.3.0</api>
   </version>
   <stability>
     <release>beta</release>
@@ -38,8 +38,11 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-- PHP7+ compatible release
-
+- Add support for PHP 7.3, 7.4 and 8.0
+- Fixed assert failures and possible faults involving comparators
+- Deprecate LevelDB->close() (use unset($db) instead, allows more consistent behaviour of iterators and snapshots, and fixes leveldb asserts)
+- Fix wrong arginfo of LevelDBWriteBatch
+- Fix memory errors when google/leveldb was compiled with different compiler options than php-leveldb
   </notes>
   <contents>
     <dir name="/">
