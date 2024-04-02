@@ -24,7 +24,7 @@ jobs:
           - 8.1.14
           - 8.2.1
         leveldb: [1.23]
-        zts: [off, on]
+        zts: [enable, disable]
 
     env:
       CFLAGS: "-march=x86-64 -DZEND_TRACK_ARENA_ALLOC=1"
@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Valgrind
+      - name: Install build dependencies
         run: sudo apt-get update && sudo apt-get install re2c valgrind
 
       - name: Restore LevelDB build cache
@@ -66,10 +66,7 @@ jobs:
         id: php-build-cache
         with:
           path: ${{ github.workspace }}/php
-          key: php-debug-${{ matrix.php }}-valgrind-${{ matrix.valgrind }}-ubuntu2004
-
-      - name: Install Valgrind
-        run: sudo apt-get update && sudo apt-get install valgrind
+          key: php-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-ubuntu2004
 
       - name: Get number of CPU cores
         if: steps.php-build-cache.outputs.cache-hit != 'true'
@@ -90,8 +87,8 @@ jobs:
             --enable-cli \
             --with-valgrind \
             --enable-debug \
-            --enable-zts=${{ matrix.zts }} \
-            --enable-maintainer-zts=${{ matrix.zts }} \
+            --${{ matrix.zts }}-zts \
+            --${{ matrix.zts }}-maintainer-zts \
             --prefix="${{ github.workspace }}/php"
           make -j ${{ steps.cpu-cores.outputs.count }} install
 
@@ -111,7 +108,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v2
         with:
-          name: test-results-${{ matrix.php }}-leveldb-${{ matrix.leveldb }}
+          name: test-results-${{ matrix.php }}-zts-${{ matrix.zts }}-leveldb-${{ matrix.leveldb }}
           path: |
             ${{ github.workspace }}/tests/*
             !${{ github.workspace }}/tests/*.phpt
