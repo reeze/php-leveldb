@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Valgrind
-        run: sudo apt-get update && sudo apt-get install valgrind
+        run: sudo apt-get update && sudo apt-get install re2c valgrind
 
       - name: Restore LevelDB build cache
         id: leveldb-build-cache
