@@ -66,7 +66,7 @@ jobs:
         id: php-build-cache
         with:
           path: ${{ github.workspace }}/php
-          key: php-debug-${{ inputs.php }}-valgrind-${{ matrix.valgrind }}-ubuntu2004
+          key: php-debug-${{ matrix.php }}-valgrind-${{ matrix.valgrind }}-ubuntu2004
 
       - name: Install Valgrind
         run: sudo apt-get update && sudo apt-get install valgrind
@@ -78,11 +78,11 @@ jobs:
 
       - name: Download PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
-        run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ inputs.php }}.tar.gz | tar -xz
+        run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ matrix.php }}.tar.gz | tar -xz
 
       - name: Compile PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
-        working-directory: php-src-php-${{ inputs.php }}
+        working-directory: php-src-php-${{ matrix.php }}
         run: |
           ./buildconf --force
           ./configure \
