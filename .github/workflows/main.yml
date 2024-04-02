@@ -27,7 +27,7 @@ jobs:
         zts: [off, on]
 
     env:
-      CFLAGS: "-march=x86-64"
+      CFLAGS: "-march=x86-64 -DZEND_TRACK_ARENA_ALLOC=1"
       CXXFLAGS: "-march=x86-64"
     steps:
       - uses: actions/checkout@v2
@@ -62,34 +62,38 @@ jobs:
           make -j8 install
 
       - name: Restore PHP build cache
+        uses: actions/cache@v4
         id: php-build-cache
-        uses: actions/cache@v2
         with:
           path: ${{ github.workspace }}/php
-          key: php-build-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-${{ hashFiles('.github/workflows/main.yml') }}
+          key: php-debug-${{ inputs.php }}-valgrind-${{ matrix.valgrind }}-ubuntu2004
 
-      - name: "Install cached PHP's dependencies"
-        if: steps.php-build-cache.outputs.cache-hit == 'true'
-        run: sudo apt update && sudo apt install libzip5
+      - name: Install Valgrind
+        run: sudo apt-get update && sudo apt-get install valgrind
 
-      - name: Clone php-build repository
+      - name: Get number of CPU cores
         if: steps.php-build-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@v2
-        with:
-          repository: php-build/php-build
-          path: php-build
+        uses: SimenB/github-actions-cpu-cores@v2
+        id: cpu-cores
+
+      - name: Download PHP
+        if: steps.php-build-cache.outputs.cache-hit != 'true'
+        run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ inputs.php }}.tar.gz | tar -xz
 
       - name: Compile PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
+        working-directory: php-src-php-${{ inputs.php }}
         run: |
-          cd $GITHUB_WORKSPACE/php-build
-          ./install-dependencies.sh
-          echo \
+          ./buildconf --force
+          ./configure \
             --disable-all \
             --enable-cli \
             --with-valgrind \
-            --enable-debug > ./share/php-build/default_configure_options
-          PHP_BUILD_ZTS_ENABLE=${{ matrix.zts }} ./bin/php-build ${{ matrix.php }} $GITHUB_WORKSPACE/php
+            --enable-debug \
+            --enable-zts=${{ matrix.zts }} \
+            --enable-maintainer-zts=${{ matrix.zts }} \
+            --prefix="${{ github.workspace }}/php"
+          make -j ${{ steps.cpu-cores.outputs.count }} install
 
       - name: Dump PHP info
         run: $GITHUB_WORKSPACE/php/bin/php -i
