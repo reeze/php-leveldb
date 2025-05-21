@@ -31,14 +31,14 @@ jobs:
       CFLAGS: "-march=x86-64 -DZEND_TRACK_ARENA_ALLOC=1"
       CXXFLAGS: "-march=x86-64"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: sudo apt-get update && sudo apt-get install re2c valgrind
 
       - name: Restore LevelDB build cache
         id: leveldb-build-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/leveldb
           key: leveldb-${{ matrix.leveldb }}-${{ hashFiles('.github/workflows/main.yml') }}
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.php }}-zts-${{ matrix.zts }}-leveldb-${{ matrix.leveldb }}
           path: |
