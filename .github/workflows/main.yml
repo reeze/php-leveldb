@@ -78,6 +78,23 @@ jobs:
         if: steps.php-build-cache.outputs.cache-hit != 'true'
         run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ matrix.php }}.tar.gz | tar -xz
 
+      - name: Install Bison 3.0.5 for PHP 7.0.33
+        if: matrix.php == '7.0.33' && steps.php-build-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Installing Bison 3.0.5 for PHP 7.0.33..."
+          sudo apt-get update
+          sudo apt-get install -y m4 build-essential
+          sudo apt-get remove --purge -y bison
+          curl -L https://ftp.gnu.org/gnu/bison/bison-3.0.5.tar.gz -o bison-3.0.5.tar.gz
+          tar -xzf bison-3.0.5.tar.gz
+          cd bison-3.0.5
+          ./configure --prefix=/usr/local
+          make
+          sudo make install
+          echo "Bison version after install:"
+          bison --version
+          cd ..
+
       - name: Compile PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
         working-directory: php-src-php-${{ matrix.php }}
