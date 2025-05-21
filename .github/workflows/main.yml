@@ -78,10 +78,10 @@ jobs:
         if: steps.php-build-cache.outputs.cache-hit != 'true'
         run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ matrix.php }}.tar.gz | tar -xz
 
-      - name: Install Bison 3.0.5 for PHP 7.0.33
-        if: matrix.php == '7.0.33' && steps.php-build-cache.outputs.cache-hit != 'true'
+      - name: Install Bison 3.0.5 for older PHP versions
+        if: steps.php-build-cache.outputs.cache-hit != 'true' && (matrix.php == '7.0.33' || matrix.php == '7.1.33' || matrix.php == '7.2.34' || matrix.php == '7.3.33')
         run: |
-          echo "Installing Bison 3.0.5 for PHP 7.0.33..."
+          echo "Installing Bison 3.0.5 for PHP ${{ matrix.php }}..."
           sudo apt-get update
           sudo apt-get install -y m4 build-essential
           sudo apt-get remove --purge -y bison
