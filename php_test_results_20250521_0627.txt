@@ -1,0 +1,742 @@
+
+
+=====================================================================
+TEST RESULT SUMMARY
+---------------------------------------------------------------------
+Exts skipped    :     0
+Exts tested     :    16
+---------------------------------------------------------------------
+
+Number of tests :    22                22
+Tests skipped   :     0 (  0.0%) --------
+Tests warned    :     0 (  0.0%) (  0.0%)
+Tests failed    :     0 (  0.0%) (  0.0%)
+Tests passed    :    22 (100.0%) (100.0%)
+---------------------------------------------------------------------
+Time taken      :     2 seconds
+=====================================================================
+
+
+
+================================================================================
+BUILD ENVIRONMENT
+================================================================================
+OS:
+Linux - Linux devbox 6.8.0 #1 SMP PREEMPT_DYNAMIC Fri May 16 17:02:18 MDT 2025 x86_64
+
+Autoconf:
+autoconf (GNU Autoconf) 2.71
+Copyright (C) 2021 Free Software Foundation, Inc.
+License GPLv3+/Autoconf: GNU GPL version 3 or later
+<https://gnu.org/licenses/gpl.html>, <https://gnu.org/licenses/exceptions.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by David J. MacKenzie and Akim Demaille.
+
+Bundled Libtool:
+libtool (GNU libtool) 2.4.7
+Written by Gordon Matzigkeit, 1996
+
+Copyright (C) 2014 Free Software Foundation, Inc.
+
+
+System Libtool:
+N/A
+Compiler:
+Using built-in specs.
+COLLECT_GCC=cc
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-linux-gnu/13/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Ubuntu 13.3.0-6ubuntu2~24.04' --with-bugurl=file:///usr/share/doc/gcc-13/README.Bugs --enable-languages=c,ada,c++,go,d,fortran,objc,obj-c++,m2 --prefix=/usr --with-gcc-major-version-only --program-suffix=-13 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/libexec --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-libstdcxx-backtrace --enable-gnu-unique-object --disable-vtable-verify --enable-plugin --enable-default-pie --with-system-zlib --enable-libphobos-checking=release --with-target-system-zlib=auto --enable-objc-gc=auto --enable-multiarch --disable-werror --enable-cet --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-nvptx/usr,amdgcn-amdhsa=/build/gcc-13-fG75Ri/gcc-13-13.3.0/debian/tmp-gcn/usr --enable-offload-defaulted --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu --with-build-config=bootstrap-lto-lean --enable-link-serialization=2
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04) 
+
+Bison:
+
+Libraries:
+	linux-vdso.so.1 (0x00007ffc80973000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f197d9f3000)
+	libxml2.so.2 => /lib/x86_64-linux-gnu/libxml2.so.2 (0x00007f197d811000)
+	libssl.so.3 => /lib/x86_64-linux-gnu/libssl.so.3 (0x00007f197d767000)
+	libcrypto.so.3 => /lib/x86_64-linux-gnu/libcrypto.so.3 (0x00007f197d254000)
+	libpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007f197d1ba000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f197d19c000)
+	libsodium.so.23 => /lib/x86_64-linux-gnu/libsodium.so.23 (0x00007f197d145000)
+	libargon2.so.1 => /lib/x86_64-linux-gnu/libargon2.so.1 (0x00007f197d13c000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f197cf2a000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f197e087000)
+	libicuuc.so.74 => /lib/x86_64-linux-gnu/libicuuc.so.74 (0x00007f197cd1d000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f197cceb000)
+	libicudata.so.74 => /lib/x86_64-linux-gnu/libicudata.so.74 (0x00007f197af89000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007f197ad0b000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007f197acdd000)
+
+
+
+================================================================================
+PHPINFO
+================================================================================
+phpinfo()
+PHP Version => 8.3.6
+
+System => Linux devbox 6.8.0 #1 SMP PREEMPT_DYNAMIC Fri May 16 17:02:18 MDT 2025 x86_64
+Build Date => Mar 19 2025 10:08:38
+Build System => Linux
+Server API => Command Line Interface
+Virtual Directory Support => disabled
+Configuration File (php.ini) Path => /etc/php/8.3/cli
+Loaded Configuration File => /etc/php/8.3/cli/php.ini
+Scan this dir for additional .ini files => /etc/php/8.3/cli/conf.d
+Additional .ini files parsed => /etc/php/8.3/cli/conf.d/10-opcache.ini,
+/etc/php/8.3/cli/conf.d/10-pdo.ini,
+/etc/php/8.3/cli/conf.d/15-xml.ini,
+/etc/php/8.3/cli/conf.d/20-calendar.ini,
+/etc/php/8.3/cli/conf.d/20-ctype.ini,
+/etc/php/8.3/cli/conf.d/20-dom.ini,
+/etc/php/8.3/cli/conf.d/20-exif.ini,
+/etc/php/8.3/cli/conf.d/20-ffi.ini,
+/etc/php/8.3/cli/conf.d/20-fileinfo.ini,
+/etc/php/8.3/cli/conf.d/20-ftp.ini,
+/etc/php/8.3/cli/conf.d/20-gettext.ini,
+/etc/php/8.3/cli/conf.d/20-iconv.ini,
+/etc/php/8.3/cli/conf.d/20-phar.ini,
+/etc/php/8.3/cli/conf.d/20-posix.ini,
+/etc/php/8.3/cli/conf.d/20-readline.ini,
+/etc/php/8.3/cli/conf.d/20-shmop.ini,
+/etc/php/8.3/cli/conf.d/20-simplexml.ini,
+/etc/php/8.3/cli/conf.d/20-sockets.ini,
+/etc/php/8.3/cli/conf.d/20-sysvmsg.ini,
+/etc/php/8.3/cli/conf.d/20-sysvsem.ini,
+/etc/php/8.3/cli/conf.d/20-sysvshm.ini,
+/etc/php/8.3/cli/conf.d/20-tokenizer.ini,
+/etc/php/8.3/cli/conf.d/20-xmlreader.ini,
+/etc/php/8.3/cli/conf.d/20-xmlwriter.ini,
+/etc/php/8.3/cli/conf.d/20-xsl.ini
+
+PHP API => 20230831
+PHP Extension => 20230831
+Zend Extension => 420230831
+Zend Extension Build => API420230831,NTS
+PHP Extension Build => API20230831,NTS
+Debug Build => no
+Thread Safety => disabled
+Zend Signal Handling => enabled
+Zend Memory Manager => enabled
+Zend Multibyte Support => disabled
+Zend Max Execution Timers => disabled
+IPv6 Support => enabled
+DTrace Support => disabled
+
+Registered PHP Streams => https, ftps, compress.zlib, php, file, glob, data, http, ftp, phar
+Registered Stream Socket Transports => tcp, udp, unix, udg, ssl, tls, tlsv1.0, tlsv1.1, tlsv1.2, tlsv1.3
+Registered Stream Filters => zlib.*, string.rot13, string.toupper, string.tolower, convert.*, consumed, dechunk, convert.iconv.*
+
+This program makes use of the Zend Scripting Language Engine:
+Zend Engine v4.3.6, Copyright (c) Zend Technologies
+    with Zend OPcache v8.3.6, Copyright (c), by Zend Technologies
+
+
+ _______________________________________________________________________
+
+
+Configuration
+
+calendar
+
+Calendar support => enabled
+
+Core
+
+PHP Version => 8.3.6
+
+Directive => Local Value => Master Value
+allow_url_fopen => On => On
+allow_url_include => Off => Off
+arg_separator.input => & => &
+arg_separator.output => & => &
+auto_append_file => no value => no value
+auto_globals_jit => On => On
+auto_prepend_file => no value => no value
+browscap => no value => no value
+default_charset => UTF-8 => UTF-8
+default_mimetype => text/html => text/html
+disable_classes => no value => no value
+disable_functions => no value => no value
+display_errors => STDERR => STDERR
+display_startup_errors => Off => Off
+doc_root => no value => no value
+docref_ext => no value => no value
+docref_root => no value => no value
+enable_dl => Off => Off
+enable_post_data_reading => On => On
+error_append_string => no value => no value
+error_log => no value => no value
+error_log_mode => 0644 => 0644
+error_prepend_string => no value => no value
+error_reporting => 22527 => 22527
+expose_php => On => On
+extension_dir => /usr/lib/php/20230831 => /usr/lib/php/20230831
+fiber.stack_size => no value => no value
+file_uploads => On => On
+hard_timeout => 2 => 2
+highlight.comment => <font style="color: #FF8000">#FF8000</font> => <font style="color: #FF8000">#FF8000</font>
+highlight.default => <font style="color: #0000BB">#0000BB</font> => <font style="color: #0000BB">#0000BB</font>
+highlight.html => <font style="color: #000000">#000000</font> => <font style="color: #000000">#000000</font>
+highlight.keyword => <font style="color: #007700">#007700</font> => <font style="color: #007700">#007700</font>
+highlight.string => <font style="color: #DD0000">#DD0000</font> => <font style="color: #DD0000">#DD0000</font>
+html_errors => Off => Off
+ignore_repeated_errors => Off => Off
+ignore_repeated_source => Off => Off
+ignore_user_abort => Off => Off
+implicit_flush => On => On
+include_path => .:/usr/share/php => .:/usr/share/php
+input_encoding => no value => no value
+internal_encoding => no value => no value
+log_errors => On => On
+mail.add_x_header => Off => Off
+mail.force_extra_parameters => no value => no value
+mail.log => no value => no value
+mail.mixed_lf_and_crlf => Off => Off
+max_execution_time => 0 => 0
+max_file_uploads => 20 => 20
+max_input_nesting_level => 64 => 64
+max_input_time => -1 => -1
+max_input_vars => 1000 => 1000
+max_multipart_body_parts => -1 => -1
+memory_limit => -1 => -1
+open_basedir => no value => no value
+output_buffering => 0 => 0
+output_encoding => no value => no value
+output_handler => no value => no value
+post_max_size => 8M => 8M
+precision => 14 => 14
+realpath_cache_size => 4096K => 4096K
+realpath_cache_ttl => 120 => 120
+register_argc_argv => On => On
+report_memleaks => On => On
+report_zend_debug => Off => Off
+request_order => GP => GP
+sendmail_from => no value => no value
+sendmail_path => /usr/sbin/sendmail -t -i => /usr/sbin/sendmail -t -i
+serialize_precision => -1 => -1
+short_open_tag => Off => Off
+SMTP => localhost => localhost
+smtp_port => 25 => 25
+sys_temp_dir => no value => no value
+syslog.facility => LOG_USER => LOG_USER
+syslog.filter => no-ctrl => no-ctrl
+syslog.ident => php => php
+unserialize_callback_func => no value => no value
+upload_max_filesize => 2M => 2M
+upload_tmp_dir => no value => no value
+user_dir => no value => no value
+user_ini.cache_ttl => 300 => 300
+user_ini.filename => .user.ini => .user.ini
+variables_order => GPCS => GPCS
+xmlrpc_error_number => 0 => 0
+xmlrpc_errors => Off => Off
+zend.assertions => -1 => -1
+zend.detect_unicode => On => On
+zend.enable_gc => On => On
+zend.exception_ignore_args => On => On
+zend.exception_string_param_max_len => 0 => 0
+zend.max_allowed_stack_size => 0 => 0
+zend.multibyte => Off => Off
+zend.reserved_stack_size => 0 => 0
+zend.script_encoding => no value => no value
+zend.signal_check => Off => Off
+
+ctype
+
+ctype functions => enabled
+
+date
+
+date/time support => enabled
+timelib version => 2022.10
+"Olson" Timezone Database Version => 0.system
+Timezone Database => internal
+Default timezone => UTC
+
+Directive => Local Value => Master Value
+date.default_latitude => 31.7667 => 31.7667
+date.default_longitude => 35.2333 => 35.2333
+date.sunrise_zenith => 90.833333 => 90.833333
+date.sunset_zenith => 90.833333 => 90.833333
+date.timezone => UTC => UTC
+
+dom
+
+DOM/XML => enabled
+DOM/XML API Version => 20031129
+libxml Version => 2.9.14
+HTML Support => enabled
+XPath Support => enabled
+XPointer Support => enabled
+Schema Support => enabled
+RelaxNG Support => enabled
+
+exif
+
+EXIF Support => enabled
+Supported EXIF Version => 0220
+Supported filetypes => JPEG, TIFF
+Multibyte decoding support using mbstring => disabled
+Extended EXIF tag formats => Canon, Casio, Fujifilm, Nikon, Olympus, Samsung, Panasonic, DJI, Sony, Pentax, Minolta, Sigma, Foveon, Kyocera, Ricoh, AGFA, Epson
+
+Directive => Local Value => Master Value
+exif.decode_jis_intel => JIS => JIS
+exif.decode_jis_motorola => JIS => JIS
+exif.decode_unicode_intel => UCS-2LE => UCS-2LE
+exif.decode_unicode_motorola => UCS-2BE => UCS-2BE
+exif.encode_jis => no value => no value
+exif.encode_unicode => ISO-8859-15 => ISO-8859-15
+
+FFI
+
+FFI support => enabled
+
+Directive => Local Value => Master Value
+ffi.enable => preload => preload
+ffi.preload => no value => no value
+
+fileinfo
+
+fileinfo support => enabled
+libmagic => 543
+
+filter
+
+Input Validation and Filtering => enabled
+
+Directive => Local Value => Master Value
+filter.default => unsafe_raw => unsafe_raw
+filter.default_flags => no value => no value
+
+ftp
+
+FTP support => enabled
+FTPS support => enabled
+
+gettext
+
+GetText Support => enabled
+
+hash
+
+hash support => enabled
+Hashing Engines => md2 md4 md5 sha1 sha224 sha256 sha384 sha512/224 sha512/256 sha512 sha3-224 sha3-256 sha3-384 sha3-512 ripemd128 ripemd160 ripemd256 ripemd320 whirlpool tiger128,3 tiger160,3 tiger192,3 tiger128,4 tiger160,4 tiger192,4 snefru snefru256 gost gost-crypto adler32 crc32 crc32b crc32c fnv132 fnv1a32 fnv164 fnv1a64 joaat murmur3a murmur3c murmur3f xxh32 xxh64 xxh3 xxh128 haval128,3 haval160,3 haval192,3 haval224,3 haval256,3 haval128,4 haval160,4 haval192,4 haval224,4 haval256,4 haval128,5 haval160,5 haval192,5 haval224,5 haval256,5 
+
+MHASH support => Enabled
+MHASH API Version => Emulated Support
+
+iconv
+
+iconv support => enabled
+iconv implementation => glibc
+iconv library version => 2.39
+
+Directive => Local Value => Master Value
+iconv.input_encoding => no value => no value
+iconv.internal_encoding => no value => no value
+iconv.output_encoding => no value => no value
+
+json
+
+json support => enabled
+
+libxml
+
+libXML support => active
+libXML Compiled Version => 2.9.14
+libXML Loaded Version => 20914
+libXML streams => enabled
+
+openssl
+
+OpenSSL support => enabled
+OpenSSL Library Version => OpenSSL 3.0.13 30 Jan 2024
+OpenSSL Header Version => OpenSSL 3.0.13 30 Jan 2024
+Openssl default config => /usr/lib/ssl/openssl.cnf
+
+Directive => Local Value => Master Value
+openssl.cafile => no value => no value
+openssl.capath => no value => no value
+
+pcntl
+
+pcntl support => enabled
+
+pcre
+
+PCRE (Perl Compatible Regular Expressions) Support => enabled
+PCRE Library Version => 10.42 2022-12-11
+PCRE Unicode Version => 14.0.0
+PCRE JIT Support => enabled
+PCRE JIT Target => x86 64bit (little endian + unaligned)
+
+Directive => Local Value => Master Value
+pcre.backtrack_limit => 1000000 => 1000000
+pcre.jit => On => On
+pcre.recursion_limit => 100000 => 100000
+
+PDO
+
+PDO support => enabled
+PDO drivers =>  
+
+Phar
+
+Phar: PHP Archive support => enabled
+Phar API version => 1.1.1
+Phar-based phar archives => enabled
+Tar-based phar archives => enabled
+ZIP-based phar archives => enabled
+gzip compression => enabled
+bzip2 compression => disabled (install ext/bz2)
+Native OpenSSL support => enabled
+
+
+Phar based on pear/PHP_Archive, original concept by Davey Shafik.
+Phar fully realized by Gregory Beaver and Marcus Boerger.
+Portions of tar implementation Copyright (c) 2003-2009 Tim Kientzle.
+Directive => Local Value => Master Value
+phar.cache_list => no value => no value
+phar.readonly => On => On
+phar.require_hash => On => On
+
+posix
+
+POSIX support => enabled
+
+random
+
+Version => 8.3.6
+
+readline
+
+Readline Support => enabled
+Readline library => EditLine wrapper
+
+Directive => Local Value => Master Value
+cli.pager => no value => no value
+cli.prompt => \b \>  => \b \> 
+
+Reflection
+
+Reflection => enabled
+
+session
+
+Session Support => enabled
+Registered save handlers => files user 
+Registered serializer handlers => php_serialize php php_binary 
+
+Directive => Local Value => Master Value
+session.auto_start => Off => Off
+session.cache_expire => 180 => 180
+session.cache_limiter => nocache => nocache
+session.cookie_domain => no value => no value
+session.cookie_httponly => Off => Off
+session.cookie_lifetime => 0 => 0
+session.cookie_path => / => /
+session.cookie_samesite => no value => no value
+session.cookie_secure => Off => Off
+session.gc_divisor => 1000 => 1000
+session.gc_maxlifetime => 1440 => 1440
+session.gc_probability => 0 => 0
+session.lazy_write => On => On
+session.name => PHPSESSID => PHPSESSID
+session.referer_check => no value => no value
+session.save_handler => files => files
+session.save_path => /var/lib/php/sessions => /var/lib/php/sessions
+session.serialize_handler => php => php
+session.sid_bits_per_character => 5 => 5
+session.sid_length => 26 => 26
+session.upload_progress.cleanup => On => On
+session.upload_progress.enabled => On => On
+session.upload_progress.freq => 1% => 1%
+session.upload_progress.min_freq => 1 => 1
+session.upload_progress.name => PHP_SESSION_UPLOAD_PROGRESS => PHP_SESSION_UPLOAD_PROGRESS
+session.upload_progress.prefix => upload_progress_ => upload_progress_
+session.use_cookies => On => On
+session.use_only_cookies => On => On
+session.use_strict_mode => Off => Off
+session.use_trans_sid => Off => Off
+
+shmop
+
+shmop support => enabled
+
+SimpleXML
+
+SimpleXML support => enabled
+Schema support => enabled
+
+sockets
+
+Sockets Support => enabled
+
+sodium
+
+sodium support => enabled
+libsodium headers version => 1.0.18
+libsodium library version => 1.0.18
+
+SPL
+
+SPL support => enabled
+Interfaces => OuterIterator, RecursiveIterator, SeekableIterator, SplObserver, SplSubject
+Classes => AppendIterator, ArrayIterator, ArrayObject, BadFunctionCallException, BadMethodCallException, CachingIterator, CallbackFilterIterator, DirectoryIterator, DomainException, EmptyIterator, FilesystemIterator, FilterIterator, GlobIterator, InfiniteIterator, InvalidArgumentException, IteratorIterator, LengthException, LimitIterator, LogicException, MultipleIterator, NoRewindIterator, OutOfBoundsException, OutOfRangeException, OverflowException, ParentIterator, RangeException, RecursiveArrayIterator, RecursiveCachingIterator, RecursiveCallbackFilterIterator, RecursiveDirectoryIterator, RecursiveFilterIterator, RecursiveIteratorIterator, RecursiveRegexIterator, RecursiveTreeIterator, RegexIterator, RuntimeException, SplDoublyLinkedList, SplFileInfo, SplFileObject, SplFixedArray, SplHeap, SplMinHeap, SplMaxHeap, SplObjectStorage, SplPriorityQueue, SplQueue, SplStack, SplTempFileObject, UnderflowException, UnexpectedValueException
+
+standard
+
+Dynamic Library Support => enabled
+Path to sendmail => /usr/sbin/sendmail -t -i
+
+Directive => Local Value => Master Value
+assert.active => On => On
+assert.bail => Off => Off
+assert.callback => no value => no value
+assert.exception => On => On
+assert.warning => On => On
+auto_detect_line_endings => Off => Off
+default_socket_timeout => 60 => 60
+from => no value => no value
+session.trans_sid_hosts => no value => no value
+session.trans_sid_tags => a=href,area=href,frame=src,form= => a=href,area=href,frame=src,form=
+unserialize_max_depth => 4096 => 4096
+url_rewriter.hosts => no value => no value
+url_rewriter.tags => form= => form=
+user_agent => no value => no value
+
+sysvmsg
+
+sysvmsg support => enabled
+
+sysvsem
+
+sysvsem support => enabled
+
+sysvshm
+
+sysvshm support => enabled
+
+tokenizer
+
+Tokenizer Support => enabled
+
+xml
+
+XML Support => active
+XML Namespace Support => active
+libxml2 Version => 2.9.14
+
+xmlreader
+
+XMLReader => enabled
+
+xmlwriter
+
+XMLWriter => enabled
+
+xsl
+
+XSL => enabled
+libxslt Version => 1.1.39
+libxslt compiled against libxml Version => 2.9.14
+EXSLT => enabled
+libexslt Version => 0.8.21
+
+Zend OPcache
+
+Opcode Caching => Disabled
+Optimization => Disabled
+SHM Cache => Enabled
+File Cache => Disabled
+JIT => Disabled
+Startup Failed => Opcode Caching is disabled for CLI
+
+Directive => Local Value => Master Value
+opcache.blacklist_filename => no value => no value
+opcache.dups_fix => Off => Off
+opcache.enable => On => On
+opcache.enable_cli => Off => Off
+opcache.enable_file_override => Off => Off
+opcache.error_log => no value => no value
+opcache.file_cache => no value => no value
+opcache.file_cache_consistency_checks => On => On
+opcache.file_cache_only => Off => Off
+opcache.file_update_protection => 2 => 2
+opcache.force_restart_timeout => 180 => 180
+opcache.huge_code_pages => Off => Off
+opcache.interned_strings_buffer => 8 => 8
+opcache.jit => no value => no value
+opcache.jit_bisect_limit => 0 => 0
+opcache.jit_blacklist_root_trace => 16 => 16
+opcache.jit_blacklist_side_trace => 8 => 8
+opcache.jit_buffer_size => 0 => 0
+opcache.jit_debug => 0 => 0
+opcache.jit_hot_func => 127 => 127
+opcache.jit_hot_loop => 64 => 64
+opcache.jit_hot_return => 8 => 8
+opcache.jit_hot_side_exit => 8 => 8
+opcache.jit_max_exit_counters => 8192 => 8192
+opcache.jit_max_loop_unrolls => 8 => 8
+opcache.jit_max_polymorphic_calls => 2 => 2
+opcache.jit_max_recursive_calls => 2 => 2
+opcache.jit_max_recursive_returns => 2 => 2
+opcache.jit_max_root_traces => 1024 => 1024
+opcache.jit_max_side_traces => 128 => 128
+opcache.jit_max_trace_length => 1024 => 1024
+opcache.jit_prof_threshold => 0.005 => 0.005
+opcache.lockfile_path => /tmp => /tmp
+opcache.log_verbosity_level => 1 => 1
+opcache.max_accelerated_files => 10000 => 10000
+opcache.max_file_size => 0 => 0
+opcache.max_wasted_percentage => 5 => 5
+opcache.memory_consumption => 128 => 128
+opcache.opt_debug_level => 0 => 0
+opcache.optimization_level => 0x7FFEBFFF => 0x7FFEBFFF
+opcache.preferred_memory_model => no value => no value
+opcache.preload => no value => no value
+opcache.preload_user => no value => no value
+opcache.protect_memory => Off => Off
+opcache.record_warnings => Off => Off
+opcache.restrict_api => no value => no value
+opcache.revalidate_freq => 2 => 2
+opcache.revalidate_path => Off => Off
+opcache.save_comments => On => On
+opcache.use_cwd => On => On
+opcache.validate_permission => Off => Off
+opcache.validate_root => Off => Off
+opcache.validate_timestamps => On => On
+
+zlib
+
+ZLib Support => enabled
+Stream Wrapper => compress.zlib://
+Stream Filter => zlib.inflate, zlib.deflate
+Compiled Version => 1.3
+Linked Version => 1.3
+
+Directive => Local Value => Master Value
+zlib.output_compression => Off => Off
+zlib.output_compression_level => -1 => -1
+zlib.output_handler => no value => no value
+
+Additional Modules
+
+Module Name
+
+Environment
+
+Variable => Value
+LESSOPEN => | /usr/bin/lesspipe %s
+TMUX => /tmp/tmux-1001/default,1478,0
+USER => swebot
+SSH_CLIENT => deleted
+XDG_SESSION_TYPE => tty
+SHLVL => 3
+TEST_PHP_SRCDIR => /app
+HOME => /home/swebot
+OLDPWD => /app
+TERM_PROGRAM_VERSION => 3.4
+SSH_TTY => deleted
+TEST_PHP_CGI_EXECUTABLE =>  
+MAKEFLAGS =>  
+DBUS_SESSION_BUS_ADDRESS => unix:path=/run/user/1001/bus
+LOGNAME => swebot
+TEST_PHP_EXECUTABLE => /usr/bin/php8.3
+_ => /usr/bin/php8.3
+XDG_SESSION_CLASS => user
+TERM => tmux-256color
+XDG_SESSION_ID => c1
+PATH => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+TEST_PHP_CGI_EXECUTABLE_ESCAPED => ''
+MAKELEVEL => 1
+XDG_RUNTIME_DIR => /run/user/1001
+LANG => C.UTF-8
+LS_COLORS => rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:
+TERM_PROGRAM => tmux
+SSH_AUTH_SOCK => deleted
+TEST_PHPDBG_EXECUTABLE =>  
+SHELL => /bin/bash
+TEST_PHP_EXECUTABLE_ESCAPED => '/usr/bin/php8.3'
+LESSCLOSE => /usr/bin/lesspipe %s %s
+PWD => /app
+SSH_CONNECTION => deleted
+CC => cc
+MFLAGS =>  
+TMUX_PANE => %0
+TEST_PHPDBG_EXECUTABLE_ESCAPED => ''
+
+PHP Variables
+
+Variable => Value
+$_SERVER['LESSOPEN'] => | /usr/bin/lesspipe %s
+$_SERVER['TMUX'] => /tmp/tmux-1001/default,1478,0
+$_SERVER['USER'] => swebot
+$_SERVER['SSH_CLIENT'] => deleted
+$_SERVER['XDG_SESSION_TYPE'] => tty
+$_SERVER['SHLVL'] => 3
+$_SERVER['TEST_PHP_SRCDIR'] => /app
+$_SERVER['HOME'] => /home/swebot
+$_SERVER['OLDPWD'] => /app
+$_SERVER['TERM_PROGRAM_VERSION'] => 3.4
+$_SERVER['SSH_TTY'] => deleted
+$_SERVER['TEST_PHP_CGI_EXECUTABLE'] => 
+$_SERVER['MAKEFLAGS'] => 
+$_SERVER['DBUS_SESSION_BUS_ADDRESS'] => unix:path=/run/user/1001/bus
+$_SERVER['LOGNAME'] => swebot
+$_SERVER['TEST_PHP_EXECUTABLE'] => /usr/bin/php8.3
+$_SERVER['_'] => /usr/bin/php8.3
+$_SERVER['XDG_SESSION_CLASS'] => user
+$_SERVER['TERM'] => tmux-256color
+$_SERVER['XDG_SESSION_ID'] => c1
+$_SERVER['PATH'] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+$_SERVER['TEST_PHP_CGI_EXECUTABLE_ESCAPED'] => ''
+$_SERVER['MAKELEVEL'] => 1
+$_SERVER['XDG_RUNTIME_DIR'] => /run/user/1001
+$_SERVER['LANG'] => C.UTF-8
+$_SERVER['LS_COLORS'] => rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:
+$_SERVER['TERM_PROGRAM'] => tmux
+$_SERVER['SSH_AUTH_SOCK'] => deleted
+$_SERVER['TEST_PHPDBG_EXECUTABLE'] => 
+$_SERVER['SHELL'] => /bin/bash
+$_SERVER['TEST_PHP_EXECUTABLE_ESCAPED'] => '/usr/bin/php8.3'
+$_SERVER['LESSCLOSE'] => /usr/bin/lesspipe %s %s
+$_SERVER['PWD'] => /app
+$_SERVER['SSH_CONNECTION'] => deleted
+$_SERVER['CC'] => cc
+$_SERVER['MFLAGS'] => 
+$_SERVER['TMUX_PANE'] => %0
+$_SERVER['TEST_PHPDBG_EXECUTABLE_ESCAPED'] => ''
+$_SERVER['PHP_SELF'] => 
+$_SERVER['SCRIPT_NAME'] => 
+$_SERVER['SCRIPT_FILENAME'] => 
+$_SERVER['PATH_TRANSLATED'] => 
+$_SERVER['DOCUMENT_ROOT'] => 
+$_SERVER['REQUEST_TIME_FLOAT'] => 1747808838.8012
+$_SERVER['REQUEST_TIME'] => 1747808838
+$_SERVER['argv'] => Array
+(
+)
+
+$_SERVER['argc'] => 0
+
+PHP License
+This program is free software; you can redistribute it and/or modify
+it under the terms of the PHP License as published by the PHP Group
+and included in the distribution in the file:  LICENSE
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+If you did not receive a copy of the PHP license, or have any
+questions about PHP licensing, please contact license@php.net.
