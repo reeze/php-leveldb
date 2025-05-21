@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: PHP ${{ matrix.php }}, ZTS ${{ matrix.zts }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     strategy:
@@ -21,8 +21,9 @@ jobs:
           - 7.3.33
           - 7.4.29
           - 8.0.27
-          - 8.1.14
-          - 8.2.1
+          - 8.1.27
+          - 8.2.14
+          - 8.3.1
         leveldb: [1.23]
         zts: [enable, disable]
 
@@ -66,7 +67,7 @@ jobs:
         id: php-build-cache
         with:
           path: ${{ github.workspace }}/php
-          key: php-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-ubuntu2004
+          key: php-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-ubuntu2204
 
       - name: Get number of CPU cores
         if: steps.php-build-cache.outputs.cache-hit != 'true'
