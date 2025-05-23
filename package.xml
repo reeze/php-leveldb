@@ -39,7 +39,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 - Add support for PHP 7.3, 7.4 and 8.0
-- Add support for PHP 8.1, 8.2 and 8.3
 - Fixed assert failures and possible faults involving comparators
 - Deprecate LevelDB->close() (use unset($db) instead, allows more consistent behaviour of iterators and snapshots, and fixes leveldb asserts)
 - Fix wrong arginfo of LevelDBWriteBatch
