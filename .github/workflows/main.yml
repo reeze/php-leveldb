@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: PHP ${{ matrix.php }}, ZTS ${{ matrix.zts }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
 
     strategy:
@@ -21,8 +21,9 @@ jobs:
           - 7.3.33
           - 7.4.29
           - 8.0.27
-          - 8.1.14
-          - 8.2.1
+          - 8.1.27
+          - 8.2.14
+          - 8.3.1
         leveldb: [1.23]
         zts: [enable, disable]
 
@@ -30,14 +31,14 @@ jobs:
       CFLAGS: "-march=x86-64 -DZEND_TRACK_ARENA_ALLOC=1"
       CXXFLAGS: "-march=x86-64"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: sudo apt-get update && sudo apt-get install re2c valgrind
 
       - name: Restore LevelDB build cache
         id: leveldb-build-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/leveldb
           key: leveldb-${{ matrix.leveldb }}-${{ hashFiles('.github/workflows/main.yml') }}
@@ -66,7 +67,7 @@ jobs:
         id: php-build-cache
         with:
           path: ${{ github.workspace }}/php
-          key: php-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-ubuntu2004
+          key: php-debug-${{ matrix.php }}-zts-${{ matrix.zts }}-ubuntu2204
 
       - name: Get number of CPU cores
         if: steps.php-build-cache.outputs.cache-hit != 'true'
@@ -76,6 +77,23 @@ jobs:
       - name: Download PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
         run: curl -L https://github.com/php/php-src/archive/refs/tags/php-${{ matrix.php }}.tar.gz | tar -xz
+
+      - name: Install Bison 3.0.5 for older PHP versions
+        if: steps.php-build-cache.outputs.cache-hit != 'true' && (matrix.php == '7.0.33' || matrix.php == '7.1.33' || matrix.php == '7.2.34' || matrix.php == '7.3.33')
+        run: |
+          echo "Installing Bison 3.0.5 for PHP ${{ matrix.php }}..."
+          sudo apt-get update
+          sudo apt-get install -y m4 build-essential
+          sudo apt-get remove --purge -y bison
+          curl -L https://ftp.gnu.org/gnu/bison/bison-3.0.5.tar.gz -o bison-3.0.5.tar.gz
+          tar -xzf bison-3.0.5.tar.gz
+          cd bison-3.0.5
+          ./configure --prefix=/usr/local
+          make
+          sudo make install
+          echo "Bison version after install:"
+          bison --version
+          cd ..
 
       - name: Compile PHP
         if: steps.php-build-cache.outputs.cache-hit != 'true'
@@ -106,7 +124,7 @@ jobs:
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.php }}-zts-${{ matrix.zts }}-leveldb-${{ matrix.leveldb }}
           path: |
