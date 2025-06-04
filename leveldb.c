@@ -640,9 +640,20 @@ PHP_METHOD(LevelDB, __construct)
 
 	intern = LEVELDB_OBJ_FROM_ZV(getThis());
 
-	if (intern->db) {
-		leveldb_close(intern->db);
-	}
+        if (intern->db) {
+                leveldb_close(intern->db);
+                intern->db = NULL;
+        }
+
+        if (intern->comparator) {
+                leveldb_comparator_destroy(intern->comparator);
+                intern->comparator = NULL;
+        }
+
+        if (intern->callable_name) {
+                zend_string_release(intern->callable_name);
+                intern->callable_name = NULL;
+        }
 
 	openoptions = php_leveldb_get_open_options(options_zv, &intern->comparator, &intern->callable_name);
 
