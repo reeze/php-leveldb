@@ -206,9 +206,10 @@ void php_leveldb_iterator_object_free(zend_object *std)
 {
 	leveldb_iterator_object *obj = LEVELDB_ITERATOR_OBJ_FROM_ZOBJ(std);
 
-	if (obj->db && obj->db->db && obj->iterator) {
-		leveldb_iter_destroy(obj->iterator);
-		/* decr. obj counter */
+	if (obj->db && obj->iterator) {
+		if (obj->db->db) {
+			leveldb_iter_destroy(obj->iterator);
+		}
 		zval_ptr_dtor(&obj->zdb);
 	}
 
@@ -456,7 +457,8 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 	if ((value = zend_hash_str_find(ht, ZEND_STRL("block_cache_size"))) != NULL) {
 		convert_to_long(value);
-		leveldb_options_set_cache(options, leveldb_cache_create_lru(Z_LVAL_P(value)));
+		leveldb_cache_t *cache = leveldb_cache_create_lru(Z_LVAL_P(value));
+		leveldb_options_set_cache(options, cache);
 	}
 
 	if ((value = zend_hash_str_find(ht, ZEND_STRL("block_restart_interval"))) != NULL) {
@@ -507,6 +509,9 @@ static inline leveldb_options_t* php_leveldb_get_open_options(zval *options_zv, 
 
 		if (comparator) {
 			*out_comparator = comparator;
+		} else {
+			zval_ptr_dtor(z2);
+			efree(z2);
 		}
 
 		leveldb_options_set_comparator(options, comparator);
@@ -685,6 +690,9 @@ PHP_METHOD(LevelDB, get)
 	LEVELDB_CHECK_DB_NOT_CLOSED(intern);
 
 	readoptions = php_leveldb_get_readoptions(intern, readoptions_zv);
+	if (!readoptions) {
+		return;
+	}
 	value = leveldb_get(intern->db, readoptions, key, key_len, &value_len, &err);
 	leveldb_readoptions_destroy(readoptions);
 
@@ -881,7 +889,8 @@ PHP_METHOD(LevelDB, getApproximateSizes)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(limit), &pos_limit);
 
 	while ((start_val = zend_hash_get_current_data_ex(Z_ARRVAL_P(start), &pos_start)) != NULL &&
-		(limit_val = zend_hash_get_current_data_ex(Z_ARRVAL_P(limit), &pos_limit)) != NULL) {
+		(limit_val = zend_hash_get_current_data_ex(Z_ARRVAL_P(limit), &pos_limit)) != NULL &&
+		i < num_ranges) {
 
 		start_key[i] = Z_STRVAL_P(start_val);
 		start_len[i] = Z_STRLEN_P(start_val);
@@ -1199,10 +1208,11 @@ static void leveldb_iterator_dtor(zend_object_iterator *iter)
 	zval *object = &iterator->intern.data;
 	zval_ptr_dtor(object);
 
-	if (iterator->current) {
-		zval_ptr_dtor(iterator->current);
-		efree(iterator->current);
-	}
+		if (iterator->current) {
+			zval_ptr_dtor(iterator->current);
+			efree(iterator->current);
+			iterator->current = NULL;
+		}
 
 	iterator->iterator_obj = NULL;
 }
@@ -1240,6 +1250,7 @@ static zval* leveldb_iterator_current_data(zend_object_iterator *iter)
 		if (iterator->current) {
 			zval_ptr_dtor(iterator->current);
 			efree(iterator->current);
+			iterator->current = NULL;
 		}
 
 		value = (char *)leveldb_iter_value(iterator_obj->iterator, &value_len);
@@ -1567,7 +1578,9 @@ PHP_METHOD(LevelDBSnapshot, release)
 	}
 
 	leveldb_object *db = intern->db;
-	leveldb_release_snapshot(db->db, intern->snapshot);
+	if (db && db->db) {
+		leveldb_release_snapshot(db->db, intern->snapshot);
+	}
 	intern->snapshot = NULL;
 	intern->db = NULL;
 }
