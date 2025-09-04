@@ -1578,7 +1578,7 @@ PHP_METHOD(LevelDBSnapshot, release)
 PHP_MINIT_FUNCTION(leveldb)
 {
 	zend_class_entry ce;
-	zend_class_entry *exception_ce = zend_exception_get_default();
+	zend_class_entry *exception_ce = zend_ce_exception;
 
 #define DECLARE_OBJ_HANDLERS(class_type) \
 	memcpy(& class_type##_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
