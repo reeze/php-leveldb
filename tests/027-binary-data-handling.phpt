@@ -18,16 +18,17 @@ echo "\n* Binary value with null bytes\n";
 $binary_value = "value\0with\0null\0bytes";
 $db->set('binary_key', $binary_value);
 $retrieved = $db->get('binary_key');
-var_dump($retrieved);
 var_dump(strlen($retrieved));
+var_dump(strlen($binary_value));
 var_dump($retrieved === $binary_value);
+echo "Hex: " . bin2hex($retrieved) . "\n";
 
 echo "\n* Both key and value with null bytes\n";
 $binary_key2 = "another\0key";
 $binary_value2 = "another\0value";
 $db->set($binary_key2, $binary_value2);
 $retrieved2 = $db->get($binary_key2);
-var_dump($retrieved2);
+var_dump(strlen($retrieved2));
 var_dump($retrieved2 === $binary_value2);
 
 echo "\n* Iterator with binary keys\n";
@@ -60,12 +61,13 @@ string(6) "value1"
 int(6)
 
 * Binary value with null bytes
-string(18) "value%cwith%cnull%cbytes"
-int(18)
+int(21)
+int(21)
 bool(true)
+Hex: 76616c75650077697468006e756c6c006279746573
 
 * Both key and value with null bytes
-string(13) "another%cvalue"
+int(13)
 bool(true)
 
 * Iterator with binary keys

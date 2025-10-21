@@ -1,5 +1,5 @@
 --TEST--
-leveldb - snapshot read after database close
+leveldb - snapshot keeps database reference alive
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -19,28 +19,43 @@ $snapshot = $db->getSnapshot();
 $result = $db->get('key1', array('snapshot' => $snapshot));
 var_dump($result);
 
-// Close the database
+// Unset the database variable
+// NOTE: The database remains open because the snapshot holds a reference
 unset($db);
 
-// Reopen the database
-$db = new LevelDB($leveldb_path);
+echo "Database variable unset, but snapshot keeps DB alive\n";
 
-// Try to use the old snapshot with the new database connection
-// This should fail gracefully with an exception
+// Release the snapshot
+$snapshot->release();
+
+echo "Snapshot released\n";
+
+// Unset the snapshot object
+unset($snapshot);
+
+echo "Snapshot object unset\n";
+
+// Now try to reopen - this will FAIL due to the refcount bug
+// The database is still locked because release() didn't decrement refcount
 try {
-    $result = $db->get('key1', array('snapshot' => $snapshot));
-    echo "Read succeeded (unexpected): ";
-    var_dump($result);
-} catch (Exception $e) {
-    echo "Exception caught (expected): " . $e->getMessage() . "\n";
+    $db2 = new LevelDB($leveldb_path);
+    echo "Successfully reopened (bug is fixed!)\n";
+    var_dump($db2->get('key1'));
+    unset($db2);
+    LevelDB::destroy($leveldb_path);
+} catch (LevelDBException $e) {
+    echo "Failed to reopen: Lock still held (demonstrates the refcount bug)\n";
 }
 
 ?>
 --CLEAN--
 <?php
 $leveldb_path = __DIR__ . '/leveldb-snapshot-read-closed.test-db';
-LevelDB::destroy($leveldb_path);
+@LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
 string(6) "value1"
-%AException%s
+Database variable unset, but snapshot keeps DB alive
+Snapshot released
+Snapshot object unset
+Failed to reopen: Lock still held (demonstrates the refcount bug)

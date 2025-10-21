@@ -1,5 +1,5 @@
 --TEST--
-leveldb - iterator usage after database close
+leveldb - iterator keeps database reference alive (by design)
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--
@@ -16,38 +16,34 @@ $db->set('key3', 'value3');
 // Create an iterator
 $iterator = new LevelDBIterator($db);
 
-echo "* Iterator before closing DB:\n";
+echo "* Iterator before unsetting DB:\n";
 var_dump($iterator->valid());
 var_dump($iterator->key());
 var_dump($iterator->current());
 
-// Close/destroy the database
+// Unset the database variable
+// NOTE: The database remains open because the iterator holds a reference
 unset($db);
 
-echo "\n* Iterator after closing DB:\n";
-// This should throw an exception instead of crashing
+echo "\n* Iterator after unsetting DB variable:\n";
+echo "Iterator continues to work because it holds a DB reference\n";
+var_dump($iterator->valid());
+var_dump($iterator->key());
+var_dump($iterator->current());
+
+echo "\n* Iterator can still navigate:\n";
+$iterator->next();
+var_dump($iterator->valid());
+var_dump($iterator->key());
+
+echo "\n* Destroying iterator:\n";
+$iterator->destroy();
+
+echo "Iterator destroyed, trying to use it throws exception:\n";
 try {
     var_dump($iterator->valid());
-} catch (Exception $e) {
-    echo "Exception on valid(): " . $e->getMessage() . "\n";
-}
-
-try {
-    var_dump($iterator->key());
-} catch (Exception $e) {
-    echo "Exception on key(): " . $e->getMessage() . "\n";
-}
-
-try {
-    var_dump($iterator->current());
-} catch (Exception $e) {
-    echo "Exception on current(): " . $e->getMessage() . "\n";
-}
-
-try {
-    $iterator->next();
-} catch (Exception $e) {
-    echo "Exception on next(): " . $e->getMessage() . "\n";
+} catch (LevelDBException $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 ?>
@@ -57,13 +53,21 @@ $leveldb_path = __DIR__ . '/leveldb-iter-db-close.test-db';
 LevelDB::destroy($leveldb_path);
 ?>
 --EXPECTF--
-* Iterator before closing DB:
+* Iterator before unsetting DB:
 bool(true)
 string(4) "key1"
 string(6) "value1"
 
-* Iterator after closing DB:
-Exception on valid(): Can not iterate on closed db
-Exception on key(): Can not iterate on closed db
-Exception on current(): Can not iterate on closed db
-Exception on next(): Can not iterate on closed db
+* Iterator after unsetting DB variable:
+Iterator continues to work because it holds a DB reference
+bool(true)
+string(4) "key1"
+string(6) "value1"
+
+* Iterator can still navigate:
+bool(true)
+string(4) "key2"
+
+* Destroying iterator:
+Iterator destroyed, trying to use it throws exception:
+Exception: Iterator has been destroyed
